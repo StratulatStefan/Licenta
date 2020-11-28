@@ -1,0 +1,8 @@
+<component name="ArtifactManager">
+  <artifact type="jar" name="GeneralManager:jar">
+    <output-path>$PROJECT_DIR$/out/artifacts/GeneralManager_jar</output-path>
+    <root id="archive" name="GeneralManager.jar">
+      <element id="module-output" name="GeneralManager" />
+    </root>
+  </artifact>
+</component>
