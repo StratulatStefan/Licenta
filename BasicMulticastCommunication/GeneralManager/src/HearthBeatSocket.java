@@ -1,21 +1,25 @@
 import model.Address;
+import model.HearthBeat;
 
 import java.io.IOException;
 import java.net.*;
-import java.util.*;
 
 /* important topic : https://stackoverflow.com/questions/19392173/multicastsocket-constructors-and-binding-to-port-or-socketaddress */
+/* better understanding of multicastSocket concept : https://tldp.org/HOWTO/Multicast-HOWTO-2.html */
 public class HearthBeatSocket extends MulticastSocket {
-    private int port;
+    private int multicastPort;
+    private Address address;
+    public static enum NetworkInterfacesTypes { LOCALHOST, LOCAL_PUBLIC_NETWORK};
     /**
      * Constructorul unui socket de Multicast
-     * @param port portul pe care se va deschide Socket-ul
+     * @param address Adresa la care va face bind socket-ul procesului curent
+     * @param multicastPort portul la care se face bind pentru ascultarea de mesaje din reteaua de multicast
      * @throws IOException
      */
-    public HearthBeatSocket(int port) throws IOException {
-        //super(new InetSocketAddress("192.168.0.1", port));
-        super(port);
-        this.port = port;
+    public HearthBeatSocket(Address address, int multicastPort) throws IOException {
+        super(new InetSocketAddress(address.getIpAddress(), multicastPort));
+        this.multicastPort = multicastPort;
+        this.address = address;
     }
 
     /**
@@ -40,7 +44,7 @@ public class HearthBeatSocket extends MulticastSocket {
     public void sendMessage(InetAddress group, String message) throws IOException {
         this.leaveGroup(group);
         byte[] messageContent = message.getBytes();
-        DatagramPacket packet = new DatagramPacket(messageContent, messageContent.length, group, port);
+        DatagramPacket packet = new DatagramPacket(messageContent, messageContent.length, group, this.multicastPort);
         this.send(packet);
         this.joinGroup(group);
     }
@@ -51,14 +55,39 @@ public class HearthBeatSocket extends MulticastSocket {
      * iar mesajul propriu zis va fi in format binar.
      * Totodata, aceasta functie este blocanta si (daca este setat) va genera o exceptie de Timeout daca
      * se asteapta prea mult timp in bucla de receptie.
-     * @param group Adresa canalului de comunicatie de tip multicast.
      * @return Mesajul primit sub forma de string
      * @throws IOException
      */
-    public String receiveMessage(InetAddress group) throws IOException{
+    public String receiveMessage() throws IOException{
         byte[] buffer = new byte[1024];
         DatagramPacket packet = new DatagramPacket(buffer, buffer.length);
         this.receive(packet);
         return new String(packet.getData(), packet.getOffset(), packet.getLength());
+    }
+
+    /**
+     * Functie pentru starea tipului interfetei retelei.
+     * @param type Tipul interfetei de retea
+     */
+    public void setNetworkInterface(HearthBeatSocket.NetworkInterfacesTypes type){
+        String networkInterfaceName = "";
+        String osName = System.getProperty("os.name").toLowerCase();
+        switch (type){
+            case LOCALHOST: networkInterfaceName = "lo";
+            case LOCAL_PUBLIC_NETWORK:
+                if(osName.contains("windows")){
+                    networkInterfaceName = "wlan2";
+                }
+                else if(osName.contains("linux") || osName.contains("raspian")){
+                    networkInterfaceName = "eth2";
+                }
+            default: networkInterfaceName = "lo";
+        }
+        try {
+            this.setNetworkInterface(NetworkInterface.getByName(networkInterfaceName));
+        }
+        catch (Exception exception){
+            System.out.println("Exception occured at setting the network interface type");
+        }
     }
 }

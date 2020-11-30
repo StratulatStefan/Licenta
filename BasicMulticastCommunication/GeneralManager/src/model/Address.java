@@ -5,12 +5,12 @@ public class Address {
     /**
      * Adresa IP
      */
-    String ipAddress;
+    private String ipAddress;
 
     /**
      * Portul
      */
-    int port;
+    private int port;
 
     /**
      * Constructorul care, pe baza adresei ip si a portului specificate, va crea obiectul adresa.
@@ -25,6 +25,20 @@ public class Address {
         if(this.validatePort(port))
             this.port = port;
     }
+
+    /**
+     * Getter pentru port
+     * @return numarul intreg ce reprezinta portul
+     */
+    public int getPort() {
+        return port;
+    }
+
+    /**
+     * Getter pentru adresa IP
+     * @return sir de caractere ce reprezinta adresa ip
+     */
+    public String getIpAddress() { return ipAddress; }
 
     /**
      * Functie care valideaza daca un string furnizat respecta formatul unei adrese IP

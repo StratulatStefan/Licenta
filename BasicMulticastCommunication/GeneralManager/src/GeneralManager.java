@@ -3,10 +3,12 @@ import model.ConnectionTable;
 
 import java.io.IOException;
 import java.net.*;
+import java.util.Enumeration;
 import java.util.List;
+import java.lang.*;
 
 /* https://docs.oracle.com/en/java/javase/11/docs/api/java.base/java/net/MulticastSocket.html */
-
+/* https://tldp.org/HOWTO/Multicast-HOWTO.html#toc1 */
 public class GeneralManager {
     /**
      * Adresa de multicast
@@ -38,7 +40,8 @@ public class GeneralManager {
         nodeAddress = address;
 
         InetAddress group = InetAddress.getByName(GeneralManager.ipAddress);
-        HearthBeatSocket socket = new HearthBeatSocket(groupPort);
+        HearthBeatSocket socket = new HearthBeatSocket(address, groupPort);
+        //socket.setNetworkInterface(HearthBeatSocket.NetworkInterfacesTypes.LOCALHOST);
         socket.joinGroup(group);
         socket.setTimeOut((int) (timeout * 1e3));
         String message;
@@ -52,7 +55,7 @@ public class GeneralManager {
                 try{
                     System.out.println(" >>> Waiting for data from friend...");
                     while(true){
-                        message = socket.receiveMessage(group);
+                        message = socket.receiveMessage();
                         receivedAddress = Address.parseAddress(message);
                         if(!connectionTable.containsAddress(receivedAddress)){
                             System.out.println(" >>> [New address] : " + receivedAddress);
@@ -85,7 +88,7 @@ public class GeneralManager {
                         }
                     }
                 }
-                Thread.sleep(3000);
+                Thread.sleep((int)(frequency * 1e3));
             }
             catch (IOException exception){
                 socket.close();
@@ -126,10 +129,21 @@ public class GeneralManager {
     /**
      * @param args Argumentele furnizate la linia de comanda
      */
-    public static void main(String[] args){
+    public static void main(String[] args) throws SocketException {
+        //System.setProperty("java.net.preferIPv4Stack", "true");
+        Enumeration<NetworkInterface> enumeration = NetworkInterface.getNetworkInterfaces();
+        int contor = 0;
+        while(enumeration.hasMoreElements()){
+            NetworkInterface networkInterface = enumeration.nextElement();
+            if(networkInterface.isUp()) {
+                //System.out.println(networkInterface.getName());
+                //System.out.println(contor + " : " + networkInterface.getInterfaceAddresses());
+            }
+            contor++;
+        }
         Address address;
         try {
-            address = generateAddress(args);
+            address = generateAddress(new String[]{args[0], "8246"});
             hearthBeatLoop(address, 3, 0.5);
         }
         catch (Exception exception){
