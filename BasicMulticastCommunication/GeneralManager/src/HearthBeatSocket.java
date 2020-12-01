@@ -1,8 +1,8 @@
 import model.Address;
-import model.HearthBeat;
 
 import java.io.IOException;
 import java.net.*;
+import java.util.concurrent.TimeoutException;
 
 /* important topic : https://stackoverflow.com/questions/19392173/multicastsocket-constructors-and-binding-to-port-or-socketaddress */
 /* better understanding of multicastSocket concept : https://tldp.org/HOWTO/Multicast-HOWTO-2.html */

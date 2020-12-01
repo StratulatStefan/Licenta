@@ -1,23 +1,16 @@
 import model.Address;
 import model.ConnectionTable;
+import sun.applet.Main;
 
-import java.io.IOException;
+import java.awt.*;
+import java.io.*;
 import java.net.*;
 import java.util.Enumeration;
-import java.util.List;
 import java.lang.*;
 
 /* https://docs.oracle.com/en/java/javase/11/docs/api/java.base/java/net/MulticastSocket.html */
 /* https://tldp.org/HOWTO/Multicast-HOWTO.html#toc1 */
-public class GeneralManager {
-    /**
-     * Adresa de multicast
-     */
-    private static String ipAddress = "230.0.0.10";
-    /**
-     * Portul de multicast
-     */
-    private static int groupPort = 8246;
+public class GeneralManager{
     /**
      * Tabela (o lista) nodurilor conectate in retea, care comunica cu nodul curent.
      */
@@ -26,80 +19,80 @@ public class GeneralManager {
     /**
      * Adresa pe care o va avea nodul curent.
      */
-    private static Address nodeAddress;
+    private Address nodeAddress;
 
     /**
-     * Principala bucla care se ocupa de manevrarea heartbeat-urilor (trimitere/receptie)
-     * @param address Adresa nodului curent
-     * @param frequency frecventa la care se trimite heartbeat-ul (exprimat in secunde)
-     * @param timeout timeout-ul pentru bucla de receptie a mesajelor de la celelalte noduri
-     * @throws IOException
+     * Frecventa heartbeat-urilor
+     * Exprimat in secunde.
      */
-    public static void hearthBeatLoop(Address address, double frequency, double timeout) throws IOException{
-        System.out.println(String.format("Node with address [%s] started...", address));
-        nodeAddress = address;
+    private final static double hearthBeatFrequency = 3;
 
-        InetAddress group = InetAddress.getByName(GeneralManager.ipAddress);
-        HearthBeatSocket socket = new HearthBeatSocket(address, groupPort);
-        //socket.setNetworkInterface(HearthBeatSocket.NetworkInterfacesTypes.LOCALHOST);
-        socket.joinGroup(group);
-        socket.setTimeOut((int) (timeout * 1e3));
-        String message;
-        Address receivedAddress;
-        while(true){
-            System.out.println("[My address] " + nodeAddress.toString());
-            System.out.println(" >>> Sending my address...");
-            connectionTable.resetAddressList();
-            try{
-                socket.sendMessage(group, nodeAddress.toString());
-                try{
-                    System.out.println(" >>> Waiting for data from friend...");
-                    while(true){
-                        message = socket.receiveMessage();
-                        receivedAddress = Address.parseAddress(message);
-                        if(!connectionTable.containsAddress(receivedAddress)){
-                            System.out.println(" >>> [New address] : " + receivedAddress);
-                            connectionTable.addAddress(receivedAddress);
-                        }
-                        else{
-                            try {
-                                connectionTable.confirmAvailability(receivedAddress);
-                            }
-                            catch (Exception exception){
-                                System.out.println(exception.getMessage());
-                            }
-                        }
-                    }
-                }
-                catch (Exception exception){
-                    List<Address> disconnected = connectionTable.checkDisconnection(2);
-                    if(disconnected.size() == 0){
-                        if(connectionTable.size() == 0){
-                            System.out.println(" >>> Nobody connected!");
-                        }
-                        else {
-                            System.out.println(connectionTable);
-                        }
-                    }
-                    else{
-                        for(Address disconnectedAddres : disconnected){
-                            System.out.println(" >>> Address " + disconnectedAddres + " disconnected");
-                            connectionTable.removeAddress(disconnectedAddres);
-                        }
-                    }
-                }
-                Thread.sleep((int)(frequency * 1e3));
-            }
-            catch (IOException exception){
-                socket.close();
-                System.out.println("IOException occured. : " + exception.getMessage());
-            }
-            catch (InterruptedException exception){
-                socket.close();
-                System.out.println("InterruptedException occured. : " + exception.getMessage());
-            }
+    /**
+     * Timeout-ul asteptarii primirii heartbeat-urilor
+     * Exprimat in secunde.
+     */
+    private final static double hearthBeatReadTimeout = .5;
 
-            System.out.println("\n");
+    /**
+     * Obiectul care se ocupa de mecanismul de hearbeats
+     */
+    private HearthBeatManager hearthBeatManager;
+
+    /**
+     * Constructorul clasei
+     * @param address Adresa nodului curent
+     * @param hearthBeatManager Managerul de heartbeat-uri
+     */
+    public GeneralManager(Address address, HearthBeatManager hearthBeatManager){
+        this.nodeAddress = address;
+        this.hearthBeatManager = hearthBeatManager;
+    }
+
+    /**
+     * Functie care porneste thread-ul pe care va fi rulat mecanismul de heartbeats
+     */
+    public void HearthBeatActivity(){
+        new Thread(hearthBeatManager).start();
+    }
+
+    /**
+     * Functie care prezinta toata activitatea nodului curent.
+     */
+    public void NodeActivity(){
+        this.HearthBeatActivity();
+        while (true) {
+            connectionTable = this.hearthBeatManager.getConnectionTable();
+            try {
+                System.err.println("++++++++++++++++++++\n");
+                System.err.println(connectionTable.toString());
+                System.err.println("++++++++++++++++++++\n\n\n\n");
+                Thread.sleep(2000);
+            } catch (InterruptedException exception) {
+                System.out.println("Timeout exception");
+                break;
+            }
+        }
+    }
+
+    /**
+     * Functie care afiseaza interfetele de retea disponibile
+     * Nu este folosita
+     */
+    public static void displayNetworkInterfaces() {
+        try {
+            Enumeration<NetworkInterface> enumeration = NetworkInterface.getNetworkInterfaces();
+            int contor = 0;
+            while (enumeration.hasMoreElements()) {
+                NetworkInterface networkInterface = enumeration.nextElement();
+                if (networkInterface.isUp()) {
+                    System.out.println(networkInterface.getName());
+                    System.out.println(contor + " : " + networkInterface.getInterfaceAddresses());
+                }
+                contor += 1;
+            }
+        }
+        catch (SocketException exception){
+            System.out.println("Error at fetching or accessing the network interfaces");
         }
     }
 
@@ -129,22 +122,13 @@ public class GeneralManager {
     /**
      * @param args Argumentele furnizate la linia de comanda
      */
-    public static void main(String[] args) throws SocketException {
-        //System.setProperty("java.net.preferIPv4Stack", "true");
-        Enumeration<NetworkInterface> enumeration = NetworkInterface.getNetworkInterfaces();
-        int contor = 0;
-        while(enumeration.hasMoreElements()){
-            NetworkInterface networkInterface = enumeration.nextElement();
-            if(networkInterface.isUp()) {
-                //System.out.println(networkInterface.getName());
-                //System.out.println(contor + " : " + networkInterface.getInterfaceAddresses());
-            }
-            contor++;
-        }
+    public static void main(String[] args) throws IOException {
         Address address;
         try {
             address = generateAddress(new String[]{args[0], "8246"});
-            hearthBeatLoop(address, 3, 0.5);
+            HearthBeatManager hearthBeatManager = new HearthBeatManager(address, hearthBeatFrequency, hearthBeatReadTimeout);
+            GeneralManager generalManager = new GeneralManager(address, hearthBeatManager);
+            generalManager.NodeActivity();
         }
         catch (Exception exception){
             System.out.println(exception.getMessage());
