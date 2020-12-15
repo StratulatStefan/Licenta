@@ -1,12 +1,13 @@
 import model.Address;
 import model.ConnectionTable;
-import sun.applet.Main;
+import model.FileHeader;
 
-import java.awt.*;
 import java.io.*;
 import java.net.*;
+import java.nio.charset.StandardCharsets;
 import java.util.Enumeration;
 import java.lang.*;
+import java.util.List;
 
 /* https://docs.oracle.com/en/java/javase/11/docs/api/java.base/java/net/MulticastSocket.html */
 /* https://tldp.org/HOWTO/Multicast-HOWTO.html#toc1 */
@@ -25,13 +26,23 @@ public class GeneralManager{
      * Frecventa heartbeat-urilor
      * Exprimat in secunde.
      */
-    private final static double hearthBeatFrequency = 3;
+    private final static double hearthBeatFrequency = 2;
 
     /**
      * Timeout-ul asteptarii primirii heartbeat-urilor
      * Exprimat in secunde.
      */
     private final static double hearthBeatReadTimeout = .5;
+
+    /**
+     * Portul pe care fi mapata ServerSocket-ul
+     */
+    private final static int serverSocketPort = 8081;
+
+    /**
+     * Dimensiunea bufferului in care vor fi citite datele de la un nod adiacent
+     */
+    private final static int bufferSize = 1024;
 
     /**
      * Obiectul care se ocupa de mecanismul de hearbeats
@@ -55,23 +66,71 @@ public class GeneralManager{
         new Thread(hearthBeatManager).start();
     }
 
-    /**
-     * Functie care prezinta toata activitatea nodului curent.
+    /** Functie care inglobeaza activitatea principala a fiecarui nod, aceea de a asigura comunicarea cu celelalte noduri
+     * in vederea trimiterii si primirii de mesaje.
      */
-    public void NodeActivity(){
-        this.HearthBeatActivity();
-        while (true) {
-            connectionTable = this.hearthBeatManager.getConnectionTable();
-            try {
-                System.err.println("++++++++++++++++++++\n");
-                System.err.println(connectionTable.toString());
-                System.err.println("++++++++++++++++++++\n\n\n\n");
-                Thread.sleep(2000);
-            } catch (InterruptedException exception) {
-                System.out.println("Timeout exception");
-                break;
+    public void MainActivity(String ipAddress) throws Exception{
+        Address address = generateAddress(new String[]{ipAddress, String.format("%d", serverSocketPort)});
+        ServerSocket serverSocket = new ServerSocket();
+        try{
+            serverSocket.bind(new InetSocketAddress(address.getIpAddress(), serverSocketPort));
+            while(true){
+                Socket clientSocket = serverSocket.accept();
+                System.out.println(String.format("Client connected : [%s : %d]\n", clientSocket.getLocalAddress(), clientSocket.getLocalPort()));
+                new Thread(MainActivityThread(serverSocket, clientSocket)).start();
             }
         }
+        catch (Exception exception){
+            serverSocket.close();
+            System.out.println(exception.getMessage());
+        }
+    }
+
+    /**
+     * Functie care inglobeaza comunicarea de date cu un nod adicant, avandu-se in vedere primirea de date de la un
+     * nod adiacent si, eventual, trimiterea informatiilor mai departe, in cazul in care nu este nod terminal.
+     * @param serverSocket Socket-ul pe care este mapat nodul curent.
+     * @param clientSocket Socket-ul nodului adiacent, de la care primeste date.
+     * @return Runnable-ul necesar pornirii unui thread separat pentru aceasta comunicare.
+     */
+    private Runnable MainActivityThread(ServerSocket serverSocket, Socket clientSocket){
+        return new Runnable() {
+            @Override
+            public void run(){
+                try {
+                    DataInputStream dataInputStream = new DataInputStream(clientSocket.getInputStream());
+                    FileOutputStream fileOutputStream = null;
+                    byte[] buffer = new byte[bufferSize];
+                    int read = 0;
+                    boolean header_found = false;
+                    while((read = dataInputStream.read(buffer, 0, bufferSize)) > 0){
+                        if(!header_found) {
+                            try {
+                                FileHeader header = new FileHeader(new String(buffer, StandardCharsets.UTF_8));
+                                fileOutputStream = new FileOutputStream(header.getFilename());
+                                System.out.println("\"" + header + "\"");
+                                header_found = true;
+                                continue;
+                            } catch (Exception exception) {
+                                System.out.println(exception.getMessage());
+                            }
+                        }
+                        fileOutputStream.write(buffer, 0, read);
+                        fileOutputStream.flush();
+                    }
+                    System.out.println("File write done");
+                    dataInputStream.close();
+                    fileOutputStream.close();
+                    clientSocket.close();
+                }
+                catch (Exception exception){
+                    System.out.println(exception.getMessage());
+                    System.out.println(String.format("Could not properly close connection with my friend : [%s : %d]",
+                            clientSocket.getLocalAddress(),
+                            clientSocket.getLocalPort()));
+                }
+            }
+        };
     }
 
     /**
@@ -126,9 +185,10 @@ public class GeneralManager{
         Address address;
         try {
             address = generateAddress(new String[]{args[0], "8246"});
-            HearthBeatManager hearthBeatManager = new HearthBeatManager(address, hearthBeatFrequency, hearthBeatReadTimeout);
+            HearthBeatManager hearthBeatManager = new HearthBeatManager(address, hearthBeatFrequency, hearthBeatReadTimeout, connectionTable);
             GeneralManager generalManager = new GeneralManager(address, hearthBeatManager);
-            generalManager.NodeActivity();
+            generalManager.HearthBeatActivity();
+            generalManager.MainActivity(args[0]);
         }
         catch (Exception exception){
             System.out.println(exception.getMessage());

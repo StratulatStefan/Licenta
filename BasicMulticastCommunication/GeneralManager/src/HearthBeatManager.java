@@ -3,13 +3,18 @@ import model.ConnectionTable;
 
 import java.io.IOException;
 import java.net.InetAddress;
+import java.sql.Timestamp;
+import java.text.DateFormat;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.List;
 
 public class HearthBeatManager implements Runnable{
     /**
-     * Tabela (o lista) nodurilor conectate in retea, care comunica cu nodul curent.
+     * O referinta la tabela de conexiuni din managerul general
      */
-    private static ConnectionTable connectionTable = new ConnectionTable();
+    private static ConnectionTable connectionTable;
 
     /**
      * Adresa de multicast
@@ -39,94 +44,116 @@ public class HearthBeatManager implements Runnable{
     private double timeout;
 
     /**
+     * Numarul de heart-beat-uri la care se face clean-up-ul tabelei de conexiuni
+     */
+    private final static int cleanupFrequency = 3;
+
+    /**
      * Constructorul managerului de heartbeat-uri pentru nodul curent.
      * @param address Adresa nodului curent
      * @param frequency Frecventa buclei de trimitere/receptie heartbeat-uri
      * @param timeout Timeout pentru primirea hearthbeat-urilor.
      */
-    public HearthBeatManager(Address address, double frequency, double timeout){
+    public HearthBeatManager(Address address, double frequency, double timeout, ConnectionTable connectionTable){
         this.nodeAddress = address;
         this.frequency = frequency;
         this.timeout = timeout;
+        HearthBeatManager.connectionTable = connectionTable;
     }
 
     /**
-     * Principala bucla care se ocupa de manevrarea heartbeat-urilor (trimitere/receptie).
-     * @throws IOException generata de o eroare aparuta la folosirea socket-ului de multicast.
+     * Functie care se ocupa de secventa de trimitere a heart-beat-urilor, odata la frequency secunde.
+     * Fiecare trimitere a beat-urilor este urmata de verificarea tabelei de conexiuni.
+     * @param group Adresa de multicast pe care se va trimite mesajul
+     * @param socket Socket-ul nodului curent
+     * @return Runnable pe baza caruia se va porni thread-ul de trimitere
      */
-    public void hearthBeatLoop() throws IOException{
-        System.out.println(String.format("Node with address [%s] started...", nodeAddress));
-        InetAddress group = InetAddress.getByName(HearthBeatManager.multicastIPAddress);
-        HearthBeatSocket socket = new HearthBeatSocket(nodeAddress, multicastPort);
-        socket.setNetworkInterface(HearthBeatSocket.NetworkInterfacesTypes.LOCALHOST);
-        socket.joinGroup(group);
-        socket.setTimeOut((int) (timeout * 1e3));
-        String message;
-        Address receivedAddress;
-        while(true){
-            System.out.println("[My address] " + nodeAddress.toString());
-            System.out.println(" >>> Sending my address...");
-            connectionTable.resetAddressList();
-            try{
-                socket.sendMessage(group, nodeAddress.toString());
-                try{
-                    System.out.println(" >>> Waiting for data from friend...");
-                    while(true){
+    public Runnable sendingLoop(InetAddress group, HearthBeatSocket socket, ConnectionTable connectionTable){
+        return new Runnable(){
+            @Override
+            public void run(){
+                while(true) {
+                    //System.out.println("Current time : " + ConnectionTable.getCurrentTimestamp());
+                    //System.out.println("[My address] " + nodeAddress.toString());
+                    //System.out.println(" >>> Sending my address...");
+                    try {
+                        socket.sendMessage(group, nodeAddress.toString());
+
+                        List<Address> disconnected = connectionTable.checkDisconnection((int)(frequency * cleanupFrequency));
+                        if(disconnected.size() == 0){
+                            if(connectionTable.size() == 0){
+                                System.out.println(" >>> Nobody connected!");
+                            }
+                            else {
+                                System.out.println(connectionTable);
+                            }
+                        }
+                        else {
+                            for (Address disconnectedAddres : disconnected) {
+                                System.out.println(" >>> Address " + disconnectedAddres + " disconnected");
+                                connectionTable.removeAddress(disconnectedAddres);
+                            }
+                        }
+                        Thread.sleep((int) (frequency * 1e3));
+                    } catch (IOException exception) {
+                        socket.close();
+                        System.out.println("IOException occured. : " + exception.getMessage());
+                    } catch (InterruptedException exception) {
+                        socket.close();
+                        System.out.println("InterruptedException occured. : " + exception.getMessage());
+                    }
+                    System.out.println("\n");
+                }
+            }
+        };
+    }
+
+    /**
+     * Functie care se ocupa de primirea mesajelor de la celelalte noduri. La fiecare primire a unui nou
+     * heartbeat, se actualizeaza tabela de conexiuni. Primirea se face incontinuu, fara timeout pe recv.
+     * @param socket Socket-ul nodului curent
+     * @return Runnable-ul pe baza caruia se va crea thread-ul de receptie a hearth-beat-urilor.
+     */
+    public Runnable receivingLoop(HearthBeatSocket socket, ConnectionTable connectionTable){
+        return new Runnable() {
+            @Override
+            public void run(){
+                String message;
+                Address receivedAddress;
+                while(true){
+                    try{
                         message = socket.receiveMessage();
                         receivedAddress = Address.parseAddress(message);
                         if(!connectionTable.containsAddress(receivedAddress)){
                             System.out.println(" >>> [New address] : " + receivedAddress);
                             connectionTable.addAddress(receivedAddress);
                         }
-                        else{
-                            try {
-                                connectionTable.confirmAvailability(receivedAddress);
-                            }
-                            catch (Exception exception){
-                                System.out.println(exception.getMessage());
-                            }
-                        }
-                    }
-                }
-                catch (Exception exception){
-                    List<Address> disconnected = connectionTable.checkDisconnection(2);
-                    if(disconnected.size() == 0){
-                        if(connectionTable.size() == 0){
-                            System.out.println(" >>> Nobody connected!");
-                        }
                         else {
-                            System.out.println(connectionTable);
+                            connectionTable.confirmAvailability(receivedAddress);
                         }
                     }
-                    else{
-                        for(Address disconnectedAddres : disconnected){
-                            System.out.println(" >>> Address " + disconnectedAddres + " disconnected");
-                            connectionTable.removeAddress(disconnectedAddres);
-                        }
+                    catch (Exception exception){
+                        System.out.println(exception.getMessage());
                     }
                 }
-                Thread.sleep((int)(frequency * 1e3));
             }
-            catch (IOException exception){
-                socket.close();
-                System.out.println("IOException occured. : " + exception.getMessage());
-            }
-            catch (InterruptedException exception){
-                socket.close();
-                System.out.println("InterruptedException occured. : " + exception.getMessage());
-            }
-
-            System.out.println("\n");
-        }
+        };
     }
 
     /**
-     * Getter pentru connectionTable.
-     * Va fi necesar astfel incat managerul general sa poata deschide conexiuni unicast cu nodurile disponibile
-     * @return tabela adreselor nodurilor conectate
+     * Principala bucla care se ocupa de manevrarea heartbeat-urilor (trimitere/receptie).
+     * @throws IOException generata de o eroare aparuta la folosirea socket-ului de multicast.
      */
-    public ConnectionTable getConnectionTable(){
-        return HearthBeatManager.connectionTable;
+    public void hearthBeatLoop(ConnectionTable connectionTable) throws IOException{
+        System.out.println(String.format("Node with address [%s] started...", nodeAddress));
+        InetAddress group = InetAddress.getByName(HearthBeatManager.multicastIPAddress);
+        HearthBeatSocket socket = new HearthBeatSocket(nodeAddress, multicastPort);
+        socket.setNetworkInterface(HearthBeatSocket.NetworkInterfacesTypes.LOCALHOST);
+        socket.joinGroup(group);
+        Thread sendingThread = new Thread(sendingLoop(group, socket, connectionTable));
+        Thread receivingThread = new Thread(receivingLoop(socket, connectionTable));
+        sendingThread.start();
+        receivingThread.start();
     }
 
     /**
@@ -135,7 +162,7 @@ public class HearthBeatManager implements Runnable{
      */
     public void run(){
         try {
-            this.hearthBeatLoop();
+            this.hearthBeatLoop(HearthBeatManager.connectionTable);
         }
         catch (IOException exception){
             System.out.println(exception.getMessage());
