@@ -1,3 +1,7 @@
+import com.sun.xml.internal.ws.util.StringUtils;
+
+import java.util.Collections;
+
 /**
  * Clasa folosita in comunicarea de date cu nodurile adiacente. Inglobeaza toate
  * datele caracteristice header-ului fisierului ce se va trimite. Prin header intelegem
@@ -127,6 +131,9 @@ public class FileHeader {
      */
     @Override
     public String toString() {
-        return String.format("<token : %s><filename : %s><size : %d>|", this.token, this.filename, this.filesize);
+        String format = String.format("<token : %s><filename : %s><size : %d>|", this.token, this.filename, this.filesize);
+        format += String.join("", Collections.nCopies(1024 - format.length(), " "));
+        System.out.println(format.length());
+        return format;
     }
 }

@@ -1,5 +1,7 @@
 package model;
 
+import java.util.Collections;
+
 /**
  * Clasa folosita in comunicarea de date cu nodurile adiacente. Inglobeaza toate
  * datele caracteristice header-ului fisierului ce se va trimite. Prin header intelegem
@@ -32,7 +34,6 @@ public class FileHeader {
      */
     public FileHeader(String message) throws Exception{
         this.ParseMessage(message);
-        System.out.println(this);
     }
 
     /**
@@ -129,6 +130,9 @@ public class FileHeader {
      */
     @Override
     public String toString() {
-        return String.format("<token : %s><filename : %s><size : %d>|", this.token, this.filename, this.filesize);
+        String format = String.format("<token : %s><filename : %s><size : %d>|", this.token, this.filename, this.filesize);
+        format += String.join("", Collections.nCopies(1024 - format.length(), " "));
+        System.out.println(format.length());
+        return format;
     }
 }
