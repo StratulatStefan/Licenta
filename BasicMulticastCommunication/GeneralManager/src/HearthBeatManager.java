@@ -1,13 +1,9 @@
-import model.Address;
+import communication.Address;
+import communication.HearthBeatSocket;
 import model.ConnectionTable;
 
 import java.io.IOException;
 import java.net.InetAddress;
-import java.sql.Timestamp;
-import java.text.DateFormat;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.Date;
 import java.util.List;
 
 public class HearthBeatManager implements Runnable{
@@ -73,7 +69,7 @@ public class HearthBeatManager implements Runnable{
             @Override
             public void run(){
                 while(true) {
-                    //System.out.println("Current time : " + ConnectionTable.getCurrentTimestamp());
+                    System.out.println("Current time : " + ConnectionTable.getCurrentTimestamp());
                     //System.out.println("[My address] " + nodeAddress.toString());
                     //System.out.println(" >>> Sending my address...");
                     try {

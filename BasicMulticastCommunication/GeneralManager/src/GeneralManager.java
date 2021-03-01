@@ -1,4 +1,4 @@
-import model.Address;
+import communication.Address;
 import model.ConnectionTable;
 import model.FileHeader;
 
@@ -6,11 +6,9 @@ import java.io.*;
 import java.net.*;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
-import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Enumeration;
 import java.lang.*;
-import java.util.List;
 
 /* https://docs.oracle.com/en/java/javase/11/docs/api/java.base/java/net/MulticastSocket.html */
 /* https://tldp.org/HOWTO/Multicast-HOWTO.html#toc1 */
@@ -157,11 +155,16 @@ public class GeneralManager{
                                 String token = cleanChain(header.getToken());
                                 if(token != null){
                                     String nextDestination = getDestinationIpAddress(token);
-                                    nextElementSocket = new Socket(nextDestination, serverSocketPort);
-                                    dataOutputStream = new DataOutputStream(nextElementSocket.getOutputStream());
-                                    header.setToken(token);
-                                    System.out.println("Next node in chain header : " + header);
-                                    dataOutputStream.write(header.toString().getBytes());
+                                    if(connectionTable.containsAddress(new Address(nextDestination, 8246))) {
+                                        nextElementSocket = new Socket(nextDestination, serverSocketPort);
+                                        dataOutputStream = new DataOutputStream(nextElementSocket.getOutputStream());
+                                        header.setToken(token);
+                                        System.out.println("Next node in chain header : " + header);
+                                        dataOutputStream.write(header.toString().getBytes());
+                                    }
+                                    else{
+                                        System.out.println("Address unknown!");
+                                    }
                                 }
                                 else{
                                     System.out.println("End of chain");
@@ -247,7 +250,7 @@ public class GeneralManager{
     public static void main(String[] args) throws IOException {
         Address address;
         try {
-            address = generateAddress(new String[]{args[0], "8246"});
+            address = generateAddress(new String[]{"127.0.0.1", "8246"});
             HearthBeatManager hearthBeatManager = new HearthBeatManager(address, hearthBeatFrequency, hearthBeatReadTimeout, connectionTable);
             GeneralManager generalManager = new GeneralManager(address, hearthBeatManager);
             generalManager.HearthBeatActivity();

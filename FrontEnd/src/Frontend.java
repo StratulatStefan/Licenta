@@ -3,33 +3,6 @@ import java.net.Socket;
 
 public class Frontend {
     private static final int bufferSize = 1024;
-    private static void sendFile(Socket socket, String token, String filename){
-        try {
-            DataOutputStream outputStream = new DataOutputStream(socket.getOutputStream());
-            File file = new File(filename);
-            FileHeader fileHeader = new FileHeader();
-            fileHeader.setFilename(filename);
-            fileHeader.setToken(token);
-            fileHeader.setFilesize(file.length());
-            byte[] binaryFile = new byte[bufferSize];
-            byte[] header = fileHeader.toString().getBytes();
-            BufferedInputStream bufferedInputStream = new BufferedInputStream(new FileInputStream(file));
-            int count;
-            outputStream.write(header);
-            while ((count = bufferedInputStream.read(binaryFile)) > 0) {
-                outputStream.write(binaryFile, 0, count);
-            }
-
-            bufferedInputStream.close();
-            outputStream.close();
-            socket.close();
-        }
-        catch (IOException exception){
-            System.out.println(exception.getMessage());
-        }
-    }
-
-
     private static boolean validateToken(String token) throws Exception{
         if(token.length() == 0)
             throw new Exception("Null token!");
@@ -58,6 +31,32 @@ public class Frontend {
         return null;
     }
 
+    private static void sendFile(Socket socket, String token, String filename){
+        try {
+            DataOutputStream outputStream = new DataOutputStream(socket.getOutputStream());
+            File file = new File(filename);
+            FileHeader fileHeader = new FileHeader();
+            fileHeader.setFilename(filename);
+            fileHeader.setToken(token);
+            fileHeader.setFilesize(file.length());
+            byte[] binaryFile = new byte[bufferSize];
+            byte[] header = fileHeader.toString().getBytes();
+            BufferedInputStream bufferedInputStream = new BufferedInputStream(new FileInputStream(file));
+            int count;
+            outputStream.write(header);
+            while ((count = bufferedInputStream.read(binaryFile)) > 0) {
+                outputStream.write(binaryFile, 0, count);
+            }
+
+            bufferedInputStream.close();
+            outputStream.close();
+            socket.close();
+        }
+        catch (IOException exception){
+            System.out.println(exception.getMessage());
+        }
+    }
+
     public static void mainActivity(String token, String filename){
         new Thread(new Runnable() {
             @Override
@@ -73,11 +72,12 @@ public class Frontend {
             }
         }).start();
     }
+
     public static void main(String[] args){
-        String token = "127.0.0.1-127.0.0.2-127.0.0.3";
+        String token = "127.0.0.1-127.0.0.2-127.0.0.3-127.0.0.4";
         mainActivity(token, "D:/Facultate/Licenta/Dropbox/FrontEnd/src/test_files/sss.pdf");
         token = "127.0.0.2-127.0.0.3-127.0.0.1";
-        mainActivity(token, "D:/Facultate/Licenta/Dropbox/FrontEnd/src/test_files/Curs_S12.rar");
+        mainActivity(token, "D:/Facultate/Licenta/Dropbox/FrontEnd/src/test_files/Dangerous.mp3");
         token = "127.0.0.3-127.0.0.1-127.0.0.2";
         mainActivity(token, "D:/Facultate/Licenta/Dropbox/FrontEnd/src/test_files/Resurse-lab 02-20201012.zip");
     }

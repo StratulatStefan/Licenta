@@ -3,6 +3,7 @@
     <output-path>$PROJECT_DIR$/out/artifacts/GeneralManager_jar</output-path>
     <root id="archive" name="GeneralManager.jar">
       <element id="module-output" name="GeneralManager" />
+      <element id="module-output" name="GeneralPurposeStructures" />
     </root>
   </artifact>
 </component>

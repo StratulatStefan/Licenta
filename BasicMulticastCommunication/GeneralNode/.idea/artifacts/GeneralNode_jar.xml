@@ -1,0 +1,9 @@
+<component name="ArtifactManager">
+  <artifact type="jar" name="GeneralNode:jar">
+    <output-path>$PROJECT_DIR$/out/artifacts/GeneralNode_jar</output-path>
+    <root id="archive" name="GeneralNode.jar">
+      <element id="module-output" name="GeneralNode" />
+      <element id="module-output" name="GeneralPurposeStructures" />
+    </root>
+  </artifact>
+</component>

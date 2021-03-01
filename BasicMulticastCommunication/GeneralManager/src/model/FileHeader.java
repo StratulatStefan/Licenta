@@ -132,7 +132,6 @@ public class FileHeader {
     public String toString() {
         String format = String.format("<token : %s><filename : %s><size : %d>|", this.token, this.filename, this.filesize);
         format += String.join("", Collections.nCopies(1024 - format.length(), " "));
-        System.out.println(format.length());
         return format;
     }
 }
