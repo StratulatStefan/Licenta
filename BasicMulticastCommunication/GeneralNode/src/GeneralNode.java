@@ -43,6 +43,8 @@ public class GeneralNode{
      */
     private HearthBeatManager hearthBeatManager;
 
+    private static String storagePath = "D:\\Facultate\\Licenta\\Storage\\";
+
     /**
      * Constructorul clasei
      * @param address Adresa nodului curent
@@ -130,8 +132,8 @@ public class GeneralNode{
             @Override
             public void run(){
                 try {
-                    DataInputStream dataInputStream = new DataInputStream(clientSocket.getInputStream());
-                    DataOutputStream dataOutputStream = null;
+                    InputStream dataInputStream = new DataInputStream(clientSocket.getInputStream());
+                    OutputStream dataOutputStream = null;
                     FileOutputStream fileOutputStream = null;
                     Socket nextElementSocket = null;
                     byte[] buffer = new byte[bufferSize];
@@ -140,9 +142,9 @@ public class GeneralNode{
                     while((read = dataInputStream.read(buffer, 0, bufferSize)) > 0){
                         if(!header_found) {
                             try {
-                                Files.createDirectories(Paths.get(serverSocket.getInetAddress().getHostAddress() ));
+                                Files.createDirectories(Paths.get(storagePath + serverSocket.getInetAddress().getHostAddress() ));
                                 FileHeader header = new FileHeader(new String(buffer, StandardCharsets.UTF_8));
-                                String filepath = serverSocket.getInetAddress().getHostAddress() + "/" + header.getFilename();
+                                String filepath = storagePath + serverSocket.getInetAddress().getHostAddress() + "/" + header.getFilename();
                                 fileOutputStream = new FileOutputStream(filepath);
                                 System.out.println("My header : " + header);
                                 String token = cleanChain(header.getToken());

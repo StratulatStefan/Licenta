@@ -1,15 +1,10 @@
 import communication.Address;
 import communication.HearthBeatSocket;
-import model.ConnectionTable;
 
 import java.io.IOException;
 import java.net.InetAddress;
-import java.sql.Timestamp;
-import java.text.DateFormat;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.List;
+
+import data.Time;
 
 public class HearthBeatManager implements Runnable{
     /**
@@ -39,10 +34,6 @@ public class HearthBeatManager implements Runnable{
      */
     private double timeout;
 
-    /**
-     * Numarul de heart-beat-uri la care se face clean-up-ul tabelei de conexiuni
-     */
-    private final static int cleanupFrequency = 3;
 
     /**
      * Constructorul managerului de heartbeat-uri pentru nodul curent.
@@ -68,7 +59,7 @@ public class HearthBeatManager implements Runnable{
             @Override
             public void run(){
                 while(true) {
-                    System.out.println("Current time : " + ConnectionTable.getCurrentTimestamp());
+                    System.out.println(Time.getCurrentTimeWithFormat() + " Se trimite un hearthbeat ...");
                     //System.out.println("[My address] " + nodeAddress.toString());
                     //System.out.println(" >>> Sending my address...");
                     try {
@@ -130,9 +121,9 @@ public class HearthBeatManager implements Runnable{
         socket.setNetworkInterface(HearthBeatSocket.NetworkInterfacesTypes.LOCALHOST);
         socket.joinGroup(group);
         Thread sendingThread = new Thread(sendingLoop(group, socket));
-        Thread receivingThread = new Thread(receivingLoop(socket));
+       // Thread receivingThread = new Thread(receivingLoop(socket));
         sendingThread.start();
-        receivingThread.start();
+        //receivingThread.start();
     }
 
     /**

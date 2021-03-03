@@ -1,10 +1,11 @@
 package model;
 
-import java.sql.Timestamp;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import data.Pair;
 import communication.Address;
+import data.Time;
 
 public class ConnectionTable {
     /**
@@ -12,28 +13,28 @@ public class ConnectionTable {
      * Obiectul asupra carora se fac toate operatiile este reprezentat de o lista;
      * Lista contine perechi (adresa,contor), si va fi folosita pentru afisare conexiunilor nodului curent.
      */
-    private List<Pair<Address, Long>> connectionTable;
+    private final List<Pair<Address, Long>> connectionTable;
 
     /**
      * Timestamp-ul la care ne raportam, astfel incat sa nu obtinem o valoare foarte mare.
      */
-    private static Timestamp baseTimestamp = Timestamp.valueOf("2020-01-01 00:00:00");
+    //private static Timestamp baseTimestamp = Timestamp.valueOf("2020-01-01 00:00:00");
 
     /**
      * Constructorul clasei, care initializeaza lista vida.
      */
     public ConnectionTable(){
-        this.connectionTable = new ArrayList<>();
+        this.connectionTable = Collections.synchronizedList(new ArrayList<>());
     }
 
     /**
      * Functie care returneaza lista de adrese din tabela de conexiuni
      * @return
      */
-    public List<Address> getConnectionTable(){
-        List<Address> addresses = new ArrayList<Address>();
+    public List<String> getConnectionTable(){
+        List<String> addresses = new ArrayList<String>();
         for(Pair<Address, Long> connection : this.connectionTable){
-            addresses.add(connection.getFirst());
+            addresses.add(connection.getFirst().getIpAddress());
         }
         return addresses;
     }
@@ -44,8 +45,10 @@ public class ConnectionTable {
      * @param address Adresa ce va fi adaugata.
      */
     public void addAddress(Address address){
-        Long timeInSeconds = getCurrentTimestamp();
-        this.connectionTable.add(new Pair<Address, Long>(address, timeInSeconds));
+        Long timeInSeconds = Time.getCurrentTimestamp();
+        synchronized (this.connectionTable) {
+            this.connectionTable.add(new Pair<Address, Long>(address, timeInSeconds));
+        }
     }
 
     /**
@@ -55,7 +58,9 @@ public class ConnectionTable {
      */
     public void removeAddress(Address address){
         if(this.containsAddress(address)) {
-            this.connectionTable.removeIf(connection -> connection.getFirst().equals(address));
+            synchronized (this.connectionTable) {
+                this.connectionTable.removeIf(connection -> connection.getFirst().equals(address));
+            }
         }
     }
 
@@ -94,7 +99,7 @@ public class ConnectionTable {
      */
     public List<Address> checkDisconnection(long limit){
         List<Address> disconnected = new ArrayList();
-        long currentTimestamp = getCurrentTimestamp();
+        long currentTimestamp = Time.getCurrentTimestamp();
         for(Pair<Address, Long> connection : this.connectionTable){
             if((currentTimestamp - connection.getSecond()) >= limit){
                 disconnected.add(connection.getFirst());
@@ -113,10 +118,12 @@ public class ConnectionTable {
         if (!this.containsAddress(address)) {
             throw new Exception("Address not found : " + address);
         }
-        long currentTimestamp = getCurrentTimestamp();
-        for (Pair<Address, Long> connection : this.connectionTable) {
-            if (connection.getFirst().equals(address)) {
-                connection.setSecond(currentTimestamp);
+        long currentTimestamp = Time.getCurrentTimestamp();
+        synchronized (this.connectionTable) {
+            for (Pair<Address, Long> connection : this.connectionTable) {
+                if (connection.getFirst().equals(address)) {
+                    connection.setSecond(currentTimestamp);
+                }
             }
         }
     }
@@ -126,14 +133,6 @@ public class ConnectionTable {
      */
     public int size(){
         return this.connectionTable.size();
-    }
-
-    /**
-     * Functie care returneaza timestamp-ul curent, raportat la timestampul de baza al clasei
-     */
-    public static long getCurrentTimestamp(){
-        Timestamp currentTimestamp = new Timestamp(System.currentTimeMillis());
-        return (currentTimestamp.getTime() - ConnectionTable.baseTimestamp.getTime()) / 1000;
     }
 
     /**

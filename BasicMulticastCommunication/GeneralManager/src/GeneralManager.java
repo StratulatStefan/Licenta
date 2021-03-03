@@ -1,14 +1,13 @@
 import communication.Address;
+import model.ClientCommunicationManager;
 import model.ConnectionTable;
-import model.FileHeader;
 
 import java.io.*;
 import java.net.*;
 import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
-import java.nio.file.Paths;
 import java.util.Enumeration;
 import java.lang.*;
+import java.util.List;
 
 /* https://docs.oracle.com/en/java/javase/11/docs/api/java.base/java/net/MulticastSocket.html */
 /* https://tldp.org/HOWTO/Multicast-HOWTO.html#toc1 */
@@ -30,12 +29,6 @@ public class GeneralManager{
     private final static double hearthBeatFrequency = 2;
 
     /**
-     * Timeout-ul asteptarii primirii heartbeat-urilor
-     * Exprimat in secunde.
-     */
-    private final static double hearthBeatReadTimeout = .5;
-
-    /**
      * Portul pe care fi mapata ServerSocket-ul
      */
     private final static int serverSocketPort = 8081;
@@ -46,18 +39,24 @@ public class GeneralManager{
     private final static int bufferSize = 1024;
 
     /**
-     * Obiectul care se ocupa de mecanismul de hearbeats
+     * Obiectul care se ocupa de mecanismul de hearthbeats
      */
     private HearthBeatManager hearthBeatManager;
+
+    /**
+     * Obiectul care se va ocupa de comunicatia cu clientul
+     */
+    private ClientCommunicationManager clientCommunicationManager;
 
     /**
      * Constructorul clasei
      * @param address Adresa nodului curent
      * @param hearthBeatManager Managerul de heartbeat-uri
      */
-    public GeneralManager(Address address, HearthBeatManager hearthBeatManager){
+    public GeneralManager(Address address, HearthBeatManager hearthBeatManager, ClientCommunicationManager clientCommunicationManager){
         this.nodeAddress = address;
         this.hearthBeatManager = hearthBeatManager;
+        this.clientCommunicationManager = clientCommunicationManager;
     }
 
     /**
@@ -77,7 +76,7 @@ public class GeneralManager{
             serverSocket.bind(new InetSocketAddress(address.getIpAddress(), serverSocketPort));
             while(true){
                 Socket clientSocket = serverSocket.accept();
-                System.out.println(String.format("Client connected : [%s : %d]\n", clientSocket.getLocalAddress(), clientSocket.getLocalPort()));
+                System.out.println(String.format("Client nou conectat : [%s : %d]\n", clientSocket.getLocalAddress(), clientSocket.getLocalPort()));
                 new Thread(MainActivityThread(serverSocket, clientSocket)).start();
             }
         }
@@ -85,44 +84,6 @@ public class GeneralManager{
             serverSocket.close();
             System.out.println(exception.getMessage());
         }
-    }
-
-    private static boolean validateToken(String token) throws Exception{
-        if(token.length() == 0)
-            throw new Exception("Null token!");
-        String[] tokenItems = token.split("\\-");
-        for(String tokenItem : tokenItems){
-            String[] values = tokenItem.split("\\.");
-            if(values.length != 4)
-                throw new Exception("Invalid token! The address is not a valid IP Address (invalid length!)");
-            for(String value : values){
-                try{
-                    int parsedValue = Integer.parseInt(value);
-                    if(parsedValue < 0 || parsedValue > 255)
-                        throw new Exception("Invalid token! The address is not a valid IP Address (8 bit representation of values)");
-                }
-                catch (NumberFormatException exception) {
-                    throw new Exception("Invalid token! The address is not a valid IP Address (it should only contain numbers!)");
-                }
-            }
-        }
-        return true;
-    }
-
-    private static String cleanChain(String token){
-        if(token.contains("-")){
-            int delimiter = token.indexOf("-");
-            return token.substring(delimiter + 1);
-        }
-        else{
-            return null;
-        }
-    }
-
-    private static String getDestinationIpAddress(String token) throws Exception{
-        if(validateToken(token))
-            return token.replace(" ","").split("\\-")[0];
-        return null;
     }
 
     /**
@@ -138,55 +99,30 @@ public class GeneralManager{
             public void run(){
                 try {
                     DataInputStream dataInputStream = new DataInputStream(clientSocket.getInputStream());
-                    DataOutputStream dataOutputStream = null;
-                    FileOutputStream fileOutputStream = null;
-                    Socket nextElementSocket = null;
+                    DataOutputStream dataOutputStream = new DataOutputStream(clientSocket.getOutputStream());
                     byte[] buffer = new byte[bufferSize];
                     int read = 0;
                     boolean header_found = false;
+                    int timeout = 2000;
                     while((read = dataInputStream.read(buffer, 0, bufferSize)) > 0){
-                        if(!header_found) {
-                            try {
-                                Files.createDirectories(Paths.get(serverSocket.getInetAddress().getHostAddress() ));
-                                FileHeader header = new FileHeader(new String(buffer, StandardCharsets.UTF_8));
-                                String filepath = serverSocket.getInetAddress().getHostAddress() + "/" + header.getFilename();
-                                fileOutputStream = new FileOutputStream(filepath);
-                                System.out.println("My header : " + header);
-                                String token = cleanChain(header.getToken());
-                                if(token != null){
-                                    String nextDestination = getDestinationIpAddress(token);
-                                    if(connectionTable.containsAddress(new Address(nextDestination, 8246))) {
-                                        nextElementSocket = new Socket(nextDestination, serverSocketPort);
-                                        dataOutputStream = new DataOutputStream(nextElementSocket.getOutputStream());
-                                        header.setToken(token);
-                                        System.out.println("Next node in chain header : " + header);
-                                        dataOutputStream.write(header.toString().getBytes());
-                                    }
-                                    else{
-                                        System.out.println("Address unknown!");
-                                    }
-                                }
-                                else{
-                                    System.out.println("End of chain");
-                                }
-                                header_found = true;
-                                continue;
-                            } catch (Exception exception) {
-                                System.out.println("Exceptie : " + exception.getMessage());
+                        String clientMessage = new String(buffer, StandardCharsets.UTF_8).substring(0,read);
+                        ClientCommunicationManager.ClientRequest clientRequest = clientCommunicationManager.parseMessageFromClient(clientMessage);
+                        if(clientRequest == ClientCommunicationManager.ClientRequest.NEW_FILE){
+                            String chain = clientCommunicationManager.generateChain(connectionTable, clientMessage);
+                            if(chain != null) {
+                                System.out.println("Token-ul a fost trimis catre client : " + chain);
+                                dataOutputStream.write(chain.getBytes());
                             }
-                        }
-                        fileOutputStream.write(buffer, 0, read);
-                        if(nextElementSocket != null){
-                            dataOutputStream.write(buffer, 0, read);
+                            else{
+                                String errormsg = "eroare";
+                                dataOutputStream.write(errormsg.getBytes());
+                            }
+
                         }
                     }
                     System.out.println("File write done");
                     dataInputStream.close();
-                    fileOutputStream.close();
-                    if(nextElementSocket != null) {
-                        nextElementSocket.close();
-                        dataOutputStream.close();
-                    }
+                    dataOutputStream.close();
                     clientSocket.close();
                 }
                 catch (Exception exception){
@@ -251,10 +187,11 @@ public class GeneralManager{
         Address address;
         try {
             address = generateAddress(new String[]{"127.0.0.1", "8246"});
-            HearthBeatManager hearthBeatManager = new HearthBeatManager(address, hearthBeatFrequency, hearthBeatReadTimeout, connectionTable);
-            GeneralManager generalManager = new GeneralManager(address, hearthBeatManager);
+            HearthBeatManager hearthBeatManager = new HearthBeatManager(address, hearthBeatFrequency, connectionTable);
+            ClientCommunicationManager clientCommunicationManager = new ClientCommunicationManager();
+            GeneralManager generalManager = new GeneralManager(address, hearthBeatManager, clientCommunicationManager);
             generalManager.HearthBeatActivity();
-            generalManager.MainActivity(args[0]);
+            generalManager.MainActivity("127.0.0.1");
         }
         catch (Exception exception){
             System.out.println(exception.getMessage());

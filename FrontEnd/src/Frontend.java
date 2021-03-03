@@ -1,8 +1,17 @@
 import java.io.*;
 import java.net.Socket;
+import java.net.UnknownHostException;
+import java.nio.charset.StandardCharsets;
 
 public class Frontend {
     private static final int bufferSize = 1024;
+
+    private static String generalManagerAddress = "127.0.0.1";
+
+    private static int generalManagerPort = 8081;
+
+    private static Socket generalManagerSocket;
+
     private static boolean validateToken(String token) throws Exception{
         if(token.length() == 0)
             throw new Exception("Null token!");
@@ -57,11 +66,42 @@ public class Frontend {
         }
     }
 
-    public static void mainActivity(String token, String filename){
+    public static String getToken(String filesize, int replication_factor){
+        String message = "newfile " + filesize + "|" + "replication " + replication_factor + "";
+        try {
+            Socket generalManagerSocket = new Socket(generalManagerAddress, generalManagerPort);
+
+            DataOutputStream socketOutputStream = new DataOutputStream(generalManagerSocket.getOutputStream());
+            System.out.println("Trimit cerere pentru token...");
+            socketOutputStream.write(message.getBytes());
+
+            DataInputStream socketInputStream = new DataInputStream(generalManagerSocket.getInputStream());
+            byte[] buffer = new byte[bufferSize];
+            int read = 0;
+            String token = null;
+            while((read = socketInputStream.read(buffer, 0, bufferSize)) > 0){
+                token = new String(buffer, StandardCharsets.UTF_8).substring(0, read);
+                break;
+            }
+
+            socketInputStream.close();
+            socketOutputStream.close();
+            generalManagerSocket.close();
+            return token;
+        }
+        catch (IOException exception){
+            System.out.println("Eroare de IO la socketOutputStream : " + exception.getMessage());
+        }
+        return "";
+    }
+
+    public static void mainActivity(String filename, int replication_factor){
         new Thread(new Runnable() {
             @Override
             public void run() {
                 try {
+                    String token = getToken("142141", replication_factor);
+                    System.out.println(filename + " -> " + token);
                     String destinationAddress = getDestinationIpAddress(token);
                     Socket socket = new Socket(destinationAddress, 8081);
                     sendFile(socket, token, filename);
@@ -74,11 +114,8 @@ public class Frontend {
     }
 
     public static void main(String[] args){
-        String token = "127.0.0.1-127.0.0.2-127.0.0.3-127.0.0.4";
-        mainActivity(token, "D:/Facultate/Licenta/Dropbox/FrontEnd/src/test_files/sss.pdf");
-        token = "127.0.0.2-127.0.0.3-127.0.0.1";
-        mainActivity(token, "D:/Facultate/Licenta/Dropbox/FrontEnd/src/test_files/Dangerous.mp3");
-        token = "127.0.0.3-127.0.0.1-127.0.0.2";
-        mainActivity(token, "D:/Facultate/Licenta/Dropbox/FrontEnd/src/test_files/Resurse-lab 02-20201012.zip");
+           mainActivity("D:/Facultate/Licenta/Dropbox/FrontEnd/src/test_files/sss.pdf", 5);
+           //mainActivity("D:/Facultate/Licenta/Dropbox/FrontEnd/src/test_files/Dangerous.mp3", 1);
+            //mainActivity("D:/Facultate/Licenta/Dropbox/FrontEnd/src/test_files/Resurse-lab 02-20201012.zip", 2);
     }
 }

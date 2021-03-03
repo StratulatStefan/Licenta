@@ -6,6 +6,8 @@ import java.io.IOException;
 import java.net.InetAddress;
 import java.util.List;
 
+import data.Time;
+
 public class HearthBeatManager implements Runnable{
     /**
      * O referinta la tabela de conexiuni din managerul general
@@ -34,12 +36,6 @@ public class HearthBeatManager implements Runnable{
     private double frequency;
 
     /**
-     * Timeout-ul asteptarii primirii heartbeat-urilor
-     * Exprimat in secunde.
-     */
-    private double timeout;
-
-    /**
      * Numarul de heart-beat-uri la care se face clean-up-ul tabelei de conexiuni
      */
     private final static int cleanupFrequency = 3;
@@ -48,12 +44,10 @@ public class HearthBeatManager implements Runnable{
      * Constructorul managerului de heartbeat-uri pentru nodul curent.
      * @param address Adresa nodului curent
      * @param frequency Frecventa buclei de trimitere/receptie heartbeat-uri
-     * @param timeout Timeout pentru primirea hearthbeat-urilor.
      */
-    public HearthBeatManager(Address address, double frequency, double timeout, ConnectionTable connectionTable){
+    public HearthBeatManager(Address address, double frequency, ConnectionTable connectionTable){
         this.nodeAddress = address;
         this.frequency = frequency;
-        this.timeout = timeout;
         HearthBeatManager.connectionTable = connectionTable;
     }
 
@@ -69,16 +63,15 @@ public class HearthBeatManager implements Runnable{
             @Override
             public void run(){
                 while(true) {
-                    System.out.println("Current time : " + ConnectionTable.getCurrentTimestamp());
-                    //System.out.println("[My address] " + nodeAddress.toString());
-                    //System.out.println(" >>> Sending my address...");
+                    System.out.println(Time.getCurrentTimeWithFormat() + " ");
+                    // System.out.println("[My address] " + nodeAddress.toString());
+                    // System.out.println(" >>> Sending my address...");
                     try {
-                        socket.sendMessage(group, nodeAddress.toString());
-
+                        //socket.sendMessage(group, nodeAddress.toString());
                         List<Address> disconnected = connectionTable.checkDisconnection((int)(frequency * cleanupFrequency));
                         if(disconnected.size() == 0){
                             if(connectionTable.size() == 0){
-                                System.out.println(" >>> Nobody connected!");
+                                System.out.println(" >>> Niciun nod conectat!");
                             }
                             else {
                                 System.out.println(connectionTable);
@@ -91,9 +84,9 @@ public class HearthBeatManager implements Runnable{
                             }
                         }
                         Thread.sleep((int) (frequency * 1e3));
-                    } catch (IOException exception) {
-                        socket.close();
-                        System.out.println("IOException occured. : " + exception.getMessage());
+                   // } catch (IOException exception) {
+                    //    socket.close();
+                     //   System.out.println("IOException occured. : " + exception.getMessage());
                     } catch (InterruptedException exception) {
                         socket.close();
                         System.out.println("InterruptedException occured. : " + exception.getMessage());
@@ -120,8 +113,9 @@ public class HearthBeatManager implements Runnable{
                     try{
                         message = socket.receiveMessage();
                         receivedAddress = Address.parseAddress(message);
+                        System.out.println("Am primit un hearthbeat de la " + receivedAddress + " ...");
                         if(!connectionTable.containsAddress(receivedAddress)){
-                            System.out.println(" >>> [New address] : " + receivedAddress);
+                            System.out.println(" >>> [Adresa noua] : " + receivedAddress);
                             connectionTable.addAddress(receivedAddress);
                         }
                         else {
