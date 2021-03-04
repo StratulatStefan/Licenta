@@ -10,8 +10,6 @@ public class Frontend {
 
     private static int generalManagerPort = 8081;
 
-    private static Socket generalManagerSocket;
-
     private static boolean validateToken(String token) throws Exception{
         if(token.length() == 0)
             throw new Exception("Null token!");
@@ -66,18 +64,25 @@ public class Frontend {
         }
     }
 
-    public static String getToken(String filesize, int replication_factor){
-        String message = "newfile " + filesize + "|" + "replication " + replication_factor + "";
+    public static String getToken(String userId, String filename, int filesize, int replication_factor){
+        StringBuilder messageBuilder = new StringBuilder();
+        messageBuilder.append("user " + userId + "|");
+        messageBuilder.append("operation newfile|");
+        String[] fname = filename.split("/");
+        messageBuilder.append("filename " + fname[fname.length - 1] + "|");
+        messageBuilder.append("filesize " + filesize + "|");
+        messageBuilder.append("replication_factor " + replication_factor);
+        System.out.println(messageBuilder.toString());
         try {
             Socket generalManagerSocket = new Socket(generalManagerAddress, generalManagerPort);
 
             DataOutputStream socketOutputStream = new DataOutputStream(generalManagerSocket.getOutputStream());
             System.out.println("Trimit cerere pentru token...");
-            socketOutputStream.write(message.getBytes());
+            socketOutputStream.write(messageBuilder.toString().getBytes());
 
             DataInputStream socketInputStream = new DataInputStream(generalManagerSocket.getInputStream());
             byte[] buffer = new byte[bufferSize];
-            int read = 0;
+            int read;
             String token = null;
             while((read = socketInputStream.read(buffer, 0, bufferSize)) > 0){
                 token = new String(buffer, StandardCharsets.UTF_8).substring(0, read);
@@ -92,15 +97,15 @@ public class Frontend {
         catch (IOException exception){
             System.out.println("Eroare de IO la socketOutputStream : " + exception.getMessage());
         }
-        return "";
+        return null;
     }
 
-    public static void mainActivity(String filename, int replication_factor){
+    public static void mainActivity(String userId, String filename, int filesize, int replication_factor){
         new Thread(new Runnable() {
             @Override
             public void run() {
                 try {
-                    String token = getToken("142141", replication_factor);
+                    String token = getToken(userId, filename, filesize, replication_factor);
                     System.out.println(filename + " -> " + token);
                     String destinationAddress = getDestinationIpAddress(token);
                     Socket socket = new Socket(destinationAddress, 8081);
@@ -114,7 +119,11 @@ public class Frontend {
     }
 
     public static void main(String[] args){
-           mainActivity("D:/Facultate/Licenta/Dropbox/FrontEnd/src/test_files/sss.pdf", 5);
+        String userId = "1";
+        String filename = "D:/Facultate/Licenta/test_files/sss.pdf";
+        int filesize = 12;
+        int replication_factor = 5;
+        mainActivity(userId, filename, filesize, replication_factor);
            //mainActivity("D:/Facultate/Licenta/Dropbox/FrontEnd/src/test_files/Dangerous.mp3", 1);
             //mainActivity("D:/Facultate/Licenta/Dropbox/FrontEnd/src/test_files/Resurse-lab 02-20201012.zip", 2);
     }

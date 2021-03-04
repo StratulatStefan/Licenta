@@ -16,11 +16,6 @@ public class ConnectionTable {
     private final List<Pair<Address, Long>> connectionTable;
 
     /**
-     * Timestamp-ul la care ne raportam, astfel incat sa nu obtinem o valoare foarte mare.
-     */
-    //private static Timestamp baseTimestamp = Timestamp.valueOf("2020-01-01 00:00:00");
-
-    /**
      * Constructorul clasei, care initializeaza lista vida.
      */
     public ConnectionTable(){
@@ -76,18 +71,6 @@ public class ConnectionTable {
             }
         }
         return false;
-    }
-
-    /**
-     * Functie care "reseteaza" valorile timestamp-urilor fiecarei adrese.
-     * Aceasta functie este folosita pentru validarea conexiunii, intrucat actualizeaza timestampul curent
-     * pana la limita la care o conexiune este considerata instabila/rupta.
-     * - Posibil sa nu mai fie nevoie -
-     */
-    public void resetAddressList(){
-        for(Pair<Address, Long> connection : this.connectionTable){
-            connection.setSecond(connection.getSecond() + 1);
-        }
     }
 
     /**
