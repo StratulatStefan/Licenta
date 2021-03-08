@@ -13,6 +13,11 @@ public class ClientCommunicationManager {
         NEW_FILE
     }
 
+    public enum ClientRequestStatus{
+        OK,
+        FILE_ALREADY_EXISTS
+    }
+
     /**
      * Colectie care va contine
      */
@@ -88,11 +93,34 @@ public class ClientCommunicationManager {
     public void registerUserNewFileRequest(HashMap<String, String> parsedMessage, String chain){
         String user = parsedMessage.get("user");
         String filename = parsedMessage.get("filename");
-        HashMap<String, String[]> fileMapping = new HashMap<>();
-        fileMapping.put(filename, chain.split("-"));
         synchronized (contentTable){
-            contentTable.put(user, fileMapping);
+            if(contentTable.containsKey(user)){
+                HashMap<String, String[]> existent = contentTable.get(user);
+                existent.put(filename, chain.split("-"));
+                contentTable.put(user, existent);
+            }
+            else {
+                HashMap<String, String[]> fileMapping = new HashMap<>();
+                fileMapping.put(filename, chain.split("-"));
+                contentTable.put(user, fileMapping);
+            }
         }
-        int x = 0;
+    }
+
+    public ClientRequestStatus checkFileStatus(HashMap<String, String> parsedMessage){
+        String user = parsedMessage.get("user");
+        String filename = parsedMessage.get("filename");
+        synchronized (contentTable){
+            if(contentTable.containsKey(user)){
+                HashMap<String, String[]> existent = contentTable.get(user);
+                for(String fname : existent.keySet()){
+                    if(fname.equals(filename)){
+                        System.out.println("File already exists!");
+                        return ClientRequestStatus.FILE_ALREADY_EXISTS;
+                    }
+                }
+            }
+        }
+        return ClientRequestStatus.OK;
     }
 }

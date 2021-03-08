@@ -34,7 +34,7 @@ public class GeneralManager{
      * Frecventa heartbeat-urilor
      * Exprimat in secunde.
      */
-    private final static double hearthBeatFrequency = 2;
+    private final static double hearthBeatFrequency = 5;
 
     /**
      * Dimensiunea bufferului in care vor fi citite datele de la un nod adiacent
@@ -50,9 +50,6 @@ public class GeneralManager{
      * Obiectul care se va ocupa de comunicatia cu clientul
      */
     private ClientCommunicationManager clientCommunicationManager;
-
-
-
 
     /**
      * Constructorul clasei
@@ -113,14 +110,20 @@ public class GeneralManager{
                         parsedMessage = clientCommunicationManager.parseMessageFromClient(clientMessage);
                         ClientCommunicationManager.ClientRequest clientRequest = clientCommunicationManager.getOperationType(parsedMessage);
                         if(clientRequest == ClientCommunicationManager.ClientRequest.NEW_FILE){
-                            chain = clientCommunicationManager.generateChain(connectionTable, parsedMessage);
-                            if(chain != null) {
-                                System.out.println("Token-ul a fost trimis catre client : " + chain);
-                                dataOutputStream.write(chain.getBytes());
+                            ClientCommunicationManager.ClientRequestStatus fileStatus = clientCommunicationManager.checkFileStatus(parsedMessage);
+                            if(fileStatus == ClientCommunicationManager.ClientRequestStatus.FILE_ALREADY_EXISTS){
+                                dataOutputStream.write("FILE ALREADY EXISTS1".getBytes());
                             }
-                            else{
-                                String errormsg = "eroare";
-                                dataOutputStream.write(errormsg.getBytes());
+                            else if(fileStatus == ClientCommunicationManager.ClientRequestStatus.OK) {
+                                chain = clientCommunicationManager.generateChain(connectionTable, parsedMessage);
+                                if (chain != null) {
+                                    System.out.println("Token-ul a fost trimis catre client : " + chain);
+                                    dataOutputStream.write(chain.getBytes());
+                                    clientCommunicationManager.registerUserNewFileRequest(parsedMessage, chain);
+                                } else {
+                                    String errormsg = "eroare";
+                                    dataOutputStream.write(errormsg.getBytes());
+                                }
                             }
 
                         }
@@ -129,7 +132,6 @@ public class GeneralManager{
                     dataInputStream.close();
                     dataOutputStream.close();
                     clientSocket.close();
-                    clientCommunicationManager.registerUserNewFileRequest(parsedMessage, chain);
                 }
                 catch (Exception exception){
                     System.out.println(exception.getMessage());

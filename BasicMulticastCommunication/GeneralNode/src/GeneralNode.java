@@ -1,5 +1,5 @@
 import communication.Address;
-import model.FileHeader;
+import communication.FileHeader;
 
 import java.io.*;
 import java.net.*;
@@ -12,217 +12,56 @@ import java.lang.*;
 /* https://tldp.org/HOWTO/Multicast-HOWTO.html#toc1 */
 public class GeneralNode{
     /**
-     * Adresa pe care o va avea nodul curent.
-     */
-    private Address nodeAddress;
-
-    /**
-     * Frecventa heartbeat-urilor
-     * Exprimat in secunde.
-     */
-    private final static double hearthBeatFrequency = 2;
-
-    /**
-     * Timeout-ul asteptarii primirii heartbeat-urilor
-     * Exprimat in secunde.
-     */
-    private final static double hearthBeatReadTimeout = .5;
-
-    /**
      * Portul pe care fi mapata ServerSocket-ul
      */
     private final static int serverSocketPort = 8081;
 
     /**
-     * Dimensiunea bufferului in care vor fi citite datele de la un nod adiacent
+     * Portul pe care va fi mapata comunicarea multicast
      */
-    private final static int bufferSize = 1024;
+    private final static int heartBeatPort = 8246;
 
     /**
      * Obiectul care se ocupa de mecanismul de hearbeats
      */
     private HearthBeatManager hearthBeatManager;
 
-    private static String storagePath = "D:\\Facultate\\Licenta\\Storage\\";
+    /**
+     * Obiectul care se va ocupa de comunicarea cu clientul
+     */
+    private ClientCommunicationManager clientCommunicationManager;
 
     /**
      * Constructorul clasei
-     * @param address Adresa nodului curent
      * @param hearthBeatManager Managerul de heartbeat-uri
      */
-    public GeneralNode(Address address, HearthBeatManager hearthBeatManager){
-        this.nodeAddress = address;
+    public GeneralNode(HearthBeatManager hearthBeatManager, ClientCommunicationManager clientCommunicationManager){
         this.hearthBeatManager = hearthBeatManager;
+        this.clientCommunicationManager = clientCommunicationManager;
     }
 
-    /**
-     * Functie care porneste thread-ul pe care va fi rulat mecanismul de heartbeats
-     */
-    public void HearthBeatActivity(){
+    public void StartActivity() throws Exception {
+        // Pornim thread-ul pe care va fi rulat mecanismul de heartbeats
         new Thread(hearthBeatManager).start();
-    }
 
-    /** Functie care inglobeaza activitatea principala a fiecarui nod, aceea de a asigura comunicarea cu celelalte noduri
-     * in vederea trimiterii si primirii de mesaje.
-     */
-    public void MainActivity(String ipAddress) throws Exception{
-        Address address = generateAddress(new String[]{ipAddress, String.format("%d", serverSocketPort)});
-        ServerSocket serverSocket = new ServerSocket();
-        try{
-            serverSocket.bind(new InetSocketAddress(address.getIpAddress(), serverSocketPort));
-            while(true){
-                Socket clientSocket = serverSocket.accept();
-                System.out.println(String.format("Client connected : [%s : %d]\n", clientSocket.getLocalAddress(), clientSocket.getLocalPort()));
-                new Thread(MainActivityThread(serverSocket, clientSocket)).start();
-            }
-        }
-        catch (Exception exception){
-            serverSocket.close();
-            System.out.println(exception.getMessage());
-        }
-    }
-
-    private static boolean validateToken(String token) throws Exception{
-        if(token.length() == 0)
-            throw new Exception("Null token!");
-        String[] tokenItems = token.split("\\-");
-        for(String tokenItem : tokenItems){
-            String[] values = tokenItem.split("\\.");
-            if(values.length != 4)
-                throw new Exception("Invalid token! The address is not a valid IP Address (invalid length!)");
-            for(String value : values){
-                try{
-                    int parsedValue = Integer.parseInt(value);
-                    if(parsedValue < 0 || parsedValue > 255)
-                        throw new Exception("Invalid token! The address is not a valid IP Address (8 bit representation of values)");
-                }
-                catch (NumberFormatException exception) {
-                    throw new Exception("Invalid token! The address is not a valid IP Address (it should only contain numbers!)");
-                }
-            }
-        }
-        return true;
-    }
-
-    private static String cleanChain(String token){
-        if(token.contains("-")){
-            int delimiter = token.indexOf("-");
-            return token.substring(delimiter + 1);
-        }
-        else{
-            return null;
-        }
-    }
-
-    private static String getDestinationIpAddress(String token) throws Exception{
-        if(validateToken(token))
-            return token.replace(" ","").split("\\-")[0];
-        return null;
-    }
-
-    /**
-     * Functie care inglobeaza comunicarea de date cu un nod adicant, avandu-se in vedere primirea de date de la un
-     * nod adiacent si, eventual, trimiterea informatiilor mai departe, in cazul in care nu este nod terminal.
-     * @param serverSocket Socket-ul pe care este mapat nodul curent.
-     * @param clientSocket Socket-ul nodului adiacent, de la care primeste date.
-     * @return Runnable-ul necesar pornirii unui thread separat pentru aceasta comunicare.
-     */
-    private Runnable MainActivityThread(ServerSocket serverSocket, Socket clientSocket){
-        return new Runnable() {
-            @Override
-            public void run(){
-                try {
-                    InputStream dataInputStream = new DataInputStream(clientSocket.getInputStream());
-                    OutputStream dataOutputStream = null;
-                    FileOutputStream fileOutputStream = null;
-                    Socket nextElementSocket = null;
-                    byte[] buffer = new byte[bufferSize];
-                    int read = 0;
-                    boolean header_found = false;
-                    while((read = dataInputStream.read(buffer, 0, bufferSize)) > 0){
-                        if(!header_found) {
-                            try {
-                                Files.createDirectories(Paths.get(storagePath + serverSocket.getInetAddress().getHostAddress() ));
-                                FileHeader header = new FileHeader(new String(buffer, StandardCharsets.UTF_8));
-                                String filepath = storagePath + serverSocket.getInetAddress().getHostAddress() + "/" + header.getFilename();
-                                fileOutputStream = new FileOutputStream(filepath);
-                                System.out.println("My header : " + header);
-                                String token = cleanChain(header.getToken());
-                                if(token != null){
-                                    String nextDestination = getDestinationIpAddress(token);
-                                    nextElementSocket = new Socket(nextDestination, serverSocketPort);
-                                    dataOutputStream = new DataOutputStream(nextElementSocket.getOutputStream());
-                                    header.setToken(token);
-                                    System.out.println("Next node in chain header : " + header);
-                                    dataOutputStream.write(header.toString().getBytes());
-                                }
-                                else{
-                                    System.out.println("End of chain");
-                                }
-                                header_found = true;
-                                continue;
-                            } catch (Exception exception) {
-                                System.out.println("Exceptie : " + exception.getMessage());
-                            }
-                        }
-                        fileOutputStream.write(buffer, 0, read);
-                        if(nextElementSocket != null){
-                            dataOutputStream.write(buffer, 0, read);
-                        }
-                    }
-                    System.out.println("File write done");
-                    dataInputStream.close();
-                    fileOutputStream.close();
-                    if(nextElementSocket != null) {
-                        nextElementSocket.close();
-                        dataOutputStream.close();
-                    }
-                    clientSocket.close();
-                }
-                catch (Exception exception){
-                    System.out.println(exception.getMessage());
-                    System.out.println(String.format("Could not properly close connection with my friend : [%s : %d]",
-                            clientSocket.getLocalAddress(),
-                            clientSocket.getLocalPort()));
-                }
-            }
-        };
-    }
-
-    /**
-     * Datele componente ale adresei nodului curent (ip si port) se vor trimite prin intermediul parametrilor la linia de comanda.
-     * Aceasta functie realizeaza o verificare de baza a paraemetrilor furnizati la linia de comanda.
-     * Se impune sa fie furnizati cei doi parametri (ip si port) si sa aiba formatul necesar. (string si int).
-     * Daca sunt valide, se va returna obiectul de tip Address.
-     * @param args argumentele furnizate la linia de coamnda
-     * @return obiectul de tip Address ce va reprezenta adresa nodului curent.
-     * @throws Exception generata in cazul in care nu se furnizeaza numarul specificat de argumente sau daca nu au tipul necesar.
-     */
-    public static Address generateAddress(String[] args) throws Exception{
-        if(args.length < 2){
-            throw new Exception("Please provide the ip address and the port number for this node.");
-        }
-        int port;
-        try{
-            port = Integer.parseInt(args[1]);
-        }
-        catch (NumberFormatException exception){
-            throw new Exception("Please provide a number for the port.");
-        }
-        return new Address(args[0], port);
+        // Pornim comunicarea cu clientul
+        clientCommunicationManager.ClientCommunicationLoop();
     }
 
     /**
      * @param args Argumentele furnizate la linia de comanda
      */
     public static void main(String[] args) throws IOException {
-        Address address;
         try {
-            address = generateAddress(new String[]{args[0], "8246"});
-            HearthBeatManager hearthBeatManager = new HearthBeatManager(address, hearthBeatFrequency, hearthBeatReadTimeout);
-            GeneralNode generalManager = new GeneralNode(address, hearthBeatManager);
-            generalManager.HearthBeatActivity();
-            generalManager.MainActivity(args[0]);
+            Address hearthBeatAddress = new Address(args[0], heartBeatPort);
+            HearthBeatManager hearthBeatManager = new HearthBeatManager(hearthBeatAddress);
+
+            Address clientCommunicationAddress = new Address(args[0], serverSocketPort);
+            InternalNodeCommunicationManager internalCommunicationManager = new InternalNodeCommunicationManager();
+            ClientCommunicationManager clientCommunicationManager = new ClientCommunicationManager(clientCommunicationAddress, internalCommunicationManager);
+
+            GeneralNode generalManager = new GeneralNode(hearthBeatManager, clientCommunicationManager);
+            generalManager.StartActivity();
         }
         catch (Exception exception){
             System.out.println(exception.getMessage());

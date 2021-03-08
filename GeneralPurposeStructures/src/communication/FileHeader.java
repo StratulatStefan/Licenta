@@ -1,4 +1,4 @@
-package model;
+package communication;
 
 import java.util.Collections;
 
@@ -20,6 +20,10 @@ public class FileHeader {
      * Dimensiunea fisierului. Aparent, nu avem nevoie de ea.
      */
     private long filesize;
+    /**
+     * ID-ul userului care va detine fisierul
+     */
+    private String userId;
 
     /**
      * Constructor vid pentru clasa.
@@ -34,6 +38,7 @@ public class FileHeader {
      */
     public FileHeader(String message) throws Exception{
         this.ParseMessage(message);
+        System.out.println(this);
     }
 
     /**
@@ -96,6 +101,14 @@ public class FileHeader {
     }
 
     /**
+     * Setter pentru id-ul userului care va detine fisierul
+     * @param userId Id-ul utilizatorului
+     */
+    public void setUserId(String userId){ this.userId = userId;}
+
+    public String getUserId(){return this.userId;}
+
+    /**
      * Functia care realizeaza parsarea mesajului; se extrag elementele individuale
      * si se asociaza campului corespunzator
      * @param message Header-ul, in formatul primit de la nodul adiacent.
@@ -114,6 +127,8 @@ public class FileHeader {
             String[] entry = item.split(":", 2);
             String key = entry[0].toLowerCase();
             String value = entry[1];
+            if(key.equals("userid"))
+                this.setUserId(value);
             if(key.equals("token"))
                 this.setToken(value);
             if(key.equals("filename"))
@@ -130,7 +145,7 @@ public class FileHeader {
      */
     @Override
     public String toString() {
-        String format = String.format("<token : %s><filename : %s><size : %d>|", this.token, this.filename, this.filesize);
+        String format = String.format("<userid : %s><token : %s><filename : %s><size : %d>|", this.userId, this.token, this.filename, this.filesize);
         format += String.join("", Collections.nCopies(1024 - format.length(), " "));
         return format;
     }

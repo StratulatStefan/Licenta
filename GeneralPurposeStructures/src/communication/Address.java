@@ -85,19 +85,6 @@ public class Address {
     }
 
     /**
-     * Functie care verifica daca doua adrese sunt egale.
-     * Egalitatea este determinata de egalitatea membrilor (ip si port)
-     * @param object Adresa cu care se face comparatia
-     * @return egalitatea dintre cele doua adrese
-     */
-    @Override
-    public boolean equals(Object object) {
-        if (object == null || getClass() != object.getClass()) return false;
-        Address address = (Address) object;
-        return port == address.port && this.ipAddress.equals(address.ipAddress);
-    }
-
-    /**
      * Functie care transforma un string intr-o adresa, avand in vedere formatul ip : port (+- un spatiu).
      * Orice alta abatere de la format este respinsa.
      * @param address String-ul care contine adresa in format text.
@@ -116,6 +103,19 @@ public class Address {
             System.out.println(exception.getMessage());
             return null;
         }
+    }
+
+    /**
+     * Functie care verifica daca doua adrese sunt egale.
+     * Egalitatea este determinata de egalitatea membrilor (ip si port)
+     * @param object Adresa cu care se face comparatia
+     * @return egalitatea dintre cele doua adrese
+     */
+    @Override
+    public boolean equals(Object object) {
+        if (object == null || getClass() != object.getClass()) return false;
+        Address address = (Address) object;
+        return port == address.port && this.ipAddress.equals(address.ipAddress);
     }
 
     /**

@@ -1,0 +1,9 @@
+<component name="ArtifactManager">
+  <artifact type="jar" build-on-make="true" name="FrontEnd:jar">
+    <output-path>$PROJECT_DIR$/out/artifacts/FrontEnd_jar</output-path>
+    <root id="archive" name="FrontEnd.jar">
+      <element id="module-output" name="FrontEnd" />
+      <element id="module-output" name="GeneralPurposeStructures" />
+    </root>
+  </artifact>
+</component>

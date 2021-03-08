@@ -26,25 +26,21 @@ public class HearthBeatManager implements Runnable{
      * Frecventa heartbeat-urilor
      * Exprimat in secunde.
      */
-    private double frequency;
+    private final static double frequency = 5;
 
     /**
      * Timeout-ul asteptarii primirii heartbeat-urilor
      * Exprimat in secunde.
      */
-    private double timeout;
+    private final static double timeout = .5;
 
 
     /**
      * Constructorul managerului de heartbeat-uri pentru nodul curent.
      * @param address Adresa nodului curent
-     * @param frequency Frecventa buclei de trimitere/receptie heartbeat-uri
-     * @param timeout Timeout pentru primirea hearthbeat-urilor.
      */
-    public HearthBeatManager(Address address, double frequency, double timeout){
+    public HearthBeatManager(Address address){
         this.nodeAddress = address;
-        this.frequency = frequency;
-        this.timeout = timeout;
     }
 
     /**

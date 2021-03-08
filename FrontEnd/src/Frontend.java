@@ -1,7 +1,8 @@
 import java.io.*;
 import java.net.Socket;
-import java.net.UnknownHostException;
 import java.nio.charset.StandardCharsets;
+
+import communication.FileHeader;
 
 public class Frontend {
     private static final int bufferSize = 1024;
@@ -38,7 +39,7 @@ public class Frontend {
         return null;
     }
 
-    private static void sendFile(Socket socket, String token, String filename){
+    private static void sendFile(Socket socket, String userId, String token, String filename){
         try {
             DataOutputStream outputStream = new DataOutputStream(socket.getOutputStream());
             File file = new File(filename);
@@ -46,6 +47,7 @@ public class Frontend {
             fileHeader.setFilename(filename);
             fileHeader.setToken(token);
             fileHeader.setFilesize(file.length());
+            fileHeader.setUserId(userId);
             byte[] binaryFile = new byte[bufferSize];
             byte[] header = fileHeader.toString().getBytes();
             BufferedInputStream bufferedInputStream = new BufferedInputStream(new FileInputStream(file));
@@ -83,16 +85,16 @@ public class Frontend {
             DataInputStream socketInputStream = new DataInputStream(generalManagerSocket.getInputStream());
             byte[] buffer = new byte[bufferSize];
             int read;
-            String token = null;
+            String response = null;
             while((read = socketInputStream.read(buffer, 0, bufferSize)) > 0){
-                token = new String(buffer, StandardCharsets.UTF_8).substring(0, read);
+                response = new String(buffer, StandardCharsets.UTF_8).substring(0, read);
                 break;
             }
 
             socketInputStream.close();
             socketOutputStream.close();
             generalManagerSocket.close();
-            return token;
+            return response;
         }
         catch (IOException exception){
             System.out.println("Eroare de IO la socketOutputStream : " + exception.getMessage());
@@ -105,11 +107,17 @@ public class Frontend {
             @Override
             public void run() {
                 try {
-                    String token = getToken(userId, filename, filesize, replication_factor);
-                    System.out.println(filename + " -> " + token);
-                    String destinationAddress = getDestinationIpAddress(token);
-                    Socket socket = new Socket(destinationAddress, 8081);
-                    sendFile(socket, token, filename);
+                    String response = getToken(userId, filename, filesize, replication_factor);
+                    if(response.contains("FILE ALREADY EXISTS")){
+                        System.out.println("File already exists!");
+                    }
+                    else {
+                        String token = response;
+                        System.out.println(filename + " -> " + token);
+                        String destinationAddress = getDestinationIpAddress(token);
+                        Socket socket = new Socket(destinationAddress, 8081);
+                        sendFile(socket, userId, token, filename);
+                    }
                 }
                 catch (Exception exception){
                     System.out.println("Ceva exceptie : " + exception.getMessage());
@@ -119,7 +127,7 @@ public class Frontend {
     }
 
     public static void main(String[] args){
-        String userId = "1";
+        String userId = "3";
         String filename = "D:/Facultate/Licenta/test_files/sss.pdf";
         int filesize = 12;
         int replication_factor = 5;
