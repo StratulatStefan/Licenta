@@ -4,6 +4,7 @@ import model.ConnectionTable;
 
 import java.io.IOException;
 import java.net.InetAddress;
+import java.util.HashMap;
 import java.util.List;
 
 import data.Time;
@@ -111,14 +112,14 @@ public class HearthBeatManager implements Runnable{
                 Address receivedAddress;
                 while(true){
                     try{
-                        message = socket.receiveMessage();
-                        System.out.println(message);
-                        if(message.contains("|")) {
+                        HashMap<String, String[]>  messages = (HashMap<String, String[]>)socket.receiveMessage();
+                        /*if(message.contains("|")) {
                             receivedAddress = Address.parseAddress(message.split("\\|")[0]);
                         }
                         else{
                             receivedAddress = Address.parseAddress(message);
-                        }
+                        }*/
+                        receivedAddress = new Address("128.0.0.1", 8246);
                         System.out.println("Am primit un hearthbeat de la " + receivedAddress + " ...");
                         if(!connectionTable.containsAddress(receivedAddress)){
                             System.out.println(" >>> [Adresa noua] : " + receivedAddress);

@@ -2,6 +2,8 @@ package communication;
 
 import java.io.IOException;
 import java.net.*;
+import java.util.HashMap;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeoutException;
 
 /* important topic : https://stackoverflow.com/questions/19392173/multicastsocket-constructors-and-binding-to-port-or-socketaddress */
@@ -62,11 +64,12 @@ public class HearthBeatSocket extends MulticastSocket {
      * @return Mesajul primit sub forma de string
      * @throws IOException
      */
-    public String receiveMessage() throws IOException{
-        byte[] buffer = new byte[1024];
+    public Object receiveMessage() throws IOException, ClassNotFoundException {
+        byte[] buffer = new byte[2048];
         DatagramPacket packet = new DatagramPacket(buffer, buffer.length);
         this.receive(packet);
-        return new String(packet.getData(), packet.getOffset(), packet.getLength());
+        return Serializer.Deserialize(buffer);
+        //return new String(packet.getData(), packet.getOffset(), packet.getLength());
     }
 
     /**

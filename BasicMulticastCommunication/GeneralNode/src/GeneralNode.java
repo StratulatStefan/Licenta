@@ -1,12 +1,7 @@
 import communication.Address;
-import communication.FileHeader;
 import os.FileSystem;
 
 import java.io.*;
-import java.net.*;
-import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
-import java.nio.file.Paths;
 import java.lang.*;
 import java.util.HashMap;
 import java.util.concurrent.ConcurrentHashMap;
@@ -38,7 +33,7 @@ public class GeneralNode{
 
     private final static String storagePath = "D:\\Facultate\\Licenta\\Storage\\";
 
-    private final static ConcurrentHashMap<String, String[]> storageStatus = new ConcurrentHashMap<>();
+    private final static HashMap<String, String[]> storageStatus = new HashMap<>();
 
     /**
      * Constructorul clasei
@@ -57,7 +52,7 @@ public class GeneralNode{
         clientCommunicationManager.ClientCommunicationLoop();
     }
 
-    public static ConcurrentHashMap<String, String[]> GetStorageStatus() throws IOException {
+    public static HashMap<String, String[]> GetStorageStatus() throws IOException {
         String path = storagePath + ipAddress;
         if(!FileSystem.CheckFileExistance(path)){
             FileSystem.CreateDir(path);

@@ -4,6 +4,7 @@ import communication.HearthBeatSocket;
 import java.io.IOException;
 import java.net.InetAddress;
 
+import communication.Serializer;
 import data.Time;
 
 public class HearthBeatManager implements Runnable{
@@ -54,23 +55,15 @@ public class HearthBeatManager implements Runnable{
         return new Runnable(){
             @Override
             public void run(){
-                int x = 0;
                 while(true) {
                     System.out.println(Time.getCurrentTimeWithFormat() + " Se trimite un hearthbeat ...");
                     //System.out.println("[My address] " + nodeAddress.toString());
                     //System.out.println(" >>> Sending my address...");
                     try {
                         String message = nodeAddress.toString();
-                        if(x == 1){
-                            message += "|";
-//                            byte[] storagestatus = GeneralNode.GetStorageStatus();...
-
-                            x = 0;
-                        }
-                        else if(x == 0){
-                            x = 1;
-                        }
-                        socket.sendMessage(group, message);
+                        socket.sendBinaryMessage(group, Serializer.Serialize(GeneralNode.GetStorageStatus()));
+                       // socket.sendBinaryMessage(group, Serializer.Serialize(new String("salutare")));
+                        //socket.sendMessage(group, message);
                         Thread.sleep((int) (frequency * 1e3));
                     } catch (IOException exception) {
                         socket.close();
@@ -99,10 +92,10 @@ public class HearthBeatManager implements Runnable{
                 Address receivedAddress;
                 //while(true){
                     try{
-                        message = socket.receiveMessage();
-                        receivedAddress = Address.parseAddress(message);
+                        //message = socket.receiveMessage();
+                        //receivedAddress = Address.parseAddress(message);
                         //if(!connectionTable.containsAddress(receivedAddress)){
-                            System.out.println(" >>> [New address] : " + receivedAddress);
+                          //  System.out.println(" >>> [New address] : " + receivedAddress);
                             //connectionTable.addAddress(receivedAddress);
                        // }
                         //else {
