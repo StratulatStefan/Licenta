@@ -42,9 +42,13 @@ public class HearthBeatSocket extends MulticastSocket {
      * @throws IOException
      */
     public void sendMessage(InetAddress group, String message) throws IOException {
-        this.leaveGroup(group);
         byte[] messageContent = message.getBytes();
-        DatagramPacket packet = new DatagramPacket(messageContent, messageContent.length, group, this.multicastPort);
+        this.sendBinaryMessage(group, messageContent);
+    }
+
+    public void sendBinaryMessage(InetAddress group, byte[] message) throws IOException {
+        this.leaveGroup(group);
+        DatagramPacket packet = new DatagramPacket(message, message.length, group, this.multicastPort);
         this.send(packet);
         this.joinGroup(group);
     }

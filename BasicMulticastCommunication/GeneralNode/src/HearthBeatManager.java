@@ -54,12 +54,23 @@ public class HearthBeatManager implements Runnable{
         return new Runnable(){
             @Override
             public void run(){
+                int x = 0;
                 while(true) {
                     System.out.println(Time.getCurrentTimeWithFormat() + " Se trimite un hearthbeat ...");
                     //System.out.println("[My address] " + nodeAddress.toString());
                     //System.out.println(" >>> Sending my address...");
                     try {
-                        socket.sendMessage(group, nodeAddress.toString());
+                        String message = nodeAddress.toString();
+                        if(x == 1){
+                            message += "|";
+//                            byte[] storagestatus = GeneralNode.GetStorageStatus();...
+
+                            x = 0;
+                        }
+                        else if(x == 0){
+                            x = 1;
+                        }
+                        socket.sendMessage(group, message);
                         Thread.sleep((int) (frequency * 1e3));
                     } catch (IOException exception) {
                         socket.close();

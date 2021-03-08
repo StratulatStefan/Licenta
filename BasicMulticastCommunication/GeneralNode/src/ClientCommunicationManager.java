@@ -76,7 +76,8 @@ public class ClientCommunicationManager {
                             try {
                                 FileHeader header = new FileHeader(new String(buffer, StandardCharsets.UTF_8));
                                 String filepath = storagePath + serverSocket.getInetAddress().getHostAddress() + "/" + header.getUserId();
-                                Files.createDirectories(Paths.get(filepath ));
+                                if(!Files.exists(Paths.get(filepath)))
+                                    Files.createDirectories(Paths.get(filepath));
                                 filepath += "/" + header.getFilename();
                                 fileOutputStream = new FileOutputStream(filepath);
                                 System.out.println("My header : " + header);

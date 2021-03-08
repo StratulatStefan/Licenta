@@ -112,7 +112,13 @@ public class HearthBeatManager implements Runnable{
                 while(true){
                     try{
                         message = socket.receiveMessage();
-                        receivedAddress = Address.parseAddress(message);
+                        System.out.println(message);
+                        if(message.contains("|")) {
+                            receivedAddress = Address.parseAddress(message.split("\\|")[0]);
+                        }
+                        else{
+                            receivedAddress = Address.parseAddress(message);
+                        }
                         System.out.println("Am primit un hearthbeat de la " + receivedAddress + " ...");
                         if(!connectionTable.containsAddress(receivedAddress)){
                             System.out.println(" >>> [Adresa noua] : " + receivedAddress);

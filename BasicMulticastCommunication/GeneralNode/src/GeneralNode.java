@@ -1,5 +1,6 @@
 import communication.Address;
 import communication.FileHeader;
+import os.FileSystem;
 
 import java.io.*;
 import java.net.*;
@@ -7,10 +8,14 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.lang.*;
+import java.util.HashMap;
+import java.util.concurrent.ConcurrentHashMap;
 
 /* https://docs.oracle.com/en/java/javase/11/docs/api/java.base/java/net/MulticastSocket.html */
 /* https://tldp.org/HOWTO/Multicast-HOWTO.html#toc1 */
 public class GeneralNode{
+    private static String ipAddress;
+
     /**
      * Portul pe care fi mapata ServerSocket-ul
      */
@@ -31,6 +36,10 @@ public class GeneralNode{
      */
     private ClientCommunicationManager clientCommunicationManager;
 
+    private final static String storagePath = "D:\\Facultate\\Licenta\\Storage\\";
+
+    private final static ConcurrentHashMap<String, String[]> storageStatus = new ConcurrentHashMap<>();
+
     /**
      * Constructorul clasei
      * @param hearthBeatManager Managerul de heartbeat-uri
@@ -48,11 +57,32 @@ public class GeneralNode{
         clientCommunicationManager.ClientCommunicationLoop();
     }
 
+    public static ConcurrentHashMap<String, String[]> GetStorageStatus() throws IOException {
+        String path = storagePath + ipAddress;
+        if(!FileSystem.CheckFileExistance(path)){
+            FileSystem.CreateDir(path);
+            System.out.println("No status defined yet!");
+            return null;
+        }
+        String [] usersDirectories = FileSystem.GetDirContent(path);
+
+        synchronized (storageStatus) {
+            for (String userDir : usersDirectories) {
+                System.out.println(userDir);
+                String[] userFiles = FileSystem.GetDirContent(path + "\\" + userDir);
+                storageStatus.put(userDir, userFiles);
+            }
+        }
+        return storageStatus;
+    }
+
     /**
      * @param args Argumentele furnizate la linia de comanda
      */
-    public static void main(String[] args) throws IOException {
+    public static void main(String[] args) {
         try {
+            ipAddress = args[0];
+
             Address hearthBeatAddress = new Address(args[0], heartBeatPort);
             HearthBeatManager hearthBeatManager = new HearthBeatManager(hearthBeatAddress);
 
@@ -61,7 +91,9 @@ public class GeneralNode{
             ClientCommunicationManager clientCommunicationManager = new ClientCommunicationManager(clientCommunicationAddress, internalCommunicationManager);
 
             GeneralNode generalManager = new GeneralNode(hearthBeatManager, clientCommunicationManager);
+            generalManager.GetStorageStatus();
             generalManager.StartActivity();
+
         }
         catch (Exception exception){
             System.out.println(exception.getMessage());
