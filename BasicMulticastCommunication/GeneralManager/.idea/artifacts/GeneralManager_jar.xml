@@ -4,6 +4,7 @@
     <root id="archive" name="GeneralManager.jar">
       <element id="module-output" name="GeneralManager" />
       <element id="module-output" name="GeneralPurposeStructures" />
+      <element id="module-output" name="Beans" />
     </root>
   </artifact>
 </component>

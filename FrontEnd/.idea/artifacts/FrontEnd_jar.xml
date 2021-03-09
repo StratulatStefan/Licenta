@@ -4,6 +4,7 @@
     <root id="archive" name="FrontEnd.jar">
       <element id="module-output" name="FrontEnd" />
       <element id="module-output" name="GeneralPurposeStructures" />
+      <element id="module-output" name="Beans" />
     </root>
   </artifact>
 </component>

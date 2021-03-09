@@ -24,28 +24,11 @@ public class ClientCommunicationManager {
     public static final ConcurrentHashMap<String, HashMap<String, String[]>> contentTable = new ConcurrentHashMap();
 
     /**
-     * Functie care interpreteaza mesajul de la client si returneaza un dictionar cu toate campurile furnizate
-     * si valorile lor
-     * @param message Mesajul de la client
-     * @return Dictionarul ce contine datele-metadatele clientului
-     */
-    public HashMap<String, String> parseMessageFromClient(String message){
-        HashMap<String, String> parsedMessage = new HashMap();
-        String[] messagecontent = message.split("\\|");
-        for(String msg : messagecontent){
-            String[] parts = msg.split("\\s");
-            parsedMessage.put(parts[0], parts[1]);
-        }
-        return parsedMessage;
-    }
-
-    /**
      * Functie care identifica tipul operatiei solicitate de utilizator
-     * @param parsedMessage Dictionarul ce contine datele-metadatele clientului
+     * @param operation String-ul ce identifica operatia
      * @return Tipul operatiei sau null daca nu s-a identificat nicio operatie valida
      */
-    public ClientRequest getOperationType(HashMap<String, String> parsedMessage){
-        String operation = parsedMessage.get("operation");
+    public ClientRequest getOperationType(String operation){
         if(operation.equals("newfile")){
             return ClientRequest.NEW_FILE;
         }
@@ -55,13 +38,11 @@ public class ClientCommunicationManager {
     /**
      * Functie care va genera lantul de noduri la care se va stoca un fisier nou aparut in sistem
      * @param connectionTable Tabela conexiunilor (noduri disponibile)
-     * @param message Mesajul clientului ce va cuprinde numele fisierului, dimensiunea fisierului si numarul
-     *                de replici necesare
+     * @param filesize Dimensiunea fisierului ce va fi stocat
+     * @param replication_factor Factorul de replicare al fisierului
      * @return Lantul de noduri la care se va stoca fisierului
      */
-    public String generateChain(ConnectionTable connectionTable, HashMap<String,String> message){
-        String filesize = message.get("filesize");
-        int replication_factor = Integer.parseInt(message.get("replication_factor"));
+    public String generateChain(ConnectionTable connectionTable, int filesize, int replication_factor){
         System.out.println("User uploaded a new file with size : " + filesize + " and replication factor : " + replication_factor);
         List<String> connectionAddresses = connectionTable.getConnectionTable();
         if(connectionAddresses.size() <  replication_factor){
@@ -70,7 +51,7 @@ public class ClientCommunicationManager {
         else{
             System.out.println("Generam token-ul..");
             String token = "";
-            // criteriu de selectare a nodurilor
+            /* !!!!!! criteriu de selectare a nodurilor !!!!!! */
             for(String address : connectionAddresses){
                 if(replication_factor == 0){
                     break;
@@ -87,12 +68,11 @@ public class ClientCommunicationManager {
     /**
      * Functie apealata daca s-a solicitat adaugarea unui nou fisier, astfel incat nodul general
      * sa cunoasca fisierul si nodurile la care este stocat
-     * @param parsedMessage Dictionarul ce contine mesajul utilizatorului (date/metadate)
      * @param chain (nodurile catre care se va trimite fisierul
+     * @param user Id-ul utilizatorului ce face solicitarea
+     * @param filename Numele fisierului nou
      */
-    public void registerUserNewFileRequest(HashMap<String, String> parsedMessage, String chain){
-        String user = parsedMessage.get("user");
-        String filename = parsedMessage.get("filename");
+    public void registerUserNewFileRequest(String chain, String user, String filename){
         synchronized (contentTable){
             if(contentTable.containsKey(user)){
                 HashMap<String, String[]> existent = contentTable.get(user);
@@ -107,9 +87,7 @@ public class ClientCommunicationManager {
         }
     }
 
-    public ClientRequestStatus checkFileStatus(HashMap<String, String> parsedMessage){
-        String user = parsedMessage.get("user");
-        String filename = parsedMessage.get("filename");
+    public ClientRequestStatus checkFileStatus(String user, String filename){
         synchronized (contentTable){
             if(contentTable.containsKey(user)){
                 HashMap<String, String[]> existent = contentTable.get(user);

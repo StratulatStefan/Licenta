@@ -1,10 +1,9 @@
 import communication.Address;
+import node_manager.NodeBeat;
 import os.FileSystem;
 
 import java.io.*;
 import java.lang.*;
-import java.util.HashMap;
-import java.util.concurrent.ConcurrentHashMap;
 
 /* https://docs.oracle.com/en/java/javase/11/docs/api/java.base/java/net/MulticastSocket.html */
 /* https://tldp.org/HOWTO/Multicast-HOWTO.html#toc1 */
@@ -33,7 +32,7 @@ public class GeneralNode{
 
     private final static String storagePath = "D:\\Facultate\\Licenta\\Storage\\";
 
-    private final static HashMap<String, String[]> storageStatus = new HashMap<>();
+    private final static NodeBeat storageStatus = new NodeBeat();
 
     /**
      * Constructorul clasei
@@ -52,7 +51,7 @@ public class GeneralNode{
         clientCommunicationManager.ClientCommunicationLoop();
     }
 
-    public static HashMap<String, String[]> GetStorageStatus() throws IOException {
+    public static NodeBeat GetStorageStatus() throws IOException {
         String path = storagePath + ipAddress;
         if(!FileSystem.CheckFileExistance(path)){
             FileSystem.CreateDir(path);
@@ -61,12 +60,9 @@ public class GeneralNode{
         }
         String [] usersDirectories = FileSystem.GetDirContent(path);
 
-        synchronized (storageStatus) {
-            for (String userDir : usersDirectories) {
-                System.out.println(userDir);
-                String[] userFiles = FileSystem.GetDirContent(path + "\\" + userDir);
-                storageStatus.put(userDir, userFiles);
-            }
+        for (String userDir : usersDirectories) {
+            String[] userFiles = FileSystem.GetDirContent(path + "\\" + userDir);
+            storageStatus.AddUserFiles(userDir, userFiles);
         }
         return storageStatus;
     }

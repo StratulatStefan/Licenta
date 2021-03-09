@@ -2,7 +2,10 @@ import java.io.*;
 import java.net.Socket;
 import java.nio.charset.StandardCharsets;
 
-import communication.FileHeader;
+import client_manager.ClientManagerRequest;
+import client_manager.Token;
+import client_node.FileHeader;
+import communication.Serializer;
 
 public class Frontend {
     private static final int bufferSize = 1024;
@@ -41,18 +44,19 @@ public class Frontend {
 
     private static void sendFile(Socket socket, String userId, String token, String filename){
         try {
-            DataOutputStream outputStream = new DataOutputStream(socket.getOutputStream());
             File file = new File(filename);
             FileHeader fileHeader = new FileHeader();
             fileHeader.setFilename(filename);
             fileHeader.setToken(token);
             fileHeader.setFilesize(file.length());
             fileHeader.setUserId(userId);
-            byte[] binaryFile = new byte[bufferSize];
-            byte[] header = fileHeader.toString().getBytes();
+
+            DataOutputStream outputStream = new DataOutputStream(socket.getOutputStream());
             BufferedInputStream bufferedInputStream = new BufferedInputStream(new FileInputStream(file));
+            outputStream.write(Serializer.Serialize(fileHeader));
+
+            byte[] binaryFile = new byte[bufferSize];
             int count;
-            outputStream.write(header);
             while ((count = bufferedInputStream.read(binaryFile)) > 0) {
                 outputStream.write(binaryFile, 0, count);
             }
@@ -67,27 +71,27 @@ public class Frontend {
     }
 
     public static String getToken(String userId, String filename, int filesize, int replication_factor){
-        StringBuilder messageBuilder = new StringBuilder();
-        messageBuilder.append("user " + userId + "|");
-        messageBuilder.append("operation newfile|");
+        ClientManagerRequest newFileRequest = new ClientManagerRequest();
+        newFileRequest.setUserId(userId);
+        newFileRequest.setOperation("newfile");
         String[] fname = filename.split("/");
-        messageBuilder.append("filename " + fname[fname.length - 1] + "|");
-        messageBuilder.append("filesize " + filesize + "|");
-        messageBuilder.append("replication_factor " + replication_factor);
-        System.out.println(messageBuilder.toString());
+        newFileRequest.setFilename(fname[fname.length - 1]);
+        newFileRequest.setFilesize(filesize);
+        newFileRequest.setReplication_factor(replication_factor);
         try {
             Socket generalManagerSocket = new Socket(generalManagerAddress, generalManagerPort);
 
             DataOutputStream socketOutputStream = new DataOutputStream(generalManagerSocket.getOutputStream());
             System.out.println("Trimit cerere pentru token...");
-            socketOutputStream.write(messageBuilder.toString().getBytes());
+            socketOutputStream.write(Serializer.Serialize(newFileRequest));
 
             DataInputStream socketInputStream = new DataInputStream(generalManagerSocket.getInputStream());
             byte[] buffer = new byte[bufferSize];
-            int read;
             String response = null;
+            int read;
             while((read = socketInputStream.read(buffer, 0, bufferSize)) > 0){
-                response = new String(buffer, StandardCharsets.UTF_8).substring(0, read);
+                Token token = (Token)Serializer.Deserialize(buffer);
+                response = token.getToken();
                 break;
             }
 
@@ -96,7 +100,7 @@ public class Frontend {
             generalManagerSocket.close();
             return response;
         }
-        catch (IOException exception){
+        catch (IOException | ClassNotFoundException exception){
             System.out.println("Eroare de IO la socketOutputStream : " + exception.getMessage());
         }
         return null;
@@ -127,10 +131,10 @@ public class Frontend {
     }
 
     public static void main(String[] args){
-        String userId = "3";
+        String userId = "1";
         String filename = "D:/Facultate/Licenta/test_files/sss.pdf";
         int filesize = 12;
-        int replication_factor = 5;
+        int replication_factor = 2;
         mainActivity(userId, filename, filesize, replication_factor);
            //mainActivity("D:/Facultate/Licenta/Dropbox/FrontEnd/src/test_files/Dangerous.mp3", 1);
             //mainActivity("D:/Facultate/Licenta/Dropbox/FrontEnd/src/test_files/Resurse-lab 02-20201012.zip", 2);

@@ -1,5 +1,6 @@
 import communication.Address;
-import communication.FileHeader;
+import client_node.FileHeader;
+import communication.Serializer;
 
 import java.io.*;
 import java.net.InetSocketAddress;
@@ -74,14 +75,14 @@ public class ClientCommunicationManager {
                     while((read = dataInputStream.read(buffer, 0, bufferSize)) > 0){
                         if(!header_found) {
                             try {
-                                FileHeader header = new FileHeader(new String(buffer, StandardCharsets.UTF_8));
+                                FileHeader header = (FileHeader) Serializer.Deserialize(buffer);
                                 String filepath = storagePath + serverSocket.getInetAddress().getHostAddress() + "/" + header.getUserId();
                                 if(!Files.exists(Paths.get(filepath)))
                                     Files.createDirectories(Paths.get(filepath));
                                 filepath += "/" + header.getFilename();
                                 fileOutputStream = new FileOutputStream(filepath);
-                                System.out.println("My header : " + header);
                                 String token = cleanChain(header.getToken());
+                                System.out.println(token);
                                 if(token != null){
                                     header.setToken(token);
                                     String nextDestination = getDestinationIpAddress(token);
@@ -98,7 +99,9 @@ public class ClientCommunicationManager {
                                 System.out.println("Exceptie : " + exception.getMessage());
                             }
                         }
-                        fileOutputStream.write(buffer, 0, read);
+                        else {
+                            fileOutputStream.write(buffer, 0, read);
+                        }
                         if(nextElementSocket != null){
                             internalCommunicationManager.SendDataChunk(dataOutputStream, buffer, read);
                         }

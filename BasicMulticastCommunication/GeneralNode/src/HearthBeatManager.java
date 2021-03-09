@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.net.InetAddress;
 
 import communication.Serializer;
+import node_manager.NodeBeat;
 import data.Time;
 
 public class HearthBeatManager implements Runnable{
@@ -57,13 +58,10 @@ public class HearthBeatManager implements Runnable{
             public void run(){
                 while(true) {
                     System.out.println(Time.getCurrentTimeWithFormat() + " Se trimite un hearthbeat ...");
-                    //System.out.println("[My address] " + nodeAddress.toString());
-                    //System.out.println(" >>> Sending my address...");
                     try {
-                        String message = nodeAddress.toString();
-                        socket.sendBinaryMessage(group, Serializer.Serialize(GeneralNode.GetStorageStatus()));
-                       // socket.sendBinaryMessage(group, Serializer.Serialize(new String("salutare")));
-                        //socket.sendMessage(group, message);
+                        NodeBeat clientStorageStatus = GeneralNode.GetStorageStatus();
+                        clientStorageStatus.SetNodeAddress(nodeAddress.toString());
+                        socket.sendBinaryMessage(group, Serializer.Serialize(clientStorageStatus));
                         Thread.sleep((int) (frequency * 1e3));
                     } catch (IOException exception) {
                         socket.close();

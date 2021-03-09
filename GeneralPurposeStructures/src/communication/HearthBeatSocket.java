@@ -69,7 +69,6 @@ public class HearthBeatSocket extends MulticastSocket {
         DatagramPacket packet = new DatagramPacket(buffer, buffer.length);
         this.receive(packet);
         return Serializer.Deserialize(buffer);
-        //return new String(packet.getData(), packet.getOffset(), packet.getLength());
     }
 
     /**

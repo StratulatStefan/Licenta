@@ -8,5 +8,6 @@
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
     <orderEntry type="module" module-name="GeneralPurposeStructures" exported="" />
+    <orderEntry type="module" module-name="Beans" exported="" />
   </component>
 </module>

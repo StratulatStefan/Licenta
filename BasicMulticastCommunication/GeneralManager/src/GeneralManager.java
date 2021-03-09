@@ -1,4 +1,7 @@
+import client_manager.ClientManagerRequest;
+import client_manager.Token;
 import communication.Address;
+import communication.Serializer;
 import model.ConnectionTable;
 
 import java.io.*;
@@ -101,32 +104,35 @@ public class GeneralManager{
                 try {
                     DataInputStream dataInputStream = new DataInputStream(clientSocket.getInputStream());
                     DataOutputStream dataOutputStream = new DataOutputStream(clientSocket.getOutputStream());
-                    HashMap<String,String> parsedMessage = null;
-                    String chain = null;
+                    String chain;
                     byte[] buffer = new byte[bufferSize];
                     int read;
                     while((read = dataInputStream.read(buffer, 0, bufferSize)) > 0){
-                        String clientMessage = new String(buffer, StandardCharsets.UTF_8).substring(0,read);
-                        parsedMessage = clientCommunicationManager.parseMessageFromClient(clientMessage);
-                        ClientCommunicationManager.ClientRequest clientRequest = clientCommunicationManager.getOperationType(parsedMessage);
+                        ClientManagerRequest clientManagerRequest = (ClientManagerRequest) Serializer.Deserialize(buffer);
+                        ClientCommunicationManager.ClientRequest clientRequest = clientCommunicationManager.getOperationType(clientManagerRequest.getOperation());
                         if(clientRequest == ClientCommunicationManager.ClientRequest.NEW_FILE){
-                            ClientCommunicationManager.ClientRequestStatus fileStatus = clientCommunicationManager.checkFileStatus(parsedMessage);
+                            ClientCommunicationManager.ClientRequestStatus fileStatus = clientCommunicationManager.checkFileStatus(clientManagerRequest.getUserId(),
+                                    clientManagerRequest.getFilename());
                             if(fileStatus == ClientCommunicationManager.ClientRequestStatus.FILE_ALREADY_EXISTS){
                                 dataOutputStream.write("FILE ALREADY EXISTS1".getBytes());
                             }
                             else if(fileStatus == ClientCommunicationManager.ClientRequestStatus.OK) {
-                                chain = clientCommunicationManager.generateChain(connectionTable, parsedMessage);
+                                chain = clientCommunicationManager.generateChain(connectionTable,
+                                        clientManagerRequest.getFilesize(), clientManagerRequest.getReplication_factor());
                                 if (chain != null) {
+                                    Token token = new Token(chain);
+                                    dataOutputStream.write(Serializer.Serialize(token));
+
                                     System.out.println("Token-ul a fost trimis catre client : " + chain);
-                                    dataOutputStream.write(chain.getBytes());
-                                    clientCommunicationManager.registerUserNewFileRequest(parsedMessage, chain);
+                                    clientCommunicationManager.registerUserNewFileRequest(chain,
+                                            clientManagerRequest.getUserId(), clientManagerRequest.getFilename());
                                 } else {
                                     String errormsg = "eroare";
                                     dataOutputStream.write(errormsg.getBytes());
                                 }
                             }
-
                         }
+                        return;
                     }
                     System.out.println("Cerinta clientului a fost realizata..");
                     dataInputStream.close();

@@ -4,6 +4,7 @@
     <root id="archive" name="GeneralNode.jar">
       <element id="module-output" name="GeneralNode" />
       <element id="module-output" name="GeneralPurposeStructures" />
+      <element id="module-output" name="Beans" />
     </root>
   </artifact>
 </component>
