@@ -14,7 +14,7 @@ public class InternalNodeCommunicationManager {
 
     public DataOutputStream GenerateNewFileDataStream(Socket socket, FileHeader header) throws IOException {
         DataOutputStream dataOutputStream = new DataOutputStream(socket.getOutputStream());
-        System.out.println("Next node in chain header : " + header);
+        System.out.println("Next node in chain header : " + header.getToken());
         dataOutputStream.write(Serializer.Serialize(header));
         return dataOutputStream;
     }

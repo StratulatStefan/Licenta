@@ -53,23 +53,21 @@ public class Frontend {
             fileHeader.setUserId(userId);
 
             DataOutputStream outputStream = new DataOutputStream(socket.getOutputStream());
-            BufferedInputStream bufferedInputStream = new BufferedInputStream(new FileInputStream(file));
+            BufferedInputStream inputStream = new BufferedInputStream(new FileInputStream(file));
             outputStream.write(Serializer.Serialize(fileHeader));
-            System.out.println(Serializer.Serialize(fileHeader).length);
 
             byte[] binaryFile = new byte[bufferSize];
             int count;
-            while ((count = bufferedInputStream.read(binaryFile)) > 0) {
+            while ((count = inputStream.read(binaryFile)) > 0) {
                 outputStream.write(binaryFile, 0, count);
             }
 
-            bufferedInputStream.close();
+            inputStream.close();
             outputStream.close();
             socket.close();
         }
         catch (IOException exception){
-            System.out.println("plm!!!");
-            System.out.println(exception.getMessage());
+            System.out.println("Exceptie la trimiterea unui nou fisier: " + exception.getMessage());
         }
     }
 
@@ -137,18 +135,18 @@ public class Frontend {
     }
 
     public static void main(String[] args){
-        String userId = "1";
+        String userId = "3";
         String filename = "D:/Facultate/Licenta/test_files/sss.pdf";
         int filesize = 12;
-        int replication_factor = 5;
+        int replication_factor = 2;
         mainActivity(userId, filename, filesize, replication_factor);
+
+        userId = "1";
+        filename = "D:/Facultate/Licenta/test_files/Resurse-lab 02-20201012.zip";
+        //mainActivity(userId, filename, filesize, replication_factor);
 
         userId = "2";
-        filename = "D:/Facultate/Licenta/test_files/Resurse-lab 02-20201012.zip";
-        mainActivity(userId, filename, filesize, replication_factor);
-
-        userId = "3";
         filename = "D:/Facultate/Licenta/test_files/Dangerous.mp3";
-         mainActivity(userId, filename, filesize, replication_factor);
+        // mainActivity(userId, filename, filesize, replication_factor);
     }
 }

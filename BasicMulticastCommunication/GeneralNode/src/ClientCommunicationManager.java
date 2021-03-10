@@ -113,7 +113,6 @@ public class ClientCommunicationManager {
                         dataOutputStream.close();
                     }
                     clientSocket.close();
-                    serverSocket.close();
                 }
                 catch (Exception exception){
                     System.out.println(exception.getMessage());
