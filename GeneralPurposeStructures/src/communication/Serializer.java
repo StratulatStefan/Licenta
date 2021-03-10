@@ -19,9 +19,14 @@ public class Serializer {
         objectOutputStream.writeObject(object);
         objectOutputStream.flush();
         byte[] content = byteArrayOutputStream.toByteArray();
+        byte[] data = new byte[1024 - content.length];
+        byte[] result = new byte[1024];
+        System.arraycopy(content, 0, result, 0,  content.length);
+        System.arraycopy(data, 0 , result, content.length, 1024 - content.length);
         objectOutputStream.close();
         byteArrayOutputStream.close();
-        return content;
+
+        return result;
     }
 
     /**

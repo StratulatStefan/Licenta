@@ -42,8 +42,9 @@ public class Frontend {
         return null;
     }
 
-    private static void sendFile(Socket socket, String userId, String token, String filename){
+    private static void sendFile(String destinationAddress, String userId, String token, String filename){
         try {
+            Socket socket = new Socket(destinationAddress, generalManagerPort);
             File file = new File(filename);
             FileHeader fileHeader = new FileHeader();
             fileHeader.setFilename(filename);
@@ -54,6 +55,7 @@ public class Frontend {
             DataOutputStream outputStream = new DataOutputStream(socket.getOutputStream());
             BufferedInputStream bufferedInputStream = new BufferedInputStream(new FileInputStream(file));
             outputStream.write(Serializer.Serialize(fileHeader));
+            System.out.println(Serializer.Serialize(fileHeader).length);
 
             byte[] binaryFile = new byte[bufferSize];
             int count;
@@ -66,6 +68,7 @@ public class Frontend {
             socket.close();
         }
         catch (IOException exception){
+            System.out.println("plm!!!");
             System.out.println(exception.getMessage());
         }
     }
@@ -88,10 +91,14 @@ public class Frontend {
             DataInputStream socketInputStream = new DataInputStream(generalManagerSocket.getInputStream());
             byte[] buffer = new byte[bufferSize];
             String response = null;
-            int read;
-            while((read = socketInputStream.read(buffer, 0, bufferSize)) > 0){
+            while(socketInputStream.read(buffer, 0, bufferSize) > 0){
                 Token token = (Token)Serializer.Deserialize(buffer);
-                response = token.getToken();
+                try {
+                    response = token.getToken();
+                }
+                catch (Exception exception){
+                    response = exception.getMessage();
+                }
                 break;
             }
 
@@ -119,8 +126,7 @@ public class Frontend {
                         String token = response;
                         System.out.println(filename + " -> " + token);
                         String destinationAddress = getDestinationIpAddress(token);
-                        Socket socket = new Socket(destinationAddress, 8081);
-                        sendFile(socket, userId, token, filename);
+                        sendFile(destinationAddress, userId, token, filename);
                     }
                 }
                 catch (Exception exception){
@@ -134,9 +140,15 @@ public class Frontend {
         String userId = "1";
         String filename = "D:/Facultate/Licenta/test_files/sss.pdf";
         int filesize = 12;
-        int replication_factor = 2;
+        int replication_factor = 5;
         mainActivity(userId, filename, filesize, replication_factor);
-           //mainActivity("D:/Facultate/Licenta/Dropbox/FrontEnd/src/test_files/Dangerous.mp3", 1);
-            //mainActivity("D:/Facultate/Licenta/Dropbox/FrontEnd/src/test_files/Resurse-lab 02-20201012.zip", 2);
+
+        userId = "2";
+        filename = "D:/Facultate/Licenta/test_files/Resurse-lab 02-20201012.zip";
+        mainActivity(userId, filename, filesize, replication_factor);
+
+        userId = "3";
+        filename = "D:/Facultate/Licenta/test_files/Dangerous.mp3";
+         mainActivity(userId, filename, filesize, replication_factor);
     }
 }

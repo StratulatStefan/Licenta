@@ -82,7 +82,6 @@ public class ClientCommunicationManager {
                                 filepath += "/" + header.getFilename();
                                 fileOutputStream = new FileOutputStream(filepath);
                                 String token = cleanChain(header.getToken());
-                                System.out.println(token);
                                 if(token != null){
                                     header.setToken(token);
                                     String nextDestination = getDestinationIpAddress(token);
@@ -114,6 +113,7 @@ public class ClientCommunicationManager {
                         dataOutputStream.close();
                     }
                     clientSocket.close();
+                    serverSocket.close();
                 }
                 catch (Exception exception){
                     System.out.println(exception.getMessage());

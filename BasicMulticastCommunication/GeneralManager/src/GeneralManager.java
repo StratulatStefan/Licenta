@@ -81,7 +81,7 @@ public class GeneralManager{
             while(true){
                 Socket clientSocket = serverSocket.accept();
                 System.out.println(String.format("Client nou conectat : [%s : %d]\n", clientSocket.getLocalAddress(), clientSocket.getLocalPort()));
-                new Thread(MainActivityThread(serverSocket, clientSocket)).start();
+                new Thread(MainActivityThread(clientSocket)).start();
             }
         }
         catch (Exception exception){
@@ -93,46 +93,42 @@ public class GeneralManager{
     /**
      * Functie care inglobeaza comunicarea de date cu un nod adicant, avandu-se in vedere primirea de date de la un
      * nod adiacent si, eventual, trimiterea informatiilor mai departe, in cazul in care nu este nod terminal.
-     * @param serverSocket Socket-ul pe care este mapat nodul curent.
      * @param clientSocket Socket-ul nodului adiacent, de la care primeste date.
      * @return Runnable-ul necesar pornirii unui thread separat pentru aceasta comunicare.
      */
-    private Runnable MainActivityThread(ServerSocket serverSocket, Socket clientSocket){
+    private Runnable MainActivityThread(Socket clientSocket){
         return new Runnable() {
             @Override
             public void run(){
                 try {
+                    Token token = new Token();
                     DataInputStream dataInputStream = new DataInputStream(clientSocket.getInputStream());
                     DataOutputStream dataOutputStream = new DataOutputStream(clientSocket.getOutputStream());
                     String chain;
                     byte[] buffer = new byte[bufferSize];
-                    int read;
-                    while((read = dataInputStream.read(buffer, 0, bufferSize)) > 0){
+                    while(dataInputStream.read(buffer, 0, bufferSize) > 0){
                         ClientManagerRequest clientManagerRequest = (ClientManagerRequest) Serializer.Deserialize(buffer);
                         ClientCommunicationManager.ClientRequest clientRequest = clientCommunicationManager.getOperationType(clientManagerRequest.getOperation());
                         if(clientRequest == ClientCommunicationManager.ClientRequest.NEW_FILE){
                             ClientCommunicationManager.ClientRequestStatus fileStatus = clientCommunicationManager.checkFileStatus(clientManagerRequest.getUserId(),
                                     clientManagerRequest.getFilename());
                             if(fileStatus == ClientCommunicationManager.ClientRequestStatus.FILE_ALREADY_EXISTS){
-                                dataOutputStream.write("FILE ALREADY EXISTS1".getBytes());
+                                token.setException("FILE ALREADY EXISTS!");
                             }
                             else if(fileStatus == ClientCommunicationManager.ClientRequestStatus.OK) {
                                 chain = clientCommunicationManager.generateChain(connectionTable,
                                         clientManagerRequest.getFilesize(), clientManagerRequest.getReplication_factor());
                                 if (chain != null) {
-                                    Token token = new Token(chain);
-                                    dataOutputStream.write(Serializer.Serialize(token));
-
+                                    token.setToken(chain);
                                     System.out.println("Token-ul a fost trimis catre client : " + chain);
                                     clientCommunicationManager.registerUserNewFileRequest(chain,
                                             clientManagerRequest.getUserId(), clientManagerRequest.getFilename());
                                 } else {
-                                    String errormsg = "eroare";
-                                    dataOutputStream.write(errormsg.getBytes());
+                                    token.setException("eroare");
                                 }
                             }
                         }
-                        return;
+                        dataOutputStream.write(Serializer.Serialize(token));
                     }
                     System.out.println("Cerinta clientului a fost realizata..");
                     dataInputStream.close();
