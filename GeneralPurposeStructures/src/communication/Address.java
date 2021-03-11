@@ -100,7 +100,7 @@ public class Address {
             return null;
         }
         catch (Exception exception){
-            System.out.println(exception.getMessage());
+            System.out.println("Addres parseAddress : " + exception.getMessage());
             return null;
         }
     }

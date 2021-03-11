@@ -28,7 +28,7 @@ public class HearthBeatManager implements Runnable{
      * Frecventa heartbeat-urilor
      * Exprimat in secunde.
      */
-    private final static double frequency = 5;
+    private final static double frequency = 3;
 
     /**
      * Timeout-ul asteptarii primirii heartbeat-urilor

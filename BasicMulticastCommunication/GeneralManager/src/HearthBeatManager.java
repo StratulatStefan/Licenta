@@ -10,11 +10,6 @@ import data.Time;
 
 public class HearthBeatManager implements Runnable{
     /**
-     * O referinta la tabela de conexiuni din managerul general
-     */
-    private static ConnectionTable connectionTable;
-
-    /**
      * Adresa de multicast
      */
     private static String multicastIPAddress = "230.0.0.10";
@@ -45,10 +40,9 @@ public class HearthBeatManager implements Runnable{
      * @param address Adresa nodului curent
      * @param frequency Frecventa buclei de trimitere/receptie heartbeat-uri
      */
-    public HearthBeatManager(Address address, double frequency, ConnectionTable connectionTable){
+    public HearthBeatManager(Address address, double frequency){
         this.nodeAddress = address;
         this.frequency = frequency;
-        HearthBeatManager.connectionTable = connectionTable;
     }
 
     /**
@@ -58,35 +52,32 @@ public class HearthBeatManager implements Runnable{
      * @param socket Socket-ul nodului curent
      * @return Runnable pe baza caruia se va porni thread-ul de trimitere
      */
-    public Runnable sendingLoop(InetAddress group, HearthBeatSocket socket, ConnectionTable connectionTable){
+    public Runnable cleanUp(InetAddress group, HearthBeatSocket socket){
         return new Runnable(){
             @Override
             public void run(){
                 while(true) {
                     System.out.println(Time.getCurrentTimeWithFormat() + " ");
-                    // System.out.println("[My address] " + nodeAddress.toString());
-                    // System.out.println(" >>> Sending my address...");
+                    System.out.println(GeneralManager.statusTable);
                     try {
-                        //socket.sendMessage(group, nodeAddress.toString());
-                        List<Address> disconnected = connectionTable.checkDisconnection((int)(frequency * cleanupFrequency));
+                        List<Address> disconnected = GeneralManager.connectionTable.checkDisconnection((int)(frequency * cleanupFrequency));
                         if(disconnected.size() == 0){
-                            if(connectionTable.size() == 0){
+                            if(GeneralManager.connectionTable.size() == 0){
                                 System.out.println(" >>> Niciun nod conectat!");
+                               // GeneralManager.statusTable.CleanUpFull();
                             }
                             else {
-                                System.out.println(connectionTable);
+                                System.out.println(GeneralManager.connectionTable);
                             }
                         }
                         else {
                             for (Address disconnectedAddres : disconnected) {
                                 System.out.println(" >>> Address " + disconnectedAddres + " disconnected");
-                                connectionTable.removeAddress(disconnectedAddres);
+                                GeneralManager.connectionTable.removeAddress(disconnectedAddres);
+                                GeneralManager.statusTable.CleanUpAtNodeDisconnection(disconnectedAddres.getIpAddress());
                             }
                         }
                         Thread.sleep((int) (frequency * 1e3));
-                   // } catch (IOException exception) {
-                    //    socket.close();
-                     //   System.out.println("IOException occured. : " + exception.getMessage());
                     } catch (InterruptedException exception) {
                         socket.close();
                         System.out.println("InterruptedException occured. : " + exception.getMessage());
@@ -103,7 +94,7 @@ public class HearthBeatManager implements Runnable{
      * @param socket Socket-ul nodului curent
      * @return Runnable-ul pe baza caruia se va crea thread-ul de receptie a hearth-beat-urilor.
      */
-    public Runnable receivingLoop(HearthBeatSocket socket, ConnectionTable connectionTable){
+    public Runnable receivingLoop(HearthBeatSocket socket){
         return new Runnable() {
             @Override
             public void run(){
@@ -113,17 +104,18 @@ public class HearthBeatManager implements Runnable{
                     try{
                         message = (NodeBeat) socket.receiveMessage();
                         receivedAddress = Address.parseAddress(message.GetNodeAddress());
+                        GeneralManager.statusTable.UpdateTable(message);
                         System.out.println("Am primit un hearthbeat de la " + receivedAddress + " ...");
-                        if(!connectionTable.containsAddress(receivedAddress)){
+                        if(!GeneralManager.connectionTable.containsAddress(receivedAddress)){
                             System.out.println(" >>> [Adresa noua] : " + receivedAddress);
-                            connectionTable.addAddress(receivedAddress);
+                            GeneralManager.connectionTable.addAddress(receivedAddress);
                         }
                         else {
-                            connectionTable.confirmAvailability(receivedAddress);
+                            GeneralManager.connectionTable.confirmAvailability(receivedAddress);
                         }
                     }
                     catch (Exception exception){
-                        System.out.println(exception.getMessage());
+                        System.out.println("Hearthbeatmanager receiveloop : " + exception.getMessage());
                     }
                 }
             }
@@ -134,14 +126,14 @@ public class HearthBeatManager implements Runnable{
      * Principala bucla care se ocupa de manevrarea heartbeat-urilor (trimitere/receptie).
      * @throws IOException generata de o eroare aparuta la folosirea socket-ului de multicast.
      */
-    public void hearthBeatLoop(ConnectionTable connectionTable) throws IOException{
+    public void hearthBeatLoop() throws IOException{
         System.out.println(String.format("Node with address [%s] started...", nodeAddress));
         InetAddress group = InetAddress.getByName(HearthBeatManager.multicastIPAddress);
         HearthBeatSocket socket = new HearthBeatSocket(nodeAddress, multicastPort);
         socket.setNetworkInterface(HearthBeatSocket.NetworkInterfacesTypes.LOCALHOST);
         socket.joinGroup(group);
-        Thread sendingThread = new Thread(sendingLoop(group, socket, connectionTable));
-        Thread receivingThread = new Thread(receivingLoop(socket, connectionTable));
+        Thread sendingThread = new Thread(cleanUp(group, socket));
+        Thread receivingThread = new Thread(receivingLoop(socket));
         sendingThread.start();
         receivingThread.start();
     }
@@ -152,7 +144,7 @@ public class HearthBeatManager implements Runnable{
      */
     public void run(){
         try {
-            this.hearthBeatLoop(HearthBeatManager.connectionTable);
+            this.hearthBeatLoop();
         }
         catch (IOException exception){
             System.out.println(exception.getMessage());

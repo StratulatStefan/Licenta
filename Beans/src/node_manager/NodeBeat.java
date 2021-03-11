@@ -2,6 +2,7 @@ package node_manager;
 
 import java.io.Serializable;
 import java.util.HashMap;
+import java.util.Set;
 
 /**
  * Clasa care va ingloba mesajul de tip heartbeat, care va fi trimis de la nodul intern la managerul general
@@ -48,8 +49,15 @@ public class NodeBeat implements Serializable {
      * Functie care returneaza lista utilizatorilor care au fisiere stocate pe acest nod
      * @return Lista utilizatorilor
      */
-    public String[] GetUsers(){
-        return (String[])this.userFiles.keySet().toArray();
+    public Set<String> GetUsers(){
+        return this.userFiles.keySet();
+    }
+
+    /**
+     * Functie care returneaza intreaga tabela de status al stocarii
+     */
+    public HashMap<String, String []> GetUserFiles(){
+        return this.userFiles;
     }
 
     /**
@@ -68,5 +76,7 @@ public class NodeBeat implements Serializable {
         return this.address;
     }
 
-
+    public void CleanUp(){
+        this.userFiles.clear();
+    }
 }

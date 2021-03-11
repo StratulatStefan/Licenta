@@ -52,6 +52,7 @@ public class GeneralNode{
     }
 
     public static NodeBeat GetStorageStatus() throws IOException {
+        storageStatus.CleanUp();
         String path = storagePath + ipAddress;
         if(!FileSystem.CheckFileExistance(path)){
             FileSystem.CreateDir(path);

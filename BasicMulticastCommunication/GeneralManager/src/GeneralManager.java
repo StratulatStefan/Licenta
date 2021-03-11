@@ -3,6 +3,7 @@ import client_manager.Token;
 import communication.Address;
 import communication.Serializer;
 import model.ConnectionTable;
+import model.StorageStatusTable;
 
 import java.io.*;
 import java.net.*;
@@ -16,7 +17,12 @@ public class GeneralManager{
     /**
      * Tabela (o lista) nodurilor conectate in retea, care comunica cu nodul curent.
      */
-    private static ConnectionTable connectionTable = new ConnectionTable();
+    public static ConnectionTable connectionTable = new ConnectionTable();
+
+    /**
+     * Tabela ce contine statusul stocarii nodurilor
+     */
+    public static StorageStatusTable statusTable = new StorageStatusTable();
 
     /**
      * Adresa IP la care va fi mapat managerul general
@@ -37,7 +43,7 @@ public class GeneralManager{
      * Frecventa heartbeat-urilor
      * Exprimat in secunde.
      */
-    private final static double hearthBeatFrequency = 5;
+    private final static double hearthBeatFrequency = 3;
 
     /**
      * Dimensiunea bufferului in care vor fi citite datele de la un nod adiacent
@@ -79,7 +85,7 @@ public class GeneralManager{
         Address multicastAddress;
         try {
             multicastAddress = new Address(generalManagerIpAddress, multicastPort);
-            HearthBeatManager hearthBeatManager = new HearthBeatManager(multicastAddress, hearthBeatFrequency, connectionTable);
+            HearthBeatManager hearthBeatManager = new HearthBeatManager(multicastAddress, hearthBeatFrequency);
 
             ClientCommunicationManager clientCommunicationManager = new ClientCommunicationManager();
             GeneralManager generalManager = new GeneralManager(hearthBeatManager, clientCommunicationManager);
