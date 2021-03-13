@@ -9,7 +9,6 @@ import java.io.DataOutputStream;
 import java.net.InetSocketAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.util.Collections;
 import java.util.List;
 import java.util.HashMap;
 import java.util.concurrent.ConcurrentHashMap;
@@ -102,16 +101,9 @@ public class ClientCommunicationManager {
     }
 
     public ClientRequestStatus checkFileStatus(String user, String filename){
-        synchronized (contentTable){
-            if(contentTable.containsKey(user)){
-                HashMap<String, String[]> existent = contentTable.get(user);
-                for(String fname : existent.keySet()){
-                    if(fname.equals(filename)){
-                        System.out.println("File already exists!");
-                        return ClientRequestStatus.FILE_ALREADY_EXISTS;
-                    }
-                }
-            }
+        boolean fileStatus = GeneralManager.statusTable.CheckFileForUser(user, filename);
+        if(fileStatus){
+            return ClientRequestStatus.FILE_ALREADY_EXISTS;
         }
         return ClientRequestStatus.OK;
     }

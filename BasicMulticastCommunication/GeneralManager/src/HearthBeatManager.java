@@ -64,7 +64,6 @@ public class HearthBeatManager implements Runnable{
                         if(disconnected.size() == 0){
                             if(GeneralManager.connectionTable.size() == 0){
                                 System.out.println(" >>> Niciun nod conectat!");
-                               // GeneralManager.statusTable.CleanUpFull();
                             }
                             else {
                                 System.out.println(GeneralManager.connectionTable);

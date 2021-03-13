@@ -39,6 +39,10 @@ public class StorageStatusTable {
                     }
                 }
 
+                // verificam daca sunt useri stersi complet de la un nod; in acest caz;
+                // eliminam adresa nodului de la care a fost sters, sau intregul user
+                CleanUpOnDeletedUser(nodeAddress.getIpAddress(), new ArrayList<>(storageEntry.GetUsers()));
+
                 // verificam daca sunt fisiere care au fost sterse, si le eliminam;
                 // eliminam adresa nodului de la care a fost sters, sau fisierul daca nu se afla pe niciun nod
                 List<String> deletedFiles = GetDeletedFiles(user, nodeAddress.getIpAddress(), storageEntry.GetUserFilesById(user));
@@ -53,7 +57,6 @@ public class StorageStatusTable {
                 if(this.statusTable.get(user).size() == 0){
                     this.statusTable.remove(user);
                 }
-
             }
         }
     }
@@ -98,6 +101,34 @@ public class StorageStatusTable {
         return deletedFiles;
     }
 
+    public void CleanUpOnDeletedUser(String userAddress, List<String> users){
+        boolean found = false;
+        synchronized (this.statusTable){
+            for(String availableUser : new ArrayList<>(this.statusTable.keySet())){
+                for(String existingUser : users){
+                    if(availableUser.equals(existingUser)){
+                        found = true;
+                        break;
+                    }
+                }
+                if(found){
+                    continue;
+                }
+                for(String file : new ArrayList<>(this.statusTable.get(availableUser).keySet())){
+                    if(this.statusTable.get(availableUser).get(file).contains(userAddress)){
+                        this.statusTable.get(availableUser).get(file).remove(userAddress);
+                    }
+                    if(this.statusTable.get(availableUser).get(file).size() == 0){
+                        this.statusTable.get(availableUser).remove(file);
+                    }
+                }
+                if(this.statusTable.get(availableUser).size() == 0){
+                    this.statusTable.remove(availableUser);
+                }
+            }
+        }
+    }
+
     public boolean CheckAddress(String user, String file, String address){
         synchronized (this.statusTable){
             for(String candidate : this.statusTable.get(user).get(file)){
@@ -107,6 +138,19 @@ public class StorageStatusTable {
             }
         }
         return false;
+    }
+
+    public boolean CheckFileForUser(String user, String file){
+        synchronized (this.statusTable){
+            if(!this.statusTable.containsKey(user)){
+                return false;
+            }
+            List<String> userFiles = new ArrayList<>(this.statusTable.get(user).keySet());
+            if(!userFiles.contains(file)){
+                return false;
+            }
+        }
+        return true;
     }
     @Override
     public String toString() {

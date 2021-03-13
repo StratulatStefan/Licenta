@@ -135,17 +135,17 @@ public class Frontend {
     }
 
     public static void main(String[] args){
-        String userId = "3";
+        String userId = "1";
         String filename = "D:/Facultate/Licenta/test_files/sss.pdf";
         int filesize = 12;
-        int replication_factor = 2;
+        int replication_factor = 3;
         mainActivity(userId, filename, filesize, replication_factor);
 
-        userId = "1";
+        userId = "2";
         filename = "D:/Facultate/Licenta/test_files/Resurse-lab 02-20201012.zip";
         //mainActivity(userId, filename, filesize, replication_factor);
 
-        userId = "2";
+        userId = "3";
         filename = "D:/Facultate/Licenta/test_files/Dangerous.mp3";
         // mainActivity(userId, filename, filesize, replication_factor);
     }

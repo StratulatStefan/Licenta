@@ -17,7 +17,7 @@ public class HearthBeatManager implements Runnable{
     /**
      * Portul de multicast
      */
-    private static int multicastPort = 8246; 
+    private static int multicastPort = 8246;
 
     /**
      * Adresa pe care o va avea nodul curent.
