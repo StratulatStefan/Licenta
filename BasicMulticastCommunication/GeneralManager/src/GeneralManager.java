@@ -17,12 +17,12 @@ public class GeneralManager{
     /**
      * Tabela (o lista) nodurilor conectate in retea, care comunica cu nodul curent.
      */
-    public static ConnectionTable connectionTable = new ConnectionTable();
+    public final static ConnectionTable connectionTable = new ConnectionTable();
 
     /**
      * Tabela ce contine statusul stocarii nodurilor
      */
-    public static StorageStatusTable statusTable = new StorageStatusTable();
+    public final static StorageStatusTable statusTable = new StorageStatusTable();
 
     /**
      * Adresa IP la care va fi mapat managerul general
@@ -43,7 +43,7 @@ public class GeneralManager{
      * Frecventa heartbeat-urilor
      * Exprimat in secunde.
      */
-    private final static double hearthBeatFrequency = 3;
+    private final static double hearthBeatFrequency = 5;
 
     /**
      * Dimensiunea bufferului in care vor fi citite datele de la un nod adiacent

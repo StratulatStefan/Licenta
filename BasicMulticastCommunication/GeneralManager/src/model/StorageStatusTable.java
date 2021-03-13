@@ -1,8 +1,6 @@
 package model;
 
 import communication.Address;
-import data.Pair;
-import data.Time;
 import node_manager.NodeBeat;
 
 import java.util.*;
@@ -17,13 +15,16 @@ public class StorageStatusTable {
     public void UpdateTable(NodeBeat storageEntry){
         Address nodeAddress = Address.parseAddress(storageEntry.GetNodeAddress());
         synchronized (this.statusTable){
-            Set<String> users = storageEntry.GetUsers();
+            List<String> users = new ArrayList<>(storageEntry.GetUsers());
             for(String user : users){
                 String[] userFiles = storageEntry.GetUserFilesById(user);
+
                 if(!this.statusTable.containsKey(user)){
+                    // daca utilizatorul nu exista, il adaugam.
                     this.statusTable.put(user, new HashMap<String, List<String>>());
                 }
                 for(String userFile : userFiles){
+                    // daca fisierul utilizatorului curent nu exista, il adaugam
                     if(!this.statusTable.get(user).containsKey(userFile)){
                         this.statusTable.get(user).put(userFile, new ArrayList<String>() {{
                             add(nodeAddress.getIpAddress());
@@ -31,19 +32,37 @@ public class StorageStatusTable {
                     }
                     else{
                         if(!CheckAddress(user, userFile, nodeAddress.getIpAddress())){
+                            // daca fisierul utilizatorului curent exista, dar nu contine adresa nodului,
+                            // adaugam adresa nodului
                             this.statusTable.get(user).get(userFile).add(nodeAddress.getIpAddress());
                         }
                     }
                 }
+
+                // verificam daca sunt fisiere care au fost sterse, si le eliminam;
+                // eliminam adresa nodului de la care a fost sters, sau fisierul daca nu se afla pe niciun nod
+                List<String> deletedFiles = GetDeletedFiles(user, nodeAddress.getIpAddress(), storageEntry.GetUserFilesById(user));
+                for(String deletedFile : deletedFiles){
+                    this.statusTable.get(user).get(deletedFile).remove(nodeAddress.getIpAddress());
+                    if(this.statusTable.get(user).get(deletedFile).size() == 0){
+                        this.statusTable.get(user).remove(deletedFile);
+                    }
+                }
+
+                // verificam daca exista utilizatori fara fisiere; ii eliminam
+                if(this.statusTable.get(user).size() == 0){
+                    this.statusTable.remove(user);
+                }
+
             }
         }
     }
 
     public void CleanUpAtNodeDisconnection(String address){
         synchronized (this.statusTable){
-            Set<String> users = this.statusTable.keySet();
+            List<String> users = new ArrayList<>(this.statusTable.keySet());
             for(String user : users){
-                Set<String> filenames = this.statusTable.get(user).keySet();
+                List<String> filenames = new ArrayList<>(this.statusTable.get(user).keySet());
                 for(String filename : filenames){
                     if(CheckAddress(user, filename, address)){
                         this.statusTable.get(user).get(filename).remove(address);
@@ -59,10 +78,24 @@ public class StorageStatusTable {
         }
     }
 
-    public void CleanUpFull(){
+    public List<String> GetDeletedFiles(String user, String userAddress, String[] userFiles){
+        List<String> deletedFiles = new ArrayList<>();
+        boolean found;
         synchronized (this.statusTable){
-            this.statusTable.clear();
+            for(String availableFile : new ArrayList<>(this.statusTable.get(user).keySet())){
+                found = false;
+                for(String candidateFile : userFiles){
+                    if(availableFile.equals(candidateFile) && this.statusTable.get(user).get(availableFile).contains(userAddress)){
+                        found = true;
+                        break;
+                    }
+                }
+                if(!found){
+                    deletedFiles.add(availableFile);
+                }
+            }
         }
+        return deletedFiles;
     }
 
     public boolean CheckAddress(String user, String file, String address){

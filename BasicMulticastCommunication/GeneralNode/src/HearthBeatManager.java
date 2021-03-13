@@ -17,7 +17,7 @@ public class HearthBeatManager implements Runnable{
     /**
      * Portul de multicast
      */
-    private static int multicastPort = 8246;
+    private static int multicastPort = 8246; 
 
     /**
      * Adresa pe care o va avea nodul curent.
@@ -28,7 +28,7 @@ public class HearthBeatManager implements Runnable{
      * Frecventa heartbeat-urilor
      * Exprimat in secunde.
      */
-    private final static double frequency = 3;
+    private final static double frequency = 5;
 
     /**
      * Timeout-ul asteptarii primirii heartbeat-urilor

@@ -33,7 +33,7 @@ public class HearthBeatManager implements Runnable{
     /**
      * Numarul de heart-beat-uri la care se face clean-up-ul tabelei de conexiuni
      */
-    private final static int cleanupFrequency = 3;
+    private final static int cleanupFrequency = 2;
 
     /**
      * Constructorul managerului de heartbeat-uri pentru nodul curent.
