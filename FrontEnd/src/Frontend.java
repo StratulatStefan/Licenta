@@ -142,11 +142,13 @@ public class Frontend {
         mainActivity(userId, filename, filesize, replication_factor);
 
         userId = "2";
+        replication_factor = 2;
         filename = "D:/Facultate/Licenta/test_files/Resurse-lab 02-20201012.zip";
-        //mainActivity(userId, filename, filesize, replication_factor);
+        mainActivity(userId, filename, filesize, replication_factor);
 
         userId = "3";
+        replication_factor = 1;
         filename = "D:/Facultate/Licenta/test_files/Dangerous.mp3";
-        // mainActivity(userId, filename, filesize, replication_factor);
+        mainActivity(userId, filename, filesize, replication_factor);
     }
 }

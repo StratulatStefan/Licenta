@@ -78,24 +78,13 @@ public class ClientCommunicationManager {
         return null;
     }
 
-    /**
-     * Functie apealata daca s-a solicitat adaugarea unui nou fisier, astfel incat nodul general
-     * sa cunoasca fisierul si nodurile la care este stocat
-     * @param chain (nodurile catre care se va trimite fisierul
-     * @param user Id-ul utilizatorului ce face solicitarea
-     * @param filename Numele fisierului nou
-     */
-    public void registerUserNewFileRequest(String chain, String user, String filename){
-        synchronized (contentTable){
-            if(contentTable.containsKey(user)){
-                HashMap<String, String[]> existent = contentTable.get(user);
-                existent.put(filename, chain.split("-"));
-                contentTable.put(user, existent);
+    public void registerUserNewFileRequest(String user, String filename, int replication_factor){
+        synchronized (GeneralManager.contentTable){
+            try {
+                GeneralManager.contentTable.AddRegister(user, filename, replication_factor);
             }
-            else {
-                HashMap<String, String[]> fileMapping = new HashMap<>();
-                fileMapping.put(filename, chain.split("-"));
-                contentTable.put(user, fileMapping);
+            catch (Exception exception){
+                System.out.println(exception.getMessage());
             }
         }
     }
@@ -161,8 +150,7 @@ public class ClientCommunicationManager {
                                 if (chain != null) {
                                     token.setToken(chain);
                                     System.out.println("Token-ul a fost trimis catre client : " + chain);
-                                    registerUserNewFileRequest(chain,
-                                            clientManagerRequest.getUserId(), clientManagerRequest.getFilename());
+                                    registerUserNewFileRequest(clientManagerRequest.getUserId(), clientManagerRequest.getFilename(), clientManagerRequest.getReplication_factor());
                                 } else {
                                     token.setException("eroare");
                                 }

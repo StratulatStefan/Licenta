@@ -3,6 +3,7 @@ import client_manager.Token;
 import communication.Address;
 import communication.Serializer;
 import model.ConnectionTable;
+import model.ContentTable;
 import model.StorageStatusTable;
 
 import java.io.*;
@@ -23,6 +24,8 @@ public class GeneralManager{
      * Tabela ce contine statusul stocarii nodurilor
      */
     public final static StorageStatusTable statusTable = new StorageStatusTable();
+
+    public final static ContentTable contentTable = new ContentTable();
 
     /**
      * Adresa IP la care va fi mapat managerul general

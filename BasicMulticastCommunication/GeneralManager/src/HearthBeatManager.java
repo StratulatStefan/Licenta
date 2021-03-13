@@ -59,6 +59,7 @@ public class HearthBeatManager implements Runnable{
                 while(true) {
                     System.out.println(Time.getCurrentTimeWithFormat() + " ");
                     System.out.println(GeneralManager.statusTable);
+                    System.out.println(GeneralManager.contentTable);
                     try {
                         List<Address> disconnected = GeneralManager.connectionTable.checkDisconnection((int)(frequency * cleanupFrequency));
                         if(disconnected.size() == 0){
