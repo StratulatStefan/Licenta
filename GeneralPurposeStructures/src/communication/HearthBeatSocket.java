@@ -12,6 +12,7 @@ public class HearthBeatSocket extends MulticastSocket {
     private int multicastPort;
     private Address address;
     public static enum NetworkInterfacesTypes { LOCALHOST, LOCAL_PUBLIC_NETWORK};
+
     /**
      * Constructorul unui socket de Multicast
      * @param address Adresa la care va face bind socket-ul procesului curent

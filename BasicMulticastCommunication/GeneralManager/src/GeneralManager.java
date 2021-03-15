@@ -1,16 +1,9 @@
-import client_manager.ClientManagerRequest;
-import client_manager.Token;
 import communication.Address;
-import communication.Serializer;
 import model.ConnectionTable;
 import model.ContentTable;
 import model.StorageStatusTable;
 
-import java.io.*;
-import java.net.*;
-import java.nio.charset.StandardCharsets;
 import java.lang.*;
-import java.util.HashMap;
 
 /* https://docs.oracle.com/en/java/javase/11/docs/api/java.base/java/net/MulticastSocket.html */
 /* https://tldp.org/HOWTO/Multicast-HOWTO.html#toc1 */
@@ -63,19 +56,24 @@ public class GeneralManager{
      */
     private ClientCommunicationManager clientCommunicationManager;
 
+    private ReplicationManager replicationManager;
+
     /**
      * Constructorul clasei
      * @param hearthBeatManager Managerul de heartbeat-uri
      */
-    public GeneralManager(HearthBeatManager hearthBeatManager, ClientCommunicationManager clientCommunicationManager){
+    public GeneralManager(HearthBeatManager hearthBeatManager, ClientCommunicationManager clientCommunicationManager, ReplicationManager replicationManager){
         this.hearthBeatManager = hearthBeatManager;
         this.clientCommunicationManager = clientCommunicationManager;
+        this.replicationManager = replicationManager;
     }
 
 
     public void StartActivity() throws Exception {
         // Pornim thread-ul pe care va fi rulat mecanismul de heartbeats
         new Thread(hearthBeatManager).start();
+
+        new Thread(replicationManager).start();
 
         clientCommunicationManager.ClientCommunicationLoop(generalManagerIpAddress, dataTransmissionPort, connectionTable);
     }
@@ -91,7 +89,9 @@ public class GeneralManager{
             HearthBeatManager hearthBeatManager = new HearthBeatManager(multicastAddress, hearthBeatFrequency);
 
             ClientCommunicationManager clientCommunicationManager = new ClientCommunicationManager();
-            GeneralManager generalManager = new GeneralManager(hearthBeatManager, clientCommunicationManager);
+
+            ReplicationManager replicationManager = new ReplicationManager();
+            GeneralManager generalManager = new GeneralManager(hearthBeatManager, clientCommunicationManager, replicationManager);
 
             generalManager.StartActivity();
         }

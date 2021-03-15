@@ -6,7 +6,7 @@ import java.util.List;
 import data.Pair;
 
 public class ContentTable {
-    private class ContentRegister{
+    public class ContentRegister{
         private String userId;
         private HashMap<String, Integer> content;
 
@@ -70,7 +70,10 @@ public class ContentTable {
         }
     }
 
+
+
     private final List<ContentRegister> contentTable;
+
     public ContentTable(){
         this.contentTable = new ArrayList<ContentRegister>();
     }
@@ -124,6 +127,27 @@ public class ContentTable {
             }
         }
         return false;
+    }
+
+    public List<String> GetUsers(){
+        List<String> userIds = new ArrayList<>();
+        synchronized (this.contentTable){
+            for(ContentRegister register : this.contentTable) {
+                userIds.add(register.getUserId());
+            }
+            return userIds;
+        }
+    }
+
+    public HashMap<String, Integer> GetUserFiles(String userId){
+        synchronized (this.contentTable) {
+            for(ContentRegister register : this.contentTable){
+                if(register.getUserId().equals(userId)){
+                    return register.content;
+                }
+            }
+            return null;
+        }
     }
 
     @Override

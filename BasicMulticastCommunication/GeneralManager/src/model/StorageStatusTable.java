@@ -152,6 +152,18 @@ public class StorageStatusTable {
         }
         return true;
     }
+
+    public List<String> GetAvailableNodesForFile(String user, String file){
+        synchronized (this.statusTable){
+            try {
+                return statusTable.get(user).get(file);
+            }
+            catch (NullPointerException exception){
+                return null;
+            }
+        }
+    }
+
     @Override
     public String toString() {
         StringBuilder stringBuilder = new StringBuilder();

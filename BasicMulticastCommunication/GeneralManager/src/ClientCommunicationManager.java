@@ -105,7 +105,7 @@ public class ClientCommunicationManager {
         Address address = new Address(generalManagerIpAddress, dataTransmissionPort);
         ServerSocket serverSocket = new ServerSocket();
         try{
-            serverSocket.bind(new InetSocketAddress(address.getIpAddress(), dataTransmissionPort));
+            serverSocket.bind(new InetSocketAddress(address.getIpAddress(), address.getPort()));
             while(true){
                 Socket clientSocket = serverSocket.accept();
                 System.out.println(String.format("Client nou conectat : [%s : %d]\n", clientSocket.getLocalAddress(), clientSocket.getLocalPort()));
@@ -114,7 +114,7 @@ public class ClientCommunicationManager {
         }
         catch (Exception exception){
             serverSocket.close();
-            System.out.println(exception.getMessage());
+            System.out.println("Client communication loop exception : " + exception.getMessage());
         }
     }
 
@@ -124,8 +124,7 @@ public class ClientCommunicationManager {
      * @param clientSocket Socket-ul nodului adiacent, de la care primeste date.
      * @return Runnable-ul necesar pornirii unui thread separat pentru aceasta comunicare.
      */
-    public Runnable
-    ClientCommunicationThread(Socket clientSocket, ConnectionTable connectionTable){
+    public Runnable ClientCommunicationThread(Socket clientSocket, ConnectionTable connectionTable){
         return new Runnable() {
             @Override
             public void run(){

@@ -30,6 +30,8 @@ public class GeneralNode{
      */
     private ClientCommunicationManager clientCommunicationManager;
 
+    private ReplicationManager replicationManager;
+
     private final static String storagePath = "D:\\Facultate\\Licenta\\Storage\\";
 
     private final static NodeBeat storageStatus = new NodeBeat();
@@ -38,14 +40,19 @@ public class GeneralNode{
      * Constructorul clasei
      * @param hearthBeatManager Managerul de heartbeat-uri
      */
-    public GeneralNode(HearthBeatManager hearthBeatManager, ClientCommunicationManager clientCommunicationManager){
+    public GeneralNode(HearthBeatManager hearthBeatManager, ClientCommunicationManager clientCommunicationManager, ReplicationManager replicationManager){
         this.hearthBeatManager = hearthBeatManager;
         this.clientCommunicationManager = clientCommunicationManager;
+        this.replicationManager = replicationManager;
     }
 
     public void StartActivity() throws Exception {
+        GetStorageStatus();
+
         // Pornim thread-ul pe care va fi rulat mecanismul de heartbeats
         new Thread(hearthBeatManager).start();
+
+        new Thread(replicationManager).start();
 
         // Pornim comunicarea cu clientul
         clientCommunicationManager.ClientCommunicationLoop();
@@ -82,11 +89,12 @@ public class GeneralNode{
             InternalNodeCommunicationManager internalCommunicationManager = new InternalNodeCommunicationManager();
             ClientCommunicationManager clientCommunicationManager = new ClientCommunicationManager(clientCommunicationAddress, internalCommunicationManager);
 
-            GeneralNode generalManager = new GeneralNode(hearthBeatManager, clientCommunicationManager);
-            generalManager.GetStorageStatus();
+            Address replicationManagerAddress = new Address(args[0], 8082);
+            ReplicationManager replicationManager = new ReplicationManager(replicationManagerAddress);
+            GeneralNode generalManager = new GeneralNode(hearthBeatManager, clientCommunicationManager, replicationManager);
             generalManager.StartActivity();
-
         }
+
         catch (Exception exception){
             System.out.println(exception.getMessage());
         }

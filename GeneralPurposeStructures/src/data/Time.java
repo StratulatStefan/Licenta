@@ -4,6 +4,9 @@ package data;
 import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
 
+/**
+ * Clasa folosita pentru calcule/reprezentari cu timpi
+ */
 public class Time {
     /**
      * Timestamp-ul la care ne raportam, astfel incat sa nu obtinem o valoare foarte mare.
