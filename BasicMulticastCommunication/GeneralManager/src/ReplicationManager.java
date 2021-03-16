@@ -1,6 +1,4 @@
 import communication.Serializer;
-import model.ContentTable;
-import model.StorageStatusTable;
 import node_manager.ReplicationRequest;
 
 import java.io.DataOutputStream;
@@ -10,7 +8,14 @@ import java.util.HashMap;
 import java.util.List;
 
 public class ReplicationManager implements Runnable{
-    private static int replication_frequency = 5;
+    private static int replicationFrequency;
+
+    private int replicationPort;
+
+    public ReplicationManager(int replicationPort, int replicationFrequency){
+        this.replicationPort = replicationPort;
+        this.replicationFrequency = replicationFrequency;
+    }
 
     private void ReplicationLoop(){
         while(true) {
@@ -34,15 +39,21 @@ public class ReplicationManager implements Runnable{
                             System.out.println("[NEED REPLICATION].");
 
                             List<String> candidates = SearchCandidatesForReplication(replication_factor, availableNodesForFile);
-                            // cautam un criteriu pe baza caruia selectam nodul de la care se face copierea
-                            String source = availableNodesForFile.get(0);
-                            System.out.println("\t\tFound source of replication : " + source);
-                            System.out.print("\t\tFound candidates for replication : ");
-                            for(String candidate : candidates){
-                                System.out.print("[" + candidate +"] ");
+                            if(replication_factor == 1 || candidates == null){
+                                System.out.println("Nu se poate realiza replicarea pentru fisierul curent. " +
+                                        "Nu exista suficiente noduri pe care sa se faca replicarea.");
                             }
-                            System.out.println();
-                            ReplicateFile(userId, userFile, source, candidates);
+                            else {
+                                // cautam un criteriu pe baza caruia selectam nodul de la care se face copierea
+                                String source = availableNodesForFile.get(0);
+                                System.out.println("\t\tFound source of replication : " + source);
+                                System.out.print("\t\tFound candidates for replication : ");
+                                for (String candidate : candidates) {
+                                    System.out.print("[" + candidate + "] ");
+                                }
+                                System.out.println();
+                                ReplicateFile(userId, userFile, source, candidates);
+                            }
                         }
                         else if (replication_factor == availableNodesForFile.size()) {
                             System.out.println("[OK].");
@@ -50,7 +61,7 @@ public class ReplicationManager implements Runnable{
                     }
                 }
                 System.out.println("------------------------------------\n");
-                Thread.sleep((int) (replication_frequency * 1e3));
+                Thread.sleep((int) (replicationFrequency * 1e3));
             }
             catch (InterruptedException exception){
                 System.out.println("Replication loop interrupted exception : " + exception.getMessage());
@@ -63,28 +74,13 @@ public class ReplicationManager implements Runnable{
         // criteriu de selectie a anumitor noduri, mai libere, ca sa stocheze noul fisier
         // momentam selectam primele gasite
 
-        List<String> candidates = ListDifferences(openNodes, availableNodes).subList(0, replication_factor - availableNodes.size());
-
-        return candidates;
-
-    }
-
-    public List<String> ListDifferences(List<String> list1, List<String> list2){
-        List<String> result = new ArrayList<>();
-        boolean found;
-        for(String list1_member : list1){
-            found = false;
-            for(String list2_member : list2){
-                if(list1_member.equals(list2_member)){
-                    found = true;
-                    break;
-                }
-            }
-            if(!found){
-                result.add(list1_member);
-            }
+        try {
+            return GeneralPurposeMethods.ListDifferences(openNodes, availableNodes).subList(0, replication_factor - availableNodes.size());
         }
-        return result;
+        catch (IndexOutOfBoundsException exception){
+            // nu s-au gasit suficiente noduri pe care sa se faca replicarea..
+            return null;
+        }
     }
 
     public void ReplicateFile(String user, String filename, String sourceAddress, List<String> destinationAddresses){
@@ -100,7 +96,7 @@ public class ReplicationManager implements Runnable{
                     replicationRequest.setDestionationAddress(destinationAddress);
 
                     try {
-                        Socket replicationSocket = new Socket(sourceAddress, 8082);
+                        Socket replicationSocket = new Socket(sourceAddress, replicationPort);
                         DataOutputStream dataOutputStream = new DataOutputStream(replicationSocket.getOutputStream());
                         dataOutputStream.write(Serializer.Serialize(replicationRequest));
                         dataOutputStream.close();

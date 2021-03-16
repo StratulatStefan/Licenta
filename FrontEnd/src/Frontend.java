@@ -138,13 +138,13 @@ public class Frontend {
         String userId = "1";
         String filename = "D:/Facultate/Licenta/test_files/sss.pdf";
         int filesize = 12;
-        int replication_factor = 2;
-        //mainActivity(userId, filename, filesize, replication_factor);
+        int replication_factor = 5;
+        mainActivity(userId, filename, filesize, replication_factor);
 
         userId = "1";
         replication_factor = 1;
         filename = "D:/Facultate/Licenta/test_files/Resurse-lab 02-20201012.zip";
-        mainActivity(userId, filename, filesize, replication_factor);
+        //mainActivity(userId, filename, filesize, replication_factor);
 
         userId = "2";
         replication_factor = 1;

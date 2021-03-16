@@ -32,7 +32,7 @@ public class HearthBeatManager implements Runnable{
     /**
      * Numarul de heart-beat-uri la care se face clean-up-ul tabelei de conexiuni
      */
-    private final static int cleanupFrequency = 2;
+    private final static int cleanupFrequency = 3;
 
     /**
      * Constructorul managerului de heartbeat-uri pentru nodul curent.
@@ -55,25 +55,29 @@ public class HearthBeatManager implements Runnable{
         return new Runnable(){
             @Override
             public void run(){
+                List<Address> disconnected;
+                int cleanUpIndex = 1;
                 while(true) {
                     System.out.println(Time.getCurrentTimeWithFormat() + " ");
                     try {
-                        List<Address> disconnected = GeneralManager.connectionTable.checkDisconnection((int)(frequency * cleanupFrequency));
-                        if(disconnected.size() == 0){
-                            if(GeneralManager.connectionTable.size() == 0){
-                                System.out.println(" >>> Niciun nod conectat!");
+                        if(cleanUpIndex == cleanupFrequency){
+                            disconnected = GeneralManager.connectionTable.checkDisconnection(frequency);
+                            if(disconnected.size() != 0){
+                                for (Address disconnectedAddres : disconnected) {
+                                    System.out.println(" >>> Address " + disconnectedAddres + " disconnected");
+                                    GeneralManager.connectionTable.removeAddress(disconnectedAddres);
+                                    GeneralManager.statusTable.CleanUpAtNodeDisconnection(disconnectedAddres.getIpAddress());
+                                }
                             }
-                            else {
-                                System.out.println(GeneralManager.connectionTable);
-                            }
+                            cleanUpIndex = 0;
+                        }
+                        if(GeneralManager.connectionTable.size() == 0){
+                            System.out.println(" >>> Niciun nod conectat!");
                         }
                         else {
-                            for (Address disconnectedAddres : disconnected) {
-                                System.out.println(" >>> Address " + disconnectedAddres + " disconnected");
-                                GeneralManager.connectionTable.removeAddress(disconnectedAddres);
-                                GeneralManager.statusTable.CleanUpAtNodeDisconnection(disconnectedAddres.getIpAddress());
-                            }
+                            System.out.println(GeneralManager.connectionTable);
                         }
+                        cleanUpIndex += 1;
                         Thread.sleep((int) (frequency * 1e3));
                     } catch (InterruptedException exception) {
                         socket.close();

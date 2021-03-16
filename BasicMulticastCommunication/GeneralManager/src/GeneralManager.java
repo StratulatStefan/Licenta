@@ -36,10 +36,20 @@ public class GeneralManager{
     private final static int dataTransmissionPort = 8081;
 
     /**
+     * Portul pentru replicare
+     */
+    private final static int replicationPort = 8082;
+
+    /**
      * Frecventa heartbeat-urilor
      * Exprimat in secunde.
      */
     private final static double hearthBeatFrequency = 5;
+
+    /**
+     * Frecventa pentru mecanismul de replicare
+     */
+    private final static int replicationFrequency = 5;
 
     /**
      * Dimensiunea bufferului in care vor fi citite datele de la un nod adiacent
@@ -58,6 +68,10 @@ public class GeneralManager{
 
     private ReplicationManager replicationManager;
 
+
+
+
+
     /**
      * Constructorul clasei
      * @param hearthBeatManager Managerul de heartbeat-uri
@@ -68,7 +82,6 @@ public class GeneralManager{
         this.replicationManager = replicationManager;
     }
 
-
     public void StartActivity() throws Exception {
         // Pornim thread-ul pe care va fi rulat mecanismul de heartbeats
         new Thread(hearthBeatManager).start();
@@ -77,7 +90,6 @@ public class GeneralManager{
 
         clientCommunicationManager.ClientCommunicationLoop(generalManagerIpAddress, dataTransmissionPort, connectionTable);
     }
-
 
     /**
      * @param args Argumentele furnizate la linia de comanda
@@ -90,7 +102,7 @@ public class GeneralManager{
 
             ClientCommunicationManager clientCommunicationManager = new ClientCommunicationManager();
 
-            ReplicationManager replicationManager = new ReplicationManager();
+            ReplicationManager replicationManager = new ReplicationManager(replicationPort, replicationFrequency);
             GeneralManager generalManager = new GeneralManager(hearthBeatManager, clientCommunicationManager, replicationManager);
 
             generalManager.StartActivity();

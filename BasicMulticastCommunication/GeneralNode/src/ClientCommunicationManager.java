@@ -44,7 +44,7 @@ public class ClientCommunicationManager {
             while(true){
                 Socket clientSocket = serverSocket.accept();
                 System.out.println(String.format("Client connected : [%s : %d]\n", clientSocket.getLocalAddress(), clientSocket.getLocalPort()));
-                new Thread(ClientCommunicationThread(serverSocket, clientSocket)).start();
+                new Thread(ClientCommunicationThread(serverSocket.getInetAddress().getHostAddress(), clientSocket)).start();
             }
         }
         catch (Exception exception){
@@ -56,15 +56,16 @@ public class ClientCommunicationManager {
     /**
      * Functie care inglobeaza comunicarea de date cu un nod adicant, avandu-se in vedere primirea de date de la un
      * nod adiacent si, eventual, trimiterea informatiilor mai departe, in cazul in care nu este nod terminal.
-     * @param serverSocket Socket-ul pe care este mapat nodul curent.
+     * @param serverAddress Adresa socket-ului pe care este mapat nodul curent.
      * @param clientSocket Socket-ul nodului adiacent, de la care primeste date.
      * @return Runnable-ul necesar pornirii unui thread separat pentru aceasta comunicare.
      */
-    private Runnable ClientCommunicationThread(ServerSocket serverSocket, Socket clientSocket){
+    private Runnable ClientCommunicationThread(String serverAddress, Socket clientSocket){
         return new Runnable() {
             @Override
             public void run(){
                 try {
+                    System.out.println("din nou aici!!!");
                     InputStream dataInputStream = new DataInputStream(clientSocket.getInputStream());
                     OutputStream dataOutputStream = null;
                     FileOutputStream fileOutputStream = null;
@@ -76,7 +77,7 @@ public class ClientCommunicationManager {
                         if(!header_found) {
                             try {
                                 FileHeader header = (FileHeader) Serializer.Deserialize(buffer);
-                                String filepath = storagePath + serverSocket.getInetAddress().getHostAddress() + "/" + header.getUserId();
+                                String filepath = storagePath + serverAddress + "/" + header.getUserId();
                                 if(!Files.exists(Paths.get(filepath)))
                                     Files.createDirectories(Paths.get(filepath));
                                 filepath += "/" + header.getFilename();
@@ -85,7 +86,6 @@ public class ClientCommunicationManager {
                                 if(token != null){
                                     header.setToken(token);
                                     String nextDestination = getDestinationIpAddress(token);
-                                    nextElementSocket = new Socket(nextDestination, nodeAddress.getPort());
                                     nextElementSocket = internalCommunicationManager.GenerateNewFileCommunication(nextDestination, nodeAddress.getPort());
                                     dataOutputStream = internalCommunicationManager.GenerateNewFileDataStream(nextElementSocket, header);
                                 }
@@ -120,6 +120,8 @@ public class ClientCommunicationManager {
                             clientSocket.getLocalAddress(),
                             clientSocket.getLocalPort()));
                 }
+                System.out.println("sunt aici.. chill!");
+                System.out.println("gata");
             }
         };
     }

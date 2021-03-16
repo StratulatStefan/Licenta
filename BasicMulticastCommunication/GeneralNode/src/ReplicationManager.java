@@ -1,5 +1,4 @@
 import client_node.FileHeader;
-import com.sun.security.ntlm.Server;
 import communication.Address;
 import communication.Serializer;
 import node_manager.ReplicationRequest;
@@ -15,6 +14,7 @@ public class ReplicationManager implements Runnable{
     private Address address;
     private static int bufferSize = 1024;
     private static String mainFilepath = "D:/Facultate/Licenta/Storage/";
+
     public ReplicationManager(Address address){
         this.address = address;
     }
@@ -58,7 +58,7 @@ public class ReplicationManager implements Runnable{
                             // daca nu s-a generat StreamCorruptedException, suntem nodul sursa, de la care incepe replicarea
                             String filepath = mainFilepath + address.getIpAddress() + "/" + replicationRequest.getUserId() + "/" + replicationRequest.getFilename();
                             System.out.println("Sunt nodul sursa si trimit comanda!!!");
-                            Socket socket = new Socket(replicationRequest.getDestionationAddress(), 8082);
+                            Socket socket = new Socket(replicationRequest.getDestionationAddress(), address.getPort());
                             DataOutputStream replicationOutputStream = new DataOutputStream(socket.getOutputStream());
 
                             File file = new File(filepath);

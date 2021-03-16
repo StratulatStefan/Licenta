@@ -80,11 +80,11 @@ public class ConnectionTable {
      * @param limit Limita de timp de la care o conexiune este considerata rupta.
      * @return Lista de conexiuni rupte.
      */
-    public List<Address> checkDisconnection(long limit){
+    public List<Address> checkDisconnection(double limit){
         List<Address> disconnected = new ArrayList();
         long currentTimestamp = Time.getCurrentTimestamp();
         for(Pair<Address, Long> connection : this.connectionTable){
-            if((currentTimestamp - connection.getSecond()) >= limit){
+            if((currentTimestamp - connection.getSecond()) > limit){
                 disconnected.add(connection.getFirst());
             }
         }

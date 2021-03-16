@@ -102,9 +102,10 @@ public class StorageStatusTable {
     }
 
     public void CleanUpOnDeletedUser(String userAddress, List<String> users){
-        boolean found = false;
+        boolean found;
         synchronized (this.statusTable){
             for(String availableUser : new ArrayList<>(this.statusTable.keySet())){
+                found = false;
                 for(String existingUser : users){
                     if(availableUser.equals(existingUser)){
                         found = true;

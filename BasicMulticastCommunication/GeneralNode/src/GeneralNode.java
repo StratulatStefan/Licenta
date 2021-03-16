@@ -20,6 +20,8 @@ public class GeneralNode{
      */
     private final static int heartBeatPort = 8246;
 
+    private final static int replicationPort = 8082;
+
     /**
      * Obiectul care se ocupa de mecanismul de hearbeats
      */
@@ -82,14 +84,14 @@ public class GeneralNode{
         try {
             ipAddress = args[0];
 
-            Address hearthBeatAddress = new Address(args[0], heartBeatPort);
+            Address hearthBeatAddress = new Address(ipAddress, heartBeatPort);
             HearthBeatManager hearthBeatManager = new HearthBeatManager(hearthBeatAddress);
 
-            Address clientCommunicationAddress = new Address(args[0], serverSocketPort);
+            Address clientCommunicationAddress = new Address(ipAddress, serverSocketPort);
             InternalNodeCommunicationManager internalCommunicationManager = new InternalNodeCommunicationManager();
             ClientCommunicationManager clientCommunicationManager = new ClientCommunicationManager(clientCommunicationAddress, internalCommunicationManager);
 
-            Address replicationManagerAddress = new Address(args[0], 8082);
+            Address replicationManagerAddress = new Address(ipAddress, replicationPort);
             ReplicationManager replicationManager = new ReplicationManager(replicationManagerAddress);
             GeneralNode generalManager = new GeneralNode(hearthBeatManager, clientCommunicationManager, replicationManager);
             generalManager.StartActivity();
