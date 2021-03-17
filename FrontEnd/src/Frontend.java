@@ -138,7 +138,7 @@ public class Frontend {
         String userId = "1";
         String filename = "D:/Facultate/Licenta/test_files/sss.pdf";
         int filesize = 12;
-        int replication_factor = 5;
+        int replication_factor = 4;
         mainActivity(userId, filename, filesize, replication_factor);
 
         userId = "1";

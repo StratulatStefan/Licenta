@@ -55,31 +55,46 @@ public class ReplicationManager implements Runnable{
                     while((read = dataInputStream.read(buffer, 0, bufferSize)) > 0){
                         try {
                             ReplicationRequest replicationRequest = (ReplicationRequest) Serializer.Deserialize(buffer);
-                            // daca nu s-a generat StreamCorruptedException, suntem nodul sursa, de la care incepe replicarea
-                            String filepath = mainFilepath + address.getIpAddress() + "/" + replicationRequest.getUserId() + "/" + replicationRequest.getFilename();
-                            System.out.println("Sunt nodul sursa si trimit comanda!!!");
-                            Socket socket = new Socket(replicationRequest.getDestionationAddress(), address.getPort());
-                            DataOutputStream replicationOutputStream = new DataOutputStream(socket.getOutputStream());
+                            String requestedOperation = replicationRequest.getOperation();
+                            if(requestedOperation.equals("replicate")) {
+                                // daca nu s-a generat StreamCorruptedException, suntem nodul sursa, de la care incepe replicarea
+                                String filepath = mainFilepath + address.getIpAddress() + "/" + replicationRequest.getUserId() + "/" + replicationRequest.getFilename();
+                                System.out.println("Am primit comanda de replicare si trimit fisierul mai departe.");
+                                Socket socket = new Socket(replicationRequest.getDestionationAddress(), address.getPort());
+                                DataOutputStream replicationOutputStream = new DataOutputStream(socket.getOutputStream());
 
-                            File file = new File(filepath);
-                            BufferedInputStream inputStream = new BufferedInputStream(new FileInputStream(file));
+                                File file = new File(filepath);
+                                BufferedInputStream inputStream = new BufferedInputStream(new FileInputStream(file));
 
-                            FileHeader fileHeader = new FileHeader();
-                            fileHeader.setFilename(replicationRequest.getFilename());
-                            fileHeader.setFilesize(file.length());
-                            fileHeader.setUserId(replicationRequest.getUserId());
+                                FileHeader fileHeader = new FileHeader();
+                                fileHeader.setFilename(replicationRequest.getFilename());
+                                fileHeader.setFilesize(file.length());
+                                fileHeader.setUserId(replicationRequest.getUserId());
 
-                            replicationOutputStream.write(Serializer.Serialize(fileHeader));
-                            byte[] binaryFile = new byte[bufferSize];
-                            int count;
-                            while ((count = inputStream.read(binaryFile)) > 0){
-                                replicationOutputStream.write(binaryFile, 0, count);
+                                replicationOutputStream.write(Serializer.Serialize(fileHeader));
+                                byte[] binaryFile = new byte[bufferSize];
+                                int count;
+                                while ((count = inputStream.read(binaryFile)) > 0) {
+                                    replicationOutputStream.write(binaryFile, 0, count);
+                                }
+
+                                inputStream.close();
+                                replicationOutputStream.close();
+                                socket.close();
+                                System.out.println("Sending replication done!");
                             }
+                            else if(requestedOperation.equals("delete")){
+                                String filepath = mainFilepath + address.getIpAddress() + "/" + replicationRequest.getUserId() + "/" + replicationRequest.getFilename();
+                                System.out.println("Am primit comanda de eliminare a fisierului.");
 
-                            inputStream.close();
-                            replicationOutputStream.close();
-                            socket.close();
-                            System.out.println("Sending replication done!");
+                                File file = new File(filepath);
+                                if(file.delete()){
+                                    System.out.println("Fisierul a fost eliminat cu succes!");
+                                }
+                                else{
+                                    System.out.println("Fisierul nu poate fi eliminat");
+                                }
+                            }
                         }
                         catch (Exception exception){
                             // daca s-a generat aceasta exceptie, suntem nodul la care se va face replicarea

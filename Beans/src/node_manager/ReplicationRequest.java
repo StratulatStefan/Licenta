@@ -7,6 +7,8 @@ public class ReplicationRequest implements Serializable {
 
     private String filename;
 
+    private String operation;
+
     private String destionationAddress;
 
     public String getUserId() {
@@ -28,5 +30,12 @@ public class ReplicationRequest implements Serializable {
     }
     public void setDestionationAddress(String destionationAddress) {
         this.destionationAddress = destionationAddress;
+    }
+
+    public String getOperation() {
+        return operation;
+    }
+    public void setOperation(String operation) {
+        this.operation = operation;
     }
 }

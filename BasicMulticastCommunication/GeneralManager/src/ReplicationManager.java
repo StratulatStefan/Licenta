@@ -35,7 +35,10 @@ public class ReplicationManager implements Runnable{
                             continue;
                         }
                         System.out.print("\t User " + userId + " | File : " + userFile + "  -->  ");
-                        if (replication_factor > availableNodesForFile.size()) {
+                        if (replication_factor == availableNodesForFile.size()) {
+                            System.out.println("[OK].");
+                        }
+                        else if (replication_factor > availableNodesForFile.size()) {
                             System.out.println("[NEED REPLICATION].");
 
                             List<String> candidates = SearchCandidatesForReplication(replication_factor, availableNodesForFile);
@@ -55,8 +58,16 @@ public class ReplicationManager implements Runnable{
                                 ReplicateFile(userId, userFile, source, candidates);
                             }
                         }
-                        else if (replication_factor == availableNodesForFile.size()) {
-                            System.out.println("[OK].");
+                        else {
+                            System.out.println("[NEED DELETION OF FILE FROM ONE NODE]");
+
+                            List<String> candidates = SearchCandidatesForDeletion(availableNodesForFile.size() - replication_factor, availableNodesForFile);
+                            System.out.print("\t\tFound nodes to delete file : ");
+                            for (String candidate : candidates) {
+                                System.out.print("[" + candidate + "] ");
+                            }
+                            System.out.println();
+                            DeleteFile(userId, userFile, candidates);
                         }
                     }
                 }
@@ -83,6 +94,37 @@ public class ReplicationManager implements Runnable{
         }
     }
 
+    public List<String> SearchCandidatesForDeletion(int count, List<String> availableNodes){
+        return availableNodes.subList(0, count);
+    }
+
+    public void DeleteFile(String user, String filename, List<String> destinationAddresses){
+        for(String destinationAddress : destinationAddresses){
+            new Thread(new Runnable() {
+                @Override
+                public void run() {
+                    System.out.println("Trimit cerere de eliminare pentru fisierul " + filename + " al userului " + user + " de la nodul " + destinationAddress);
+
+                    ReplicationRequest replicationRequest = new ReplicationRequest();
+                    replicationRequest.setUserId(user);
+                    replicationRequest.setFilename(filename);
+                    replicationRequest.setOperation("delete");
+
+                    try{
+                        Socket deleteSocket = new Socket(destinationAddress, replicationPort);
+                        DataOutputStream dataOutputStream = new DataOutputStream(deleteSocket.getOutputStream());
+                        dataOutputStream.write(Serializer.Serialize(replicationRequest));
+                        dataOutputStream.close();
+                        deleteSocket.close();
+                    }
+                    catch (Exception exception){
+                        System.out.println("Delete file request exception : " + exception.getMessage());
+                    }
+                }
+            }).start();
+        }
+    }
+
     public void ReplicateFile(String user, String filename, String sourceAddress, List<String> destinationAddresses){
         for(String destinationAddress : destinationAddresses){
             new Thread(new Runnable() {
@@ -94,6 +136,7 @@ public class ReplicationManager implements Runnable{
                     replicationRequest.setUserId(user);
                     replicationRequest.setFilename(filename);
                     replicationRequest.setDestionationAddress(destinationAddress);
+                    replicationRequest.setOperation("replicate");
 
                     try {
                         Socket replicationSocket = new Socket(sourceAddress, replicationPort);
