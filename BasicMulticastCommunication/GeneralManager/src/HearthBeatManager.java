@@ -79,6 +79,10 @@ public class HearthBeatManager implements Runnable{
                         }
                         cleanUpIndex += 1;
                         Thread.sleep((int) (frequency * 1e3));
+
+                        if(GeneralManager.contentTable.needInit){
+                            GeneralManager.contentTable.Initialize(GeneralManager.statusTable);
+                        }
                     } catch (InterruptedException exception) {
                         socket.close();
                         System.out.println("InterruptedException occured. : " + exception.getMessage());

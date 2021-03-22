@@ -68,10 +68,6 @@ public class GeneralManager{
 
     private ReplicationManager replicationManager;
 
-
-
-
-
     /**
      * Constructorul clasei
      * @param hearthBeatManager Managerul de heartbeat-uri
@@ -88,7 +84,7 @@ public class GeneralManager{
 
         new Thread(replicationManager).start();
 
-        clientCommunicationManager.ClientCommunicationLoop(generalManagerIpAddress, dataTransmissionPort, connectionTable);
+        clientCommunicationManager.ClientCommunicationLoop(generalManagerIpAddress, dataTransmissionPort);
     }
 
     /**

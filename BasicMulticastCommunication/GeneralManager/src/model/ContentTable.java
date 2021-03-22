@@ -70,7 +70,24 @@ public class ContentTable {
         }
     }
 
+    public boolean needInit = true;
 
+    public void Initialize(StorageStatusTable storageStatusTable){
+        synchronized (this.contentTable) {
+            for (String user : storageStatusTable.GetUsers()) {
+                HashMap<String, Integer> userFilesNodesCount = storageStatusTable.GetUserFilesNodesCount(user);
+                for (String filename : new ArrayList<>(userFilesNodesCount.keySet())) {
+                    try {
+                        this.AddRegister(user, filename, userFilesNodesCount.get(filename));
+                    }
+                    catch (Exception exception){
+                        // nu prea avem cum sa ajunge aici la init
+                    }
+                }
+            }
+        }
+        needInit = false;
+    }
 
     private final List<ContentRegister> contentTable;
 
@@ -97,7 +114,7 @@ public class ContentTable {
                 if(register.getUserId().equals(userId)){
                     register.RemoveRegister(filename);
                     if(register.size() == 0){
-                        this.contentTable.remove(userId);
+                        this.contentTable.remove(register);
                     }
                     return;
                 }
@@ -148,6 +165,14 @@ public class ContentTable {
             }
             return null;
         }
+    }
+
+    public boolean CheckForUserFile(String userId, String filename){
+        HashMap<String, Integer> userFiles = GetUserFiles(userId);
+        if(userFiles != null && new ArrayList<>(userFiles.keySet()).contains(filename)){
+            return true;
+        }
+        return false;
     }
 
     @Override

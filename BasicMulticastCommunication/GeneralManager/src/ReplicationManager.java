@@ -68,13 +68,16 @@ public class ReplicationManager implements Runnable{
                             }
                             System.out.println();
                             DeleteFile(userId, userFile, candidates);
+                            if(replication_factor == 0) {
+                                GeneralManager.contentTable.DeleteRegister(userId, userFile);
+                            }
                         }
                     }
                 }
                 System.out.println("------------------------------------\n");
                 Thread.sleep((int) (replicationFrequency * 1e3));
             }
-            catch (InterruptedException exception){
+            catch (Exception exception){
                 System.out.println("Replication loop interrupted exception : " + exception.getMessage());
             }
         }

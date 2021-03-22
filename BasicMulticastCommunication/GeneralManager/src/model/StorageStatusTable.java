@@ -165,6 +165,22 @@ public class StorageStatusTable {
         }
     }
 
+    public List<String> GetUsers(){
+        synchronized (this.statusTable) {
+            return new ArrayList<>(this.statusTable.keySet());
+        }
+    }
+
+    public HashMap<String, Integer> GetUserFilesNodesCount(String userId){
+        synchronized (this.statusTable) {
+            HashMap<String, Integer> filesNodesCounts = new HashMap<>();
+            for (String filename : new ArrayList<>(this.statusTable.get(userId).keySet())) {
+                filesNodesCounts.put(filename, this.statusTable.get(userId).get(filename).size());
+            }
+            return filesNodesCounts;
+        }
+    }
+
     @Override
     public String toString() {
         StringBuilder stringBuilder = new StringBuilder();
