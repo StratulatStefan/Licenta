@@ -8,18 +8,18 @@ import java.net.Socket;
 
 public class InternalNodeCommunicationManager {
 
-    public Socket GenerateNewFileCommunication(String destinationIP, int port) throws IOException {
+    public Socket generateNewFileCommunication(String destinationIP, int port) throws IOException {
         return new Socket(destinationIP, port);
     }
 
-    public DataOutputStream GenerateNewFileDataStream(Socket socket, FileHeader header) throws IOException {
+    public DataOutputStream generateNewFileDataStream(Socket socket, FileHeader header) throws IOException {
         DataOutputStream dataOutputStream = new DataOutputStream(socket.getOutputStream());
         System.out.println("Next node in chain header : " + header.getToken());
-        dataOutputStream.write(Serializer.Serialize(header));
+        dataOutputStream.write(Serializer.serialize(header));
         return dataOutputStream;
     }
 
-    public void SendDataChunk(OutputStream dataOutputStream, byte[] buffer, int read) throws IOException {
+    public void sendDataChunk(OutputStream dataOutputStream, byte[] buffer, int read) throws IOException {
         dataOutputStream.write(buffer, 0, read);
     }
 }

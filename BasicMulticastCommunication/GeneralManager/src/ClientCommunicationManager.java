@@ -65,17 +65,17 @@ public class ClientCommunicationManager {
         }
         else{
             System.out.println("Generam token-ul..");
-            String token = "";
+            StringBuilder token = new StringBuilder();
             /* !!!!!! criteriu de selectare a nodurilor !!!!!! */
             for(String address : connectionAddresses){
                 if(replication_factor == 0){
                     break;
                 }
-                token = token + address + "-";
+                token.append(address).append("-");
                 replication_factor -= 1;
             }
-            token = token.substring(0, token.length() - 1);
-            return token;
+            token = new StringBuilder(token.substring(0, token.length() - 1));
+            return token.toString();
         }
         return null;
     }
@@ -92,7 +92,7 @@ public class ClientCommunicationManager {
                             exception.printStackTrace();
                         }
                         try {
-                            GeneralManager.contentTable.AddRegister(user, filename, replication_factor);
+                            GeneralManager.contentTable.addRegister(user, filename, replication_factor);
                         } catch (Exception exception) {
                             exception.printStackTrace();
                         }
@@ -107,7 +107,7 @@ public class ClientCommunicationManager {
     }
 
     public ClientRequestStatus checkFileStatus(String user, String filename){
-        boolean fileStatus = GeneralManager.contentTable.CheckForUserFile(user, filename);
+        boolean fileStatus = GeneralManager.contentTable.checkForUserFile(user, filename);
         if(fileStatus){
             return ClientRequestStatus.FILE_EXISTS;
         }
@@ -117,7 +117,7 @@ public class ClientCommunicationManager {
     /** Functie care inglobeaza activitatea principala a fiecarui nod, aceea de a asigura comunicarea cu celelalte noduri
      * in vederea trimiterii si primirii de mesaje.
      */
-    public void ClientCommunicationLoop(String generalManagerIpAddress, int dataTransmissionPort) throws Exception{
+    public void clientCommunicationLoop(String generalManagerIpAddress, int dataTransmissionPort) throws Exception{
         Address address = new Address(generalManagerIpAddress, dataTransmissionPort);
         ServerSocket serverSocket = new ServerSocket();
         try{
@@ -125,7 +125,7 @@ public class ClientCommunicationManager {
             while(true){
                 Socket clientSocket = serverSocket.accept();
                 System.out.println(String.format("Client nou conectat : [%s : %d]\n", clientSocket.getLocalAddress(), clientSocket.getLocalPort()));
-                new Thread(ClientCommunicationThread(clientSocket)).start();
+                new Thread(clientCommunicationThread(clientSocket)).start();
             }
         }
         catch (Exception exception){
@@ -140,7 +140,7 @@ public class ClientCommunicationManager {
      * @param clientSocket Socket-ul nodului adiacent, de la care primeste date.
      * @return Runnable-ul necesar pornirii unui thread separat pentru aceasta comunicare.
      */
-    public Runnable ClientCommunicationThread(Socket clientSocket){
+    public Runnable clientCommunicationThread(Socket clientSocket){
         return new Runnable() {
             @Override
             public void run(){
@@ -151,7 +151,7 @@ public class ClientCommunicationManager {
                     String chain;
                     byte[] buffer = new byte[bufferSize];
                     while(dataInputStream.read(buffer, 0, bufferSize) > 0){
-                        ClientManagerRequest clientManagerRequest = (ClientManagerRequest) Serializer.Deserialize(buffer);
+                        ClientManagerRequest clientManagerRequest = (ClientManagerRequest) Serializer.deserialize(buffer);
                         ClientRequest clientRequest = getOperationType(clientManagerRequest.getClass());
 
                         ClientRequestStatus fileStatus = checkFileStatus(clientManagerRequest.getUserId(), clientManagerRequest.getFilename());
@@ -198,7 +198,7 @@ public class ClientCommunicationManager {
                                         break;
                                     }
                                     case FILE_EXISTS:{
-                                        GeneralManager.contentTable.UpdateReplicationFactor(clientManagerRequest.getUserId(), clientManagerRequest.getFilename(), 0);
+                                        GeneralManager.contentTable.updateReplicationFactor(clientManagerRequest.getUserId(), clientManagerRequest.getFilename(), 0);
                                         response.setResponse("OK");
                                         break;
                                     }
@@ -206,7 +206,7 @@ public class ClientCommunicationManager {
                                 break;
                             }
                         }
-                        dataOutputStream.write(Serializer.Serialize(response));
+                        dataOutputStream.write(Serializer.serialize(response));
                     }
                     System.out.println("Cerinta clientului a fost realizata..");
                     dataInputStream.close();

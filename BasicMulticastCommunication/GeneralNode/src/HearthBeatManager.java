@@ -59,9 +59,9 @@ public class HearthBeatManager implements Runnable{
                 while(true) {
                     System.out.println(Time.getCurrentTimeWithFormat() + " Se trimite un hearthbeat ...");
                     try {
-                        NodeBeat clientStorageStatus = GeneralNode.GetStorageStatus();
-                        clientStorageStatus.SetNodeAddress(nodeAddress.toString());
-                        socket.sendBinaryMessage(group, Serializer.Serialize(clientStorageStatus));
+                        NodeBeat clientStorageStatus = GeneralNode.getStorageStatus();
+                        clientStorageStatus.setNodeAddress(nodeAddress.toString());
+                        socket.sendBinaryMessage(group, Serializer.serialize(clientStorageStatus));
                         Thread.sleep((int) (frequency * 1e3));
                     } catch (IOException exception) {
                         socket.close();

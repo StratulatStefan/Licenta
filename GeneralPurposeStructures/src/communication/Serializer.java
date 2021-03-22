@@ -13,7 +13,7 @@ public class Serializer {
      * @param object Obiectul ce se doreste a fi serializat
      * @return Stream-ul binar.
      */
-    public static byte[] Serialize(Object object) throws IOException {
+    public static byte[] serialize(Object object) throws IOException {
         ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
         ObjectOutputStream objectOutputStream = new ObjectOutputStream(byteArrayOutputStream);
         objectOutputStream.writeObject(object);
@@ -34,7 +34,7 @@ public class Serializer {
      * @param bytestream Stream-ul binar de date
      * @return Obiectul construit pe baza stream-ului de date.
      */
-    public static Object Deserialize(byte[] bytestream) throws IOException, ClassNotFoundException {
+    public static Object deserialize(byte[] bytestream) throws IOException, ClassNotFoundException {
         ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream(bytestream);
         ObjectInputStream objectInputStream = new ObjectInputStream(byteArrayInputStream);
         Object obj = objectInputStream.readObject();

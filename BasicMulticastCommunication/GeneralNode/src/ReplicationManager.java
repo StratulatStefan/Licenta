@@ -54,7 +54,7 @@ public class ReplicationManager implements Runnable{
                     int read;
                     while((read = dataInputStream.read(buffer, 0, bufferSize)) > 0){
                         try {
-                            ReplicationRequest replicationRequest = (ReplicationRequest) Serializer.Deserialize(buffer);
+                            ReplicationRequest replicationRequest = (ReplicationRequest) Serializer.deserialize(buffer);
                             String requestedOperation = replicationRequest.getOperation();
                             if(requestedOperation.equals("replicate")) {
                                 // daca nu s-a generat StreamCorruptedException, suntem nodul sursa, de la care incepe replicarea
@@ -71,7 +71,7 @@ public class ReplicationManager implements Runnable{
                                 fileHeader.setFilesize(file.length());
                                 fileHeader.setUserId(replicationRequest.getUserId());
 
-                                replicationOutputStream.write(Serializer.Serialize(fileHeader));
+                                replicationOutputStream.write(Serializer.serialize(fileHeader));
                                 byte[] binaryFile = new byte[bufferSize];
                                 int count;
                                 while ((count = inputStream.read(binaryFile)) > 0) {
@@ -100,7 +100,7 @@ public class ReplicationManager implements Runnable{
                             // daca s-a generat aceasta exceptie, suntem nodul la care se va face replicarea
                             // asteptam sa primim un Fileheader
                             if(!file_header_found){
-                                FileHeader fileHeader = (FileHeader)Serializer.Deserialize(buffer);
+                                FileHeader fileHeader = (FileHeader)Serializer.deserialize(buffer);
                                 String path = mainFilepath + address.getIpAddress() + "/" + fileHeader.getUserId();
                                 if(!Files.exists(Paths.get(path)))
                                     Files.createDirectories(Paths.get(path));

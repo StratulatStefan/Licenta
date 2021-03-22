@@ -50,7 +50,7 @@ public class FileSender {
 
             DataOutputStream outputStream = new DataOutputStream(socket.getOutputStream());
             BufferedInputStream inputStream = new BufferedInputStream(new FileInputStream(file));
-            outputStream.write(Serializer.Serialize(fileHeader));
+            outputStream.write(Serializer.serialize(fileHeader));
 
             byte[] binaryFile = new byte[bufferSize];
             int count;

@@ -6,7 +6,6 @@ import client_manager.data.ClientManagerRequest;
 import client_manager.data.DeleteFileRequest;
 import client_manager.data.NewFileRequest;
 import client_manager.data.RenameFileRequest;
-import client_node.FileHeader;
 import communication.Serializer;
 
 public class Frontend {
@@ -16,7 +15,7 @@ public class Frontend {
 
     private static int generalManagerPort = 8081;
 
-    public static String ManagerOperationRequest(ClientManagerRequest clientRequest) throws NullPointerException, IOException, ClassNotFoundException {
+    public static String managerOperationRequest(ClientManagerRequest clientRequest) throws NullPointerException, IOException, ClassNotFoundException {
         String[] fname = clientRequest.getFilename().split("/");
         clientRequest.setFilename(fname[fname.length - 1]);
 
@@ -40,13 +39,13 @@ public class Frontend {
 
             socketOutputStream = new DataOutputStream(generalManagerSocket.getOutputStream());
             System.out.println("Trimit cerere pentru " + op + " ...");
-            socketOutputStream.write(Serializer.Serialize(clientRequest));
+            socketOutputStream.write(Serializer.serialize(clientRequest));
 
             socketInputStream = new DataInputStream(generalManagerSocket.getInputStream());
             byte[] buffer = new byte[bufferSize];
             String response = null;
             while(socketInputStream.read(buffer, 0, bufferSize) > 0){
-                ManagerResponse userResponse = (ManagerResponse)Serializer.Deserialize(buffer);
+                ManagerResponse userResponse = (ManagerResponse)Serializer.deserialize(buffer);
                 response = userResponse.getResponse();
                 break;
             }
@@ -74,7 +73,7 @@ public class Frontend {
             public void run() {
                 try {
                     String fullPath = requestData.getFilename();
-                    String response = ManagerOperationRequest(requestData);
+                    String response = managerOperationRequest(requestData);
 
                     Class<? extends ClientManagerRequest> operation = requestData.getClass();
                     if(operation == NewFileRequest.class){

@@ -12,12 +12,12 @@ public class StorageStatusTable {
         this.statusTable = new HashMap<>();
     }
 
-    public void UpdateTable(NodeBeat storageEntry){
-        Address nodeAddress = Address.parseAddress(storageEntry.GetNodeAddress());
+    public void updateTable(NodeBeat storageEntry){
+        Address nodeAddress = Address.parseAddress(storageEntry.getNodeAddress());
         synchronized (this.statusTable){
-            List<String> users = new ArrayList<>(storageEntry.GetUsers());
+            List<String> users = new ArrayList<>(storageEntry.getUsers());
             for(String user : users){
-                String[] userFiles = storageEntry.GetUserFilesById(user);
+                String[] userFiles = storageEntry.getUserFilesById(user);
 
                 if(!this.statusTable.containsKey(user)){
                     // daca utilizatorul nu exista, il adaugam.
@@ -31,7 +31,7 @@ public class StorageStatusTable {
                         }});
                     }
                     else{
-                        if(!CheckAddress(user, userFile, nodeAddress.getIpAddress())){
+                        if(!checkAddress(user, userFile, nodeAddress.getIpAddress())){
                             // daca fisierul utilizatorului curent exista, dar nu contine adresa nodului,
                             // adaugam adresa nodului
                             this.statusTable.get(user).get(userFile).add(nodeAddress.getIpAddress());
@@ -41,11 +41,11 @@ public class StorageStatusTable {
 
                 // verificam daca sunt useri stersi complet de la un nod; in acest caz;
                 // eliminam adresa nodului de la care a fost sters, sau intregul user
-                CleanUpOnDeletedUser(nodeAddress.getIpAddress(), new ArrayList<>(storageEntry.GetUsers()));
+                cleanUpOnDeletedUser(nodeAddress.getIpAddress(), new ArrayList<>(storageEntry.getUsers()));
 
                 // verificam daca sunt fisiere care au fost sterse, si le eliminam;
                 // eliminam adresa nodului de la care a fost sters, sau fisierul daca nu se afla pe niciun nod
-                List<String> deletedFiles = GetDeletedFiles(user, nodeAddress.getIpAddress(), storageEntry.GetUserFilesById(user));
+                List<String> deletedFiles = getDeletedFiles(user, nodeAddress.getIpAddress(), storageEntry.getUserFilesById(user));
                 for(String deletedFile : deletedFiles){
                     this.statusTable.get(user).get(deletedFile).remove(nodeAddress.getIpAddress());
                     if(this.statusTable.get(user).get(deletedFile).size() == 0){
@@ -61,13 +61,13 @@ public class StorageStatusTable {
         }
     }
 
-    public void CleanUpAtNodeDisconnection(String address){
+    public void cleanUpAtNodeDisconnection(String address){
         synchronized (this.statusTable){
             List<String> users = new ArrayList<>(this.statusTable.keySet());
             for(String user : users){
                 List<String> filenames = new ArrayList<>(this.statusTable.get(user).keySet());
                 for(String filename : filenames){
-                    if(CheckAddress(user, filename, address)){
+                    if(checkAddress(user, filename, address)){
                         this.statusTable.get(user).get(filename).remove(address);
                     }
                     if(this.statusTable.get(user).get(filename).size() == 0){
@@ -81,7 +81,7 @@ public class StorageStatusTable {
         }
     }
 
-    public List<String> GetDeletedFiles(String user, String userAddress, String[] userFiles){
+    public List<String> getDeletedFiles(String user, String userAddress, String[] userFiles){
         List<String> deletedFiles = new ArrayList<>();
         boolean found;
         synchronized (this.statusTable){
@@ -101,7 +101,7 @@ public class StorageStatusTable {
         return deletedFiles;
     }
 
-    public void CleanUpOnDeletedUser(String userAddress, List<String> users){
+    public void cleanUpOnDeletedUser(String userAddress, List<String> users){
         boolean found;
         synchronized (this.statusTable){
             for(String availableUser : new ArrayList<>(this.statusTable.keySet())){
@@ -116,9 +116,7 @@ public class StorageStatusTable {
                     continue;
                 }
                 for(String file : new ArrayList<>(this.statusTable.get(availableUser).keySet())){
-                    if(this.statusTable.get(availableUser).get(file).contains(userAddress)){
-                        this.statusTable.get(availableUser).get(file).remove(userAddress);
-                    }
+                    this.statusTable.get(availableUser).get(file).remove(userAddress);
                     if(this.statusTable.get(availableUser).get(file).size() == 0){
                         this.statusTable.get(availableUser).remove(file);
                     }
@@ -130,7 +128,7 @@ public class StorageStatusTable {
         }
     }
 
-    public boolean CheckAddress(String user, String file, String address){
+    public boolean checkAddress(String user, String file, String address){
         synchronized (this.statusTable){
             for(String candidate : this.statusTable.get(user).get(file)){
                 if(candidate.equals(address)){
@@ -141,7 +139,7 @@ public class StorageStatusTable {
         return false;
     }
 
-    public boolean CheckFileForUser(String user, String file){
+    public boolean checkFileForUser(String user, String file){
         synchronized (this.statusTable){
             if(!this.statusTable.containsKey(user)){
                 return false;
@@ -154,7 +152,7 @@ public class StorageStatusTable {
         return true;
     }
 
-    public List<String> GetAvailableNodesForFile(String user, String file){
+    public List<String> getAvailableNodesForFile(String user, String file){
         synchronized (this.statusTable){
             try {
                 return statusTable.get(user).get(file);
@@ -165,13 +163,13 @@ public class StorageStatusTable {
         }
     }
 
-    public List<String> GetUsers(){
+    public List<String> getUsers(){
         synchronized (this.statusTable) {
             return new ArrayList<>(this.statusTable.keySet());
         }
     }
 
-    public HashMap<String, Integer> GetUserFilesNodesCount(String userId){
+    public HashMap<String, Integer> getUserFilesNodesCount(String userId){
         synchronized (this.statusTable) {
             HashMap<String, Integer> filesNodesCounts = new HashMap<>();
             for (String filename : new ArrayList<>(this.statusTable.get(userId).keySet())) {
@@ -188,11 +186,11 @@ public class StorageStatusTable {
         stringBuilder.append("Storage Status Table\n");
         synchronized (this.statusTable) {
             for (String user : this.statusTable.keySet()) {
-                stringBuilder.append("User id  : " + user + "\n");
+                stringBuilder.append("User id  : ").append(user).append("\n");
                 for (String file : this.statusTable.get(user).keySet()) {
-                    stringBuilder.append("\tFilename : " + file + "\n");
+                    stringBuilder.append("\tFilename : ").append(file).append("\n");
                     for (String address : this.statusTable.get(user).get(file)) {
-                        stringBuilder.append("\t\t" + address + "\n");
+                        stringBuilder.append("\t\t").append(address).append("\n");
                     }
                 }
                 stringBuilder.append("\n");

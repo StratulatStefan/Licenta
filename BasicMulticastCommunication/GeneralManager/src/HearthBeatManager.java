@@ -66,7 +66,7 @@ public class HearthBeatManager implements Runnable{
                                 for (Address disconnectedAddres : disconnected) {
                                     System.out.println(" >>> Address " + disconnectedAddres + " disconnected");
                                     GeneralManager.connectionTable.removeAddress(disconnectedAddres);
-                                    GeneralManager.statusTable.CleanUpAtNodeDisconnection(disconnectedAddres.getIpAddress());
+                                    GeneralManager.statusTable.cleanUpAtNodeDisconnection(disconnectedAddres.getIpAddress());
                                 }
                             }
                             cleanUpIndex = 0;
@@ -81,7 +81,7 @@ public class HearthBeatManager implements Runnable{
                         Thread.sleep((int) (frequency * 1e3));
 
                         if(GeneralManager.contentTable.needInit){
-                            GeneralManager.contentTable.Initialize(GeneralManager.statusTable);
+                            GeneralManager.contentTable.initialize(GeneralManager.statusTable);
                         }
                     } catch (InterruptedException exception) {
                         socket.close();
@@ -108,8 +108,8 @@ public class HearthBeatManager implements Runnable{
                 while(true){
                     try{
                         message = (NodeBeat) socket.receiveMessage();
-                        receivedAddress = Address.parseAddress(message.GetNodeAddress());
-                        GeneralManager.statusTable.UpdateTable(message);
+                        receivedAddress = Address.parseAddress(message.getNodeAddress());
+                        GeneralManager.statusTable.updateTable(message);
                         System.out.println("Am primit un hearthbeat de la " + receivedAddress + " ...");
                         if(!GeneralManager.connectionTable.containsAddress(receivedAddress)){
                             System.out.println(" >>> [Adresa noua] : " + receivedAddress);

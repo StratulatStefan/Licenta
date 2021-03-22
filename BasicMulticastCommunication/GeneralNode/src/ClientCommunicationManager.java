@@ -37,14 +37,14 @@ public class ClientCommunicationManager {
      * nu se afla primul in lant)
      * @throws IOException Exceptie generata la crearea ServerSocket-ului.
      */
-    public void ClientCommunicationLoop() throws Exception {
+    public void clientCommunicationLoop() throws Exception {
         ServerSocket serverSocket = new ServerSocket();
         try{
             serverSocket.bind(new InetSocketAddress(nodeAddress.getIpAddress(), nodeAddress.getPort()));
             while(true){
                 Socket clientSocket = serverSocket.accept();
                 System.out.println(String.format("Client connected : [%s : %d]\n", clientSocket.getLocalAddress(), clientSocket.getLocalPort()));
-                new Thread(ClientCommunicationThread(serverSocket.getInetAddress().getHostAddress(), clientSocket)).start();
+                new Thread(clientCommunicationThread(serverSocket.getInetAddress().getHostAddress(), clientSocket)).start();
             }
         }
         catch (Exception exception){
@@ -60,7 +60,7 @@ public class ClientCommunicationManager {
      * @param clientSocket Socket-ul nodului adiacent, de la care primeste date.
      * @return Runnable-ul necesar pornirii unui thread separat pentru aceasta comunicare.
      */
-    private Runnable ClientCommunicationThread(String serverAddress, Socket clientSocket){
+    private Runnable clientCommunicationThread(String serverAddress, Socket clientSocket){
         return new Runnable() {
             @Override
             public void run(){
@@ -76,7 +76,7 @@ public class ClientCommunicationManager {
                     while((read = dataInputStream.read(buffer, 0, bufferSize)) > 0){
                         if(!header_found) {
                             try {
-                                FileHeader header = (FileHeader) Serializer.Deserialize(buffer);
+                                FileHeader header = (FileHeader) Serializer.deserialize(buffer);
                                 String filepath = storagePath + serverAddress + "/" + header.getUserId();
                                 if(!Files.exists(Paths.get(filepath)))
                                     Files.createDirectories(Paths.get(filepath));
@@ -86,8 +86,8 @@ public class ClientCommunicationManager {
                                 if(token != null){
                                     header.setToken(token);
                                     String nextDestination = getDestinationIpAddress(token);
-                                    nextElementSocket = internalCommunicationManager.GenerateNewFileCommunication(nextDestination, nodeAddress.getPort());
-                                    dataOutputStream = internalCommunicationManager.GenerateNewFileDataStream(nextElementSocket, header);
+                                    nextElementSocket = internalCommunicationManager.generateNewFileCommunication(nextDestination, nodeAddress.getPort());
+                                    dataOutputStream = internalCommunicationManager.generateNewFileDataStream(nextElementSocket, header);
                                 }
                                 else{
                                     System.out.println("End of chain");
@@ -102,7 +102,7 @@ public class ClientCommunicationManager {
                             fileOutputStream.write(buffer, 0, read);
                         }
                         if(nextElementSocket != null){
-                            internalCommunicationManager.SendDataChunk(dataOutputStream, buffer, read);
+                            internalCommunicationManager.sendDataChunk(dataOutputStream, buffer, read);
                         }
                     }
                     System.out.println("File write done");

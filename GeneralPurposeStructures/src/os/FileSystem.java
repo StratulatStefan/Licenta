@@ -14,7 +14,7 @@ public class FileSystem {
      * @param path Calea catre fisierul cautat.
      * @return True daca fisierul exista, False in caz contrar.
      */
-    public static boolean CheckFileExistance(String path){
+    public static boolean checkFileExistance(String path){
         return Files.exists(Paths.get(path));
     }
 
@@ -23,7 +23,7 @@ public class FileSystem {
      * @param path Calea noului director.
      * @throws IOException Exceptie generata daca directorul exista deja.
      */
-    public static void CreateDir(String path) throws IOException {
+    public static void createDir(String path) throws IOException {
         Files.createDirectories(Paths.get(path ));
     }
 
@@ -32,8 +32,8 @@ public class FileSystem {
      * @param path Calea catre directorul cautat.s
      * @return Continutul directorului sau null, in cazul in care acesta nu exista.
      */
-    public static String[] GetDirContent(String path){
-        if(!CheckFileExistance(path))
+    public static String[] getDirContent(String path){
+        if(!checkFileExistance(path))
             return null;
         File directory = new File(path);
         return directory.list();

@@ -19,7 +19,7 @@ public class ContentTable {
             this.userId = userId;
             this.content = new HashMap<String, Integer>();
             try {
-                AddRegister(filename, replication_factor);
+                addRegister(filename, replication_factor);
             }
             catch (Exception exception){
                 // nu avem cum sa ajungem aici.
@@ -33,21 +33,21 @@ public class ContentTable {
             this.userId = userId;
         }
 
-        public void AddRegister(String filename, int replication_factor) throws Exception{
+        public void addRegister(String filename, int replication_factor) throws Exception{
             if(this.content.containsKey(filename)){
                 throw new Exception("File already exists!");
             }
             this.content.put(filename, replication_factor);
         }
 
-        public void RemoveRegister(String filename) throws Exception {
+        public void removeRegister(String filename) throws Exception {
             if (!this.content.containsKey(filename)) {
                 throw new Exception("Register not found");
             }
             this.content.remove(filename);
         }
 
-        public void UpdateReplicationFactor(String filename, int replication_factor) throws Exception{
+        public void updateReplicationFactor(String filename, int replication_factor) throws Exception{
             if(!this.content.containsKey(filename)){
                 throw new Exception("Register not found");
             }
@@ -72,13 +72,19 @@ public class ContentTable {
 
     public boolean needInit = true;
 
-    public void Initialize(StorageStatusTable storageStatusTable){
+    private final List<ContentRegister> contentTable;
+
+    public ContentTable(){
+        this.contentTable = new ArrayList<ContentRegister>();
+    }
+
+    public void initialize(StorageStatusTable storageStatusTable){
         synchronized (this.contentTable) {
-            for (String user : storageStatusTable.GetUsers()) {
-                HashMap<String, Integer> userFilesNodesCount = storageStatusTable.GetUserFilesNodesCount(user);
+            for (String user : storageStatusTable.getUsers()) {
+                HashMap<String, Integer> userFilesNodesCount = storageStatusTable.getUserFilesNodesCount(user);
                 for (String filename : new ArrayList<>(userFilesNodesCount.keySet())) {
                     try {
-                        this.AddRegister(user, filename, userFilesNodesCount.get(filename));
+                        this.addRegister(user, filename, userFilesNodesCount.get(filename));
                     }
                     catch (Exception exception){
                         // nu prea avem cum sa ajunge aici la init
@@ -89,17 +95,11 @@ public class ContentTable {
         needInit = false;
     }
 
-    private final List<ContentRegister> contentTable;
-
-    public ContentTable(){
-        this.contentTable = new ArrayList<ContentRegister>();
-    }
-
-    public void AddRegister(String userId, String filename, int replication_factor) throws Exception{
+    public void addRegister(String userId, String filename, int replication_factor) throws Exception{
         synchronized (this.contentTable){
             for(ContentRegister register : this.contentTable){
                 if(register.getUserId().equals(userId)){
-                    register.AddRegister(filename, replication_factor);
+                    register.addRegister(filename, replication_factor);
                     return;
                 }
             }
@@ -108,11 +108,11 @@ public class ContentTable {
         }
     }
 
-    public void DeleteRegister(String userId, String filename) throws Exception{
+    public void deleteRegister(String userId, String filename) throws Exception{
         synchronized (this.contentTable){
             for(ContentRegister register : this.contentTable){
                 if(register.getUserId().equals(userId)){
-                    register.RemoveRegister(filename);
+                    register.removeRegister(filename);
                     if(register.size() == 0){
                         this.contentTable.remove(register);
                     }
@@ -123,11 +123,11 @@ public class ContentTable {
         }
     }
 
-    public void UpdateReplicationFactor(String userId, String filename, int replication_factor) throws Exception{
+    public void updateReplicationFactor(String userId, String filename, int replication_factor) throws Exception{
         synchronized (this.contentTable){
             for(ContentRegister register : this.contentTable){
                 if(register.getUserId().equals(userId)){
-                    register.UpdateReplicationFactor(filename, replication_factor);
+                    register.updateReplicationFactor(filename, replication_factor);
                     return;
                 }
             }
@@ -135,7 +135,7 @@ public class ContentTable {
         }
     }
 
-    public boolean ContainsUser(String userId){
+    public boolean containsUser(String userId){
         synchronized (this.contentTable){
             for(ContentRegister register : this.contentTable){
                 if(register.getUserId().equals(userId)){
@@ -146,7 +146,7 @@ public class ContentTable {
         return false;
     }
 
-    public List<String> GetUsers(){
+    public List<String> getUsers(){
         List<String> userIds = new ArrayList<>();
         synchronized (this.contentTable){
             for(ContentRegister register : this.contentTable) {
@@ -156,7 +156,7 @@ public class ContentTable {
         }
     }
 
-    public HashMap<String, Integer> GetUserFiles(String userId){
+    public HashMap<String, Integer> getUserFiles(String userId){
         synchronized (this.contentTable) {
             for(ContentRegister register : this.contentTable){
                 if(register.getUserId().equals(userId)){
@@ -167,12 +167,9 @@ public class ContentTable {
         }
     }
 
-    public boolean CheckForUserFile(String userId, String filename){
-        HashMap<String, Integer> userFiles = GetUserFiles(userId);
-        if(userFiles != null && new ArrayList<>(userFiles.keySet()).contains(filename)){
-            return true;
-        }
-        return false;
+    public boolean checkForUserFile(String userId, String filename){
+        HashMap<String, Integer> userFiles = getUserFiles(userId);
+        return userFiles != null && new ArrayList<>(userFiles.keySet()).contains(filename);
     }
 
     @Override

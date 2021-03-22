@@ -10,7 +10,7 @@ public class GeneralPurposeMethods {
      * @param <T> Tipul de date al membrilor listei.
      * @return list1 - list2
      */
-    public static <T> List<T> ListDifferences(List<T> list1, List<T> list2){
+    public static <T> List<T> listDifferences(List<T> list1, List<T> list2){
         List<T> result = new ArrayList<>();
         boolean found;
         for(T list1_member : list1){

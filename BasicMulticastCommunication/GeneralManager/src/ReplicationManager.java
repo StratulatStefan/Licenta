@@ -17,7 +17,7 @@ public class ReplicationManager implements Runnable{
         this.replicationFrequency = replicationFrequency;
     }
 
-    private void ReplicationLoop(){
+    private void replicationLoop(){
         while(true) {
             System.out.println(GeneralManager.statusTable);
             System.out.println(GeneralManager.contentTable);
@@ -25,11 +25,11 @@ public class ReplicationManager implements Runnable{
             System.out.println("------------------------------------");
             System.out.println("Replication Status");
             try {
-                for (String userId : GeneralManager.contentTable.GetUsers()) {
-                    HashMap<String, Integer> userFiles = GeneralManager.contentTable.GetUserFiles(userId);
+                for (String userId : GeneralManager.contentTable.getUsers()) {
+                    HashMap<String, Integer> userFiles = GeneralManager.contentTable.getUserFiles(userId);
                     for (String userFile : new ArrayList<>(userFiles.keySet())) {
                         int replication_factor = userFiles.get(userFile);
-                        List<String> availableNodesForFile = GeneralManager.statusTable.GetAvailableNodesForFile(userId, userFile);
+                        List<String> availableNodesForFile = GeneralManager.statusTable.getAvailableNodesForFile(userId, userFile);
                         if(availableNodesForFile ==  null){
                             // eroare de sincronizare; se va rezolva la iteratia urmatoare
                             continue;
@@ -41,7 +41,7 @@ public class ReplicationManager implements Runnable{
                         else if (replication_factor > availableNodesForFile.size()) {
                             System.out.println("[NEED REPLICATION].");
 
-                            List<String> candidates = SearchCandidatesForReplication(replication_factor, availableNodesForFile);
+                            List<String> candidates = searchCandidatesForReplication(replication_factor, availableNodesForFile);
                             if(replication_factor == 1 || candidates == null){
                                 System.out.println("Nu se poate realiza replicarea pentru fisierul curent. " +
                                         "Nu exista suficiente noduri pe care sa se faca replicarea.");
@@ -55,21 +55,21 @@ public class ReplicationManager implements Runnable{
                                     System.out.print("[" + candidate + "] ");
                                 }
                                 System.out.println();
-                                ReplicateFile(userId, userFile, source, candidates);
+                                replicateFile(userId, userFile, source, candidates);
                             }
                         }
                         else {
                             System.out.println("[NEED DELETION OF FILE FROM ONE NODE]");
 
-                            List<String> candidates = SearchCandidatesForDeletion(availableNodesForFile.size() - replication_factor, availableNodesForFile);
+                            List<String> candidates = searchCandidatesForDeletion(availableNodesForFile.size() - replication_factor, availableNodesForFile);
                             System.out.print("\t\tFound nodes to delete file : ");
                             for (String candidate : candidates) {
                                 System.out.print("[" + candidate + "] ");
                             }
                             System.out.println();
-                            DeleteFile(userId, userFile, candidates);
+                            deleteFile(userId, userFile, candidates);
                             if(replication_factor == 0) {
-                                GeneralManager.contentTable.DeleteRegister(userId, userFile);
+                                GeneralManager.contentTable.deleteRegister(userId, userFile);
                             }
                         }
                     }
@@ -83,13 +83,13 @@ public class ReplicationManager implements Runnable{
         }
     }
 
-    public List<String> SearchCandidatesForReplication(int replication_factor, List<String> availableNodes){
+    public List<String> searchCandidatesForReplication(int replication_factor, List<String> availableNodes){
         List<String> openNodes = GeneralManager.connectionTable.getConnectionTable();
         // criteriu de selectie a anumitor noduri, mai libere, ca sa stocheze noul fisier
         // momentam selectam primele gasite
 
         try {
-            return GeneralPurposeMethods.ListDifferences(openNodes, availableNodes).subList(0, replication_factor - availableNodes.size());
+            return GeneralPurposeMethods.listDifferences(openNodes, availableNodes).subList(0, replication_factor - availableNodes.size());
         }
         catch (IndexOutOfBoundsException exception){
             // nu s-au gasit suficiente noduri pe care sa se faca replicarea..
@@ -97,11 +97,11 @@ public class ReplicationManager implements Runnable{
         }
     }
 
-    public List<String> SearchCandidatesForDeletion(int count, List<String> availableNodes){
+    public List<String> searchCandidatesForDeletion(int count, List<String> availableNodes){
         return availableNodes.subList(0, count);
     }
 
-    public void DeleteFile(String user, String filename, List<String> destinationAddresses){
+    public void deleteFile(String user, String filename, List<String> destinationAddresses){
         for(String destinationAddress : destinationAddresses){
             new Thread(new Runnable() {
                 @Override
@@ -116,7 +116,7 @@ public class ReplicationManager implements Runnable{
                     try{
                         Socket deleteSocket = new Socket(destinationAddress, replicationPort);
                         DataOutputStream dataOutputStream = new DataOutputStream(deleteSocket.getOutputStream());
-                        dataOutputStream.write(Serializer.Serialize(replicationRequest));
+                        dataOutputStream.write(Serializer.serialize(replicationRequest));
                         dataOutputStream.close();
                         deleteSocket.close();
                     }
@@ -128,7 +128,7 @@ public class ReplicationManager implements Runnable{
         }
     }
 
-    public void ReplicateFile(String user, String filename, String sourceAddress, List<String> destinationAddresses){
+    public void replicateFile(String user, String filename, String sourceAddress, List<String> destinationAddresses){
         for(String destinationAddress : destinationAddresses){
             new Thread(new Runnable() {
                 @Override
@@ -144,7 +144,7 @@ public class ReplicationManager implements Runnable{
                     try {
                         Socket replicationSocket = new Socket(sourceAddress, replicationPort);
                         DataOutputStream dataOutputStream = new DataOutputStream(replicationSocket.getOutputStream());
-                        dataOutputStream.write(Serializer.Serialize(replicationRequest));
+                        dataOutputStream.write(Serializer.serialize(replicationRequest));
                         dataOutputStream.close();
                         replicationSocket.close();
                     }
@@ -157,7 +157,7 @@ public class ReplicationManager implements Runnable{
     }
 
     public void run(){
-        this.ReplicationLoop();
+        this.replicationLoop();
     }
 
 }

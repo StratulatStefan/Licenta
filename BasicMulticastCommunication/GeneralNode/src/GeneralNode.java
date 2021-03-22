@@ -49,7 +49,7 @@ public class GeneralNode{
     }
 
     public void StartActivity() throws Exception {
-        GetStorageStatus();
+        getStorageStatus();
 
         // Pornim thread-ul pe care va fi rulat mecanismul de heartbeats
         new Thread(hearthBeatManager).start();
@@ -57,22 +57,22 @@ public class GeneralNode{
         new Thread(replicationManager).start();
 
         // Pornim comunicarea cu clientul
-        clientCommunicationManager.ClientCommunicationLoop();
+        clientCommunicationManager.clientCommunicationLoop();
     }
 
-    public static NodeBeat GetStorageStatus() throws IOException {
-        storageStatus.CleanUp();
+    public static NodeBeat getStorageStatus() throws IOException {
+        storageStatus.cleanUp();
         String path = storagePath + ipAddress;
-        if(!FileSystem.CheckFileExistance(path)){
-            FileSystem.CreateDir(path);
+        if(!FileSystem.checkFileExistance(path)){
+            FileSystem.createDir(path);
             System.out.println("No status defined yet!");
             return null;
         }
-        String [] usersDirectories = FileSystem.GetDirContent(path);
+        String [] usersDirectories = FileSystem.getDirContent(path);
 
         for (String userDir : usersDirectories) {
-            String[] userFiles = FileSystem.GetDirContent(path + "\\" + userDir);
-            storageStatus.AddUserFiles(userDir, userFiles);
+            String[] userFiles = FileSystem.getDirContent(path + "\\" + userDir);
+            storageStatus.addUserFiles(userDir, userFiles);
         }
         return storageStatus;
     }

@@ -78,13 +78,13 @@ public class GeneralManager{
         this.replicationManager = replicationManager;
     }
 
-    public void StartActivity() throws Exception {
+    public void startActivity() throws Exception {
         // Pornim thread-ul pe care va fi rulat mecanismul de heartbeats
         new Thread(hearthBeatManager).start();
 
         new Thread(replicationManager).start();
 
-        clientCommunicationManager.ClientCommunicationLoop(generalManagerIpAddress, dataTransmissionPort);
+        clientCommunicationManager.clientCommunicationLoop(generalManagerIpAddress, dataTransmissionPort);
     }
 
     /**
@@ -101,7 +101,7 @@ public class GeneralManager{
             ReplicationManager replicationManager = new ReplicationManager(replicationPort, replicationFrequency);
             GeneralManager generalManager = new GeneralManager(hearthBeatManager, clientCommunicationManager, replicationManager);
 
-            generalManager.StartActivity();
+            generalManager.startActivity();
         }
         catch (Exception exception){
             System.out.println(exception.getMessage());
