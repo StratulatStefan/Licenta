@@ -1,41 +1,14 @@
 package node_manager;
+import java.util.ArrayList;
+import java.util.List;
 
-import java.io.Serializable;
+public class ReplicationRequest extends EditRequest {
+    private ArrayList<String> destionationAddress;
 
-public class ReplicationRequest implements Serializable {
-    private String userId;
-
-    private String filename;
-
-    private String operation;
-
-    private String destionationAddress;
-
-    public String getUserId() {
-        return userId;
-    }
-    public void setUserId(String userId) {
-        this.userId = userId;
-    }
-
-    public String getFilename() {
-        return filename;
-    }
-    public void setFilename(String filename) {
-        this.filename = filename;
-    }
-
-    public String getDestionationAddress() {
+    public List<String> getDestionationAddress() {
         return destionationAddress;
     }
-    public void setDestionationAddress(String destionationAddress) {
-        this.destionationAddress = destionationAddress;
-    }
-
-    public String getOperation() {
-        return operation;
-    }
-    public void setOperation(String operation) {
-        this.operation = operation;
+    public void setDestionationAddress(List<String> destionationAddress) {
+        this.destionationAddress = new ArrayList<>(destionationAddress);
     }
 }

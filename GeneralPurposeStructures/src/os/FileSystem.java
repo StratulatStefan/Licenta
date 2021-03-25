@@ -38,4 +38,29 @@ public class FileSystem {
         File directory = new File(path);
         return directory.list();
     }
+
+    public static void deleteFile(String filepath){
+        File file = new File(filepath);
+        if(file.delete()){
+            System.out.println("Fisierul a fost eliminat cu succes!");
+        }
+        else{
+            System.out.println("Fisierul nu poate fi eliminat");
+        }
+    }
+
+    public static void renameFile(String prevName, String newName){
+        if(checkFileExistance(newName)){
+           System.out.println("Nu se poate redenumi fisierul! Exista deja un fisier cu noul nume!");
+           return;
+        }
+
+        try {
+            Files.move(Paths.get(prevName), Paths.get(newName));
+        }
+        catch (IOException e){
+            System.out.println("Exceptie la redenumirea fisierului");
+        }
+    }
+
 }

@@ -105,25 +105,19 @@ public class Frontend {
         newFileRequest.setFilesize(12);
         newFileRequest.setReplication_factor(3);
 
-        mainActivity(newFileRequest);
-
-
         DeleteFileRequest deleteFileRequest = new DeleteFileRequest();
-        deleteFileRequest.setFilename("D:/Facultate/Licenta/test_files/sss.pdf");
+        //deleteFileRequest.setFilename("D:/Facultate/Licenta/test_files/sss.pdf");
+        deleteFileRequest.setFilename("D:/Facultate/Licenta/test_files/1917.mp4");
         deleteFileRequest.setUserId("1");
 
-      //  mainActivity(deleteFileRequest);
+       // mainActivity(deleteFileRequest);
 
         RenameFileRequest renameFileRequest = new RenameFileRequest();
-        renameFileRequest.setFilename("D:/Facultate/Licenta/test_files/sss.pdf");
+        renameFileRequest.setFilename("sss.pdf");
         renameFileRequest.setUserId("1");
         renameFileRequest.setNewName("sss1.pdf");
 
         mainActivity(renameFileRequest);
-
-
-
-
 
 
         //userId = "1";
