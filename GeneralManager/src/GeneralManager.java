@@ -1,4 +1,5 @@
 import communication.Address;
+import config.AppConfig;
 import model.ConnectionTable;
 import model.ContentTable;
 import model.StorageStatusTable;
@@ -23,38 +24,7 @@ public class GeneralManager{
     /**
      * Adresa IP la care va fi mapat managerul general
      */
-    private static String generalManagerIpAddress = "127.0.0.1";
-
-    /**
-     * Portul de multicast.
-     */
-    private static int multicastPort = 8246;
-
-    /**
-     * Portul pentru comunicarea cu clientul
-     */
-    private final static int dataTransmissionPort = 8081;
-
-    /**
-     * Portul pentru replicare
-     */
-    private final static int replicationPort = 8082;
-
-    /**
-     * Frecventa heartbeat-urilor
-     * Exprimat in secunde.
-     */
-    private final static double hearthBeatFrequency = 5;
-
-    /**
-     * Frecventa pentru mecanismul de replicare
-     */
-    private final static int replicationFrequency = 5;
-
-    /**
-     * Dimensiunea bufferului in care vor fi citite datele de la un nod adiacent
-     */
-    private final static int bufferSize = 1024;
+    private static String generalManagerIpAddress;
 
     /**
      * Obiectul care se ocupa de mecanismul de hearthbeats
@@ -88,29 +58,31 @@ public class GeneralManager{
 
         new Thread(replicationManager).start();
 
-        clientCommunicationManager.clientCommunicationLoop(generalManagerIpAddress, dataTransmissionPort);
+        clientCommunicationManager.clientCommunicationLoop(generalManagerIpAddress);
+    }
+
+    public static void readConfigParams(){
+        generalManagerIpAddress = AppConfig.getParam("generalManagerIpAddress");
     }
 
     /**
      * @param args Argumentele furnizate la linia de comanda
      */
     public static void main(String[] args){
-        Address multicastAddress;
+        AppConfig.readConfig();
+        readConfigParams();
+
         try {
-            multicastAddress = new Address(generalManagerIpAddress, multicastPort);
-            HearthBeatManager hearthBeatManager = new HearthBeatManager(multicastAddress, hearthBeatFrequency);
-
+            HearthBeatManager hearthBeatManager = new HearthBeatManager(generalManagerIpAddress);
             ClientCommunicationManager clientCommunicationManager = new ClientCommunicationManager();
-
-            ReplicationManager replicationManager = new ReplicationManager(replicationPort, replicationFrequency);
-
+            ReplicationManager replicationManager = new ReplicationManager();
             FileSystemManager editRequestManager = new FileSystemManager();
-            GeneralManager generalManager = new GeneralManager(hearthBeatManager, clientCommunicationManager, replicationManager, editRequestManager);
 
+            GeneralManager generalManager = new GeneralManager(hearthBeatManager, clientCommunicationManager, replicationManager, editRequestManager);
             generalManager.startActivity();
         }
         catch (Exception exception){
-            System.out.println(exception.getMessage());
+            System.out.println("Exceptie la main : " + exception.getMessage());
         }
     }
 }

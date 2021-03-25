@@ -5,6 +5,7 @@ import client_manager.data.NewFileRequest;
 import client_manager.data.RenameFileRequest;
 import communication.Address;
 import communication.Serializer;
+import config.AppConfig;
 
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
@@ -31,7 +32,18 @@ public class ClientCommunicationManager {
     /**
      * Dimensiunea bufferului in care vor fi citite datele de la un nod adiacent
      */
-    private final static int bufferSize = 1024;
+    private static int bufferSize;
+
+    private static int dataTransmissionPort;
+
+    public ClientCommunicationManager(){
+        readConfigParams();
+    }
+
+    public void readConfigParams(){
+        bufferSize = Integer.parseInt(AppConfig.getParam("buffersize"));
+        dataTransmissionPort = Integer.parseInt(AppConfig.getParam("dataTransmissionPort"));
+    }
 
     /**
      * Functie care identifica tipul operatiei solicitate de utilizator
@@ -112,7 +124,7 @@ public class ClientCommunicationManager {
     /** Functie care inglobeaza activitatea principala a fiecarui nod, aceea de a asigura comunicarea cu celelalte noduri
      * in vederea trimiterii si primirii de mesaje.
      */
-    public void clientCommunicationLoop(String generalManagerIpAddress, int dataTransmissionPort) throws Exception{
+    public void clientCommunicationLoop(String generalManagerIpAddress) throws Exception{
         Address address = new Address(generalManagerIpAddress, dataTransmissionPort);
         ServerSocket serverSocket = new ServerSocket();
         try{

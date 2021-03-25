@@ -1,4 +1,5 @@
 import communication.Address;
+import config.AppConfig;
 import node_manager.NodeBeat;
 import os.FileSystem;
 
@@ -10,17 +11,13 @@ import java.lang.*;
 public class GeneralNode{
     private static String ipAddress;
 
-    /**
-     * Portul pe care fi mapata ServerSocket-ul
-     */
-    private final static int serverSocketPort = 8081;
+    private  static String storagePath;
 
-    /**
-     * Portul pe care va fi mapata comunicarea multicast
-     */
-    private final static int heartBeatPort = 8246;
+    private final static NodeBeat storageStatus = new NodeBeat();
 
-    private final static int fileSystemMngrPort = 8082;
+
+    /* ------------------------------------------------------------------------------ */
+
 
     /**
      * Obiectul care se ocupa de mecanismul de hearbeats
@@ -34,9 +31,9 @@ public class GeneralNode{
 
     private FileSystemManager fileSystemManager;
 
-    private final static String storagePath = "D:\\Facultate\\Licenta\\Storage\\";
 
-    private final static NodeBeat storageStatus = new NodeBeat();
+    /* ------------------------------------------------------------------------------ */
+
 
     /**
      * Constructorul clasei
@@ -51,12 +48,10 @@ public class GeneralNode{
     public void StartActivity() throws Exception {
         getStorageStatus();
 
-        // Pornim thread-ul pe care va fi rulat mecanismul de heartbeats
         new Thread(hearthBeatManager).start();
 
         new Thread(fileSystemManager).start();
 
-        // Pornim comunicarea cu clientul
         clientCommunicationManager.clientCommunicationLoop();
     }
 
@@ -77,22 +72,29 @@ public class GeneralNode{
         return storageStatus;
     }
 
+
+    /* ------------------------------------------------------------------------------ */
+
+    public static void readConfigParams(){
+        storagePath = AppConfig.getParam("storagePath");
+    }
+
     /**
      * @param args Argumentele furnizate la linia de comanda
      */
     public static void main(String[] args) {
+        AppConfig.readConfig();
+        readConfigParams();
         try {
             ipAddress = args[0];
 
-            Address hearthBeatAddress = new Address(ipAddress, heartBeatPort);
-            HearthBeatManager hearthBeatManager = new HearthBeatManager(hearthBeatAddress);
+            HearthBeatManager hearthBeatManager = new HearthBeatManager(ipAddress);
 
-            Address clientCommunicationAddress = new Address(ipAddress, serverSocketPort);
             InternalNodeCommunicationManager internalCommunicationManager = new InternalNodeCommunicationManager();
-            ClientCommunicationManager clientCommunicationManager = new ClientCommunicationManager(clientCommunicationAddress, internalCommunicationManager);
+            ClientCommunicationManager clientCommunicationManager = new ClientCommunicationManager(ipAddress, internalCommunicationManager);
 
-            Address filesystemManagerAddress = new Address(ipAddress, fileSystemMngrPort);
-            FileSystemManager fileSystemManager = new FileSystemManager(filesystemManagerAddress);
+            FileSystemManager fileSystemManager = new FileSystemManager(ipAddress);
+
             GeneralNode generalManager = new GeneralNode(hearthBeatManager, clientCommunicationManager, fileSystemManager);
             generalManager.StartActivity();
         }

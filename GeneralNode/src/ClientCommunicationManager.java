@@ -1,6 +1,7 @@
 import communication.Address;
 import client_node.FileHeader;
 import communication.Serializer;
+import config.AppConfig;
 
 import java.io.*;
 import java.net.InetSocketAddress;
@@ -9,6 +10,7 @@ import java.net.Socket;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.sql.Struct;
 
 public class ClientCommunicationManager {
     /**
@@ -19,14 +21,23 @@ public class ClientCommunicationManager {
     /**
      * Dimensiunea bufferului in care vor fi citite datele de la un nod adiacent
      */
-    private final static int bufferSize = 1024;
+    private static int bufferSize;
 
-    private final static String storagePath = "D:\\Facultate\\Licenta\\Storage\\";
+    private static String storagePath;
+
+    private static int dataTransmissionPort;
 
     private InternalNodeCommunicationManager internalCommunicationManager;
 
-    public ClientCommunicationManager(Address address, InternalNodeCommunicationManager internalNodeCommunicationManager){
-        this.nodeAddress = address;
+    public void readConfigParams(){
+        bufferSize = Integer.parseInt(AppConfig.getParam("buffersize"));
+        dataTransmissionPort = Integer.parseInt(AppConfig.getParam("dataTransmissionPort"));
+        storagePath = AppConfig.getParam("storagePath");
+    }
+
+    public ClientCommunicationManager(String address, InternalNodeCommunicationManager internalNodeCommunicationManager) throws Exception{
+        readConfigParams();
+        this.nodeAddress = new Address(address, dataTransmissionPort);
         this.internalCommunicationManager = internalNodeCommunicationManager;
     }
 

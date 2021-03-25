@@ -1,4 +1,5 @@
 import communication.Serializer;
+import config.AppConfig;
 import node_manager.DeleteRequest;
 import node_manager.ReplicationRequest;
 
@@ -13,12 +14,34 @@ public class ReplicationManager implements Runnable{
 
     private int replicationPort;
 
-    public ReplicationManager(int replicationPort, int replicationFrequency){
-        this.replicationPort = replicationPort;
-        this.replicationFrequency = replicationFrequency;
+    public ReplicationManager(){
+        readConfigParams();
     }
 
-    private void replicationLoop(){
+    public List<String> searchCandidatesForReplication(int replication_factor, List<String> availableNodes){
+        List<String> openNodes = GeneralManager.connectionTable.getConnectionTable();
+        // criteriu de selectie a anumitor noduri, mai libere, ca sa stocheze noul fisier
+        // momentam selectam primele gasite
+
+        try {
+            return GeneralPurposeMethods.listDifferences(openNodes, availableNodes).subList(0, replication_factor - availableNodes.size());
+        }
+        catch (IndexOutOfBoundsException exception){
+            // nu s-au gasit suficiente noduri pe care sa se faca replicarea..
+            return null;
+        }
+    }
+
+    public List<String> searchCandidatesForDeletion(int count, List<String> availableNodes){
+        return availableNodes.subList(0, count);
+    }
+
+    public void readConfigParams(){
+        replicationPort = Integer.parseInt(AppConfig.getParam("replicationPort"));
+        replicationFrequency = Integer.parseInt(AppConfig.getParam("replicationFrequency"));
+    }
+
+    public void run(){
         while(true) {
             System.out.println(GeneralManager.statusTable);
             System.out.println(GeneralManager.contentTable);
@@ -32,7 +55,7 @@ public class ReplicationManager implements Runnable{
                         int replication_factor = userFiles.get(userFile);
                         List<String> availableNodesForFile = GeneralManager.statusTable.getAvailableNodesForFile(userId, userFile);
                         if(availableNodesForFile ==  null){
-                            // eroare de sincronizare; se va rezolva la iteratia urmatoare
+                            // eroare de sincronizare; se va rezolva la iteratia urmatoare a for-ului prin useri
                             continue;
                         }
                         System.out.print("\t User " + userId + " | File : " + userFile + "  -->  ");
@@ -82,30 +105,6 @@ public class ReplicationManager implements Runnable{
                 System.out.println("Replication loop interrupted exception : " + exception.getMessage());
             }
         }
-    }
-
-    public List<String> searchCandidatesForReplication(int replication_factor, List<String> availableNodes){
-        List<String> openNodes = GeneralManager.connectionTable.getConnectionTable();
-        // criteriu de selectie a anumitor noduri, mai libere, ca sa stocheze noul fisier
-        // momentam selectam primele gasite
-
-        try {
-            return GeneralPurposeMethods.listDifferences(openNodes, availableNodes).subList(0, replication_factor - availableNodes.size());
-        }
-        catch (IndexOutOfBoundsException exception){
-            // nu s-au gasit suficiente noduri pe care sa se faca replicarea..
-            return null;
-        }
-    }
-
-    public List<String> searchCandidatesForDeletion(int count, List<String> availableNodes){
-        return availableNodes.subList(0, count);
-    }
-
-
-
-    public void run(){
-        this.replicationLoop();
     }
 
 }

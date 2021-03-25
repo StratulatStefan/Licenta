@@ -1,5 +1,6 @@
 import communication.Address;
 import communication.HearthBeatSocket;
+import config.AppConfig;
 import node_manager.NodeBeat;
 import java.io.IOException;
 import java.net.InetAddress;
@@ -11,12 +12,12 @@ public class HearthBeatManager implements Runnable{
     /**
      * Adresa de multicast
      */
-    private static String multicastIPAddress = "230.0.0.10";
+    private static String multicastIPAddress;
 
     /**
      * Portul de multicast
      */
-    private static int multicastPort = 8246;
+    private static int multicastPort;
 
     /**
      * Adresa pe care o va avea nodul curent.
@@ -32,16 +33,15 @@ public class HearthBeatManager implements Runnable{
     /**
      * Numarul de heart-beat-uri la care se face clean-up-ul tabelei de conexiuni
      */
-    private final static int cleanupFrequency = 3;
+    private static int cleanupFrequency;
 
     /**
      * Constructorul managerului de heartbeat-uri pentru nodul curent.
      * @param address Adresa nodului curent
-     * @param frequency Frecventa buclei de trimitere/receptie heartbeat-uri
      */
-    public HearthBeatManager(Address address, double frequency){
-        this.nodeAddress = address;
-        this.frequency = frequency;
+    public HearthBeatManager(String address) throws Exception{
+        readConfigParams();
+        this.nodeAddress = new Address(address, multicastPort);
     }
 
     /**
@@ -127,29 +127,30 @@ public class HearthBeatManager implements Runnable{
         };
     }
 
-    /**
-     * Principala bucla care se ocupa de manevrarea heartbeat-urilor (trimitere/receptie).
-     * @throws IOException generata de o eroare aparuta la folosirea socket-ului de multicast.
-     */
-    public void hearthBeatLoop() throws IOException{
-        System.out.println(String.format("Node with address [%s] started...", nodeAddress));
-        InetAddress group = InetAddress.getByName(HearthBeatManager.multicastIPAddress);
-        HearthBeatSocket socket = new HearthBeatSocket(nodeAddress, multicastPort);
-        socket.setNetworkInterface(HearthBeatSocket.NetworkInterfacesTypes.LOCALHOST);
-        socket.joinGroup(group);
-        Thread sendingThread = new Thread(cleanUp(group, socket));
-        Thread receivingThread = new Thread(receivingLoop(socket));
-        sendingThread.start();
-        receivingThread.start();
+    public void readConfigParams(){
+        multicastIPAddress = AppConfig.getParam("multicastIPAddress");
+        multicastPort = Integer.parseInt(AppConfig.getParam("multicastPort"));
+        frequency = Integer.parseInt(AppConfig.getParam("hearthBeatFrequency"));
+        cleanupFrequency = Integer.parseInt(AppConfig.getParam("cleanupFrequency"));
     }
 
     /**
      * Acest manager de hearbeat-uri va trebui sa fie executat pe un thread separat, astfel incat sa nu blocheze comunicarea
      * managerului general cu nodurile conectate. Asadar, trebuie implementata functia run, care se va executa la apelul start.
+     *
+     * Principala bucla care se ocupa de manevrarea heartbeat-urilor (trimitere/receptie).
      */
     public void run(){
         try {
-            this.hearthBeatLoop();
+            System.out.println(String.format("Node with address [%s] started...", nodeAddress));
+            InetAddress group = InetAddress.getByName(HearthBeatManager.multicastIPAddress);
+            HearthBeatSocket socket = new HearthBeatSocket(nodeAddress, multicastPort);
+            socket.setNetworkInterface(HearthBeatSocket.NetworkInterfacesTypes.LOCALHOST);
+            socket.joinGroup(group);
+            Thread sendingThread = new Thread(cleanUp(group, socket));
+            Thread receivingThread = new Thread(receivingLoop(socket));
+            sendingThread.start();
+            receivingThread.start();
         }
         catch (IOException exception){
             System.out.println(exception.getMessage());
