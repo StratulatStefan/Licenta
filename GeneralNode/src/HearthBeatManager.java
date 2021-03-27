@@ -9,22 +9,25 @@ import config.AppConfig;
 import node_manager.NodeBeat;
 import data.Time;
 
+/**
+ * Clasa care se va ocupa de tot mecanismul de heartbeats.
+ * Va trimite mesaje frecvent catre nodul general;
+ * Mesajele vor contine adresa nodului si statusul stocarii
+ */
 public class HearthBeatManager implements Runnable{
+    /** -------- Atribute -------- **/
     /**
      * Adresa de multicast
      */
     private static String multicastIPAddress;
-
     /**
      * Portul de multicast
      */
     private static int multicastPort;
-
     /**
      * Adresa pe care o va avea nodul curent.
      */
     private Address nodeAddress;
-
     /**
      * Frecventa heartbeat-urilor
      * Exprimat in secunde.
@@ -32,9 +35,10 @@ public class HearthBeatManager implements Runnable{
     private static double frequency;
 
 
-    /* ------------------------------------------------------------------------------ */
-
-
+    /** -------- Constructor & Configurare -------- **/
+    /**
+     * Functie care citeste si initializeaza parametrii de configurare
+     */
     public void readConfigParams(){
         multicastPort = Integer.parseInt(AppConfig.getParam("multicastPort"));
         multicastIPAddress = AppConfig.getParam("multicastIPAddress");
@@ -50,6 +54,8 @@ public class HearthBeatManager implements Runnable{
         this.nodeAddress = new Address(address, multicastPort);
     }
 
+
+    /** -------- Main -------- **/
     /**
      * Functie care se ocupa de secventa de trimitere a heart-beat-urilor, odata la frequency secunde.
      * Fiecare trimitere a beat-urilor este urmata de verificarea tabelei de conexiuni.
@@ -94,21 +100,21 @@ public class HearthBeatManager implements Runnable{
                 String message;
                 Address receivedAddress;
                 //while(true){
-                    try{
-                        //message = socket.receiveMessage();
-                        //receivedAddress = Address.parseAddress(message);
-                        //if(!connectionTable.containsAddress(receivedAddress)){
-                          //  System.out.println(" >>> [New address] : " + receivedAddress);
-                            //connectionTable.addAddress(receivedAddress);
-                       // }
-                        //else {
-                       //    connectionTable.confirmAvailability(receivedAddress);
-                       // }
-                    }
-                    catch (Exception exception){
-                        System.out.println(exception.getMessage());
-                    }
-               // }
+                try{
+                    //message = socket.receiveMessage();
+                    //receivedAddress = Address.parseAddress(message);
+                    //if(!connectionTable.containsAddress(receivedAddress)){
+                    //  System.out.println(" >>> [New address] : " + receivedAddress);
+                    //connectionTable.addAddress(receivedAddress);
+                    // }
+                    //else {
+                    //    connectionTable.confirmAvailability(receivedAddress);
+                    // }
+                }
+                catch (Exception exception){
+                    System.out.println(exception.getMessage());
+                }
+                // }
             }
         };
     }

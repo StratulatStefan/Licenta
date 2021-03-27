@@ -8,17 +8,27 @@ import java.lang.*;
 
 /* https://docs.oracle.com/en/java/javase/11/docs/api/java.base/java/net/MulticastSocket.html */
 /* https://tldp.org/HOWTO/Multicast-HOWTO.html#toc1 */
+
+/**
+ * Clasa generala a nodului intern.
+ */
 public class GeneralNode{
+    /** -------- Atribute -------- **/
+    /**
+     * Adresa IP la care va fi mapat nodul intern
+     */
     private static String ipAddress;
-
+    /**
+     * Calea de baza la care se vor stoca fisierele
+     */
     private  static String storagePath;
-
+    /**
+     * Obiectul care va fi trimis la nodul general sub forma de heartbeat
+     * **/
     private final static NodeBeat storageStatus = new NodeBeat();
 
 
-    /* ------------------------------------------------------------------------------ */
-
-
+    /** -------- Managerii activitatilor -------- **/
     /**
      * Obiectul care se ocupa de mecanismul de hearbeats
      */
@@ -29,11 +39,19 @@ public class GeneralNode{
      */
     private ClientCommunicationManager clientCommunicationManager;
 
+    /**
+     * Obiectul care se va ocupa de comunicarea cu nodul general pentru prelucrarea fisiere.
+     */
     private FileSystemManager fileSystemManager;
 
 
-    /* ------------------------------------------------------------------------------ */
-
+    /** -------- Constructor & Configurare -------- **/
+    /**
+     * Functie care citeste si initializeaza parametrii de configurare
+     */
+    public static void readConfigParams(){
+        storagePath = AppConfig.getParam("storagePath");
+    }
 
     /**
      * Constructorul clasei
@@ -44,16 +62,16 @@ public class GeneralNode{
         this.fileSystemManager = new FileSystemManager(ipAddress);
     }
 
-    public void StartActivity() throws Exception {
-        getStorageStatus();
 
-        new Thread(hearthBeatManager).start();
-
-        new Thread(fileSystemManager).start();
-
-        clientCommunicationManager.clientCommunicationLoop();
-    }
-
+    /** -------- Getter -------- **/
+    /**
+     * Functie care acceseaza filesystem-ul si determina statusul stocarii nodului curent;
+     * Extrage toti utilizatorii si fisierele din stocarea nodului curent, si compune heartBeat-ul
+     * ce va fi trimis catre nodul general.
+     * Pentru a se evita instantierea unui nou beat la perioade regulate de timp, heartbeat-ul are o singura instanta,
+     * care se trimite mereu catre nodul general, doar ca se modifica valorile acestuia
+     * @return Heartbeat-ul (acelasi, dar cu alte valori)
+     */
     public static NodeBeat getStorageStatus() throws IOException {
         storageStatus.cleanUp();
         String path = storagePath + ipAddress;
@@ -72,10 +90,19 @@ public class GeneralNode{
     }
 
 
-    /* ------------------------------------------------------------------------------ */
+    /** -------- Main -------- **/
+    /**
+     * Functia care porneste toate activitatile managerilor;
+     * Apeluri de functii sau pornire de thread-uri
+     */
+    public void StartActivity() throws Exception {
+        getStorageStatus();
 
-    public static void readConfigParams(){
-        storagePath = AppConfig.getParam("storagePath");
+        new Thread(hearthBeatManager).start();
+
+        new Thread(fileSystemManager).start();
+
+        clientCommunicationManager.clientCommunicationLoop();
     }
 
     /**

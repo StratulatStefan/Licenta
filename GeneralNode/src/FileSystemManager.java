@@ -2,10 +2,7 @@ import client_node.FileHeader;
 import communication.Address;
 import communication.Serializer;
 import config.AppConfig;
-import node_manager.DeleteRequest;
-import node_manager.EditRequest;
-import node_manager.RenameRequest;
-import node_manager.ReplicationRequest;
+import node_manager.*;
 import os.FileSystem;
 
 import java.io.*;
@@ -13,16 +10,35 @@ import java.net.InetSocketAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
 
+/**
+ * Clasa are ca obiectiv prelucrarile fisierelor;
+ * Se bazeaza pe comunicarea cu nodul general si tratarea cererilor de prelucrare a fisierelor.
+ * Replicare, eliminare, redenumire
+ */
 public class FileSystemManager implements Runnable{
+    /** -------- Atribute -------- **/
+    /**
+     * Adresa socket-ului pe care este mapata comunicarea cu nodul general.
+     */
     private final Address address;
+    /**
+     * Dimensiunea bufferului de receptie a datelor.
+     */
     private static int bufferSize;
+    /**
+     * Portul pe care este mapata comunicarea cu nodul general.
+     */
     private static int fileSystemMngrPort;
+    /**
+     * Calea de baza la care se vor stoca fisierele
+     */
     private static String mainFilepath;
 
 
-    /* ------------------------------------------------------------------------------ */
-
-
+    /** -------- Constructor & Configurare -------- **/
+    /**
+     * Functie care citeste si initializeaza parametrii de configurare
+     */
     public void readConfigParams(){
         fileSystemMngrPort = Integer.parseInt(AppConfig.getParam("replicationPort"));
         bufferSize = Integer.parseInt(AppConfig.getParam("buffersize"));
@@ -30,11 +46,23 @@ public class FileSystemManager implements Runnable{
 
     }
 
+    /**
+     * Constructorul clasei;
+     * Citeste si instantiaza parametrii de configurare
+     */
     public FileSystemManager(String address) throws Exception{
         readConfigParams();
         this.address = new Address(address, fileSystemMngrPort);
     }
 
+
+    /** -------- Main -------- **/
+    /**
+     * Functia de trimitere a replicii fisierului solicitat, catre nodul corespunzator.
+     * @param userId Id-ul utilizatorului care detine fisierul.
+     * @param filename Numele fisierului.
+     * @param destionationAddress Adresa nodului.
+     */
     public void sendReplication(String userId, String filename, String destionationAddress){
         new Thread(new Runnable() {
             @Override
@@ -70,6 +98,12 @@ public class FileSystemManager implements Runnable{
         System.out.println("Replica trimisa cu succes catre " + destionationAddress);
     }
 
+    /**
+     * Functia care inglobeaza bucla de comunicare cu clientul.
+     * Se interpreteaza cererea, se determina tipul operatiei solicitate si se executa operatiunea
+     * ceruta asupra fisierului.
+     * @param clientSocket Socket-ul pe care se conecteaza nodul general.
+     */
     public Runnable fileSystemManagerLoop(Socket clientSocket){
         return new Runnable() {
             @Override
@@ -138,10 +172,9 @@ public class FileSystemManager implements Runnable{
         };
     }
 
-
-    /* ------------------------------------------------------------------------------ */
-
-
+    /**
+     * Asteptarea conectarii nodului general si instantierea threadului de tratare a cererii
+     */
     @Override
     public void run() {
         ServerSocket serverSocket = null;
