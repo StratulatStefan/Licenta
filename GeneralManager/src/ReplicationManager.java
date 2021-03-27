@@ -1,23 +1,47 @@
-import communication.Serializer;
 import config.AppConfig;
-import node_manager.DeleteRequest;
-import node_manager.ReplicationRequest;
-
-import java.io.DataOutputStream;
-import java.net.Socket;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
 public class ReplicationManager implements Runnable{
+    /** -------- Atribute -------- **/
+    /**
+     * Frecventa de executare a buclei de replicare
+     */
     private static int replicationFrequency;
 
+    /**
+     * Portul pe care este deschis socket-ul de pe nodul intern
+     */
     private int replicationPort;
 
+
+    /** -------- Constructor & Configurare -------- **/
+    /**
+     * Functie care citeste si initializeaza parametrii de configurare
+     */
+    public void readConfigParams(){
+        replicationPort = Integer.parseInt(AppConfig.getParam("replicationPort"));
+        replicationFrequency = Integer.parseInt(AppConfig.getParam("replicationFrequency"));
+    }
+
+    /**
+     * Constructorul clasei;
+     * Citeste si instantiaza parametrii de configurare
+     */
     public ReplicationManager(){
         readConfigParams();
     }
 
+
+    /** -------- Functii de cautare -------- **/
+    /**
+     * Functie care parcurge tabela de status a nodurilor conectate si identifica
+     * nodurile care ar putea stocare un anumit fisier (trebuie sa nu contina fisierul respectiv
+     * si sa aiba spatiu);
+     * @param replication_factor Numarul de noduri necesare.
+     * @param availableNodes Lista nodurilor care contin deja fisieru
+     */
     public List<String> searchCandidatesForReplication(int replication_factor, List<String> availableNodes){
         List<String> openNodes = GeneralManager.connectionTable.getConnectionTable();
         // criteriu de selectie a anumitor noduri, mai libere, ca sa stocheze noul fisier
@@ -32,15 +56,18 @@ public class ReplicationManager implements Runnable{
         }
     }
 
+    /**
+     * Functie care returneaza nodurile care contin un anumit fisier ;
+     * Trebuie sa se elimine fisierul de la aceste noduri;
+     * @param count Numarul de noduri care trebuie sa elimine fisierul.
+     * @param availableNodes Lista tuturor nodurilor disponibile care contin fisierul.
+     */
     public List<String> searchCandidatesForDeletion(int count, List<String> availableNodes){
         return availableNodes.subList(0, count);
     }
 
-    public void readConfigParams(){
-        replicationPort = Integer.parseInt(AppConfig.getParam("replicationPort"));
-        replicationFrequency = Integer.parseInt(AppConfig.getParam("replicationFrequency"));
-    }
 
+    /** -------- Main -------- **/
     public void run(){
         while(true) {
             System.out.println(GeneralManager.statusTable);

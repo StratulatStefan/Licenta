@@ -9,6 +9,14 @@ import java.lang.*;
 /* https://docs.oracle.com/en/java/javase/11/docs/api/java.base/java/net/MulticastSocket.html */
 /* https://tldp.org/HOWTO/Multicast-HOWTO.html#toc1 */
 public class GeneralManager{
+    /** -------- Atribute generale -------- **/
+    /**
+     * Adresa IP la care va fi mapat managerul general
+     */
+    private static String generalManagerIpAddress;
+
+
+    /** -------- Tabele -------- **/
     /**
      * Tabela (o lista) nodurilor conectate in retea, care comunica cu nodul curent.
      */
@@ -19,13 +27,13 @@ public class GeneralManager{
      */
     public final static StorageStatusTable statusTable = new StorageStatusTable();
 
+    /**
+     * Tabela ce contine fisierele care ar trebui sa existe in sistem
+     */
     public final static ContentTable contentTable = new ContentTable();
 
-    /**
-     * Adresa IP la care va fi mapat managerul general
-     */
-    private static String generalManagerIpAddress;
 
+    /** -------- Managerii activitatilor -------- **/
     /**
      * Obiectul care se ocupa de mecanismul de hearthbeats
      */
@@ -36,22 +44,41 @@ public class GeneralManager{
      */
     private ClientCommunicationManager clientCommunicationManager;
 
+    /**
+     * Obiectul care se va ocupa de mecanismul de replicare
+     */
     private ReplicationManager replicationManager;
 
+    /**
+     * Obiectul care se va ocupa de prelucrarea fisierelor
+     */
     public static FileSystemManager fileSystemManager;
+
+
+    /** -------- Functii de initializare -------- **/
+    /**
+     * Functie care citeste si initializeaza parametrii de configurare
+     */
+    public static void readConfigParams(){
+        generalManagerIpAddress = AppConfig.getParam("generalManagerIpAddress");
+    }
 
     /**
      * Constructorul clasei
-     * @param hearthBeatManager Managerul de heartbeat-uri
      */
-    public GeneralManager(HearthBeatManager hearthBeatManager, ClientCommunicationManager clientCommunicationManager,
-                          ReplicationManager replicationManager, FileSystemManager fileSystemManager){
-        this.hearthBeatManager = hearthBeatManager;
-        this.clientCommunicationManager = clientCommunicationManager;
-        this.replicationManager = replicationManager;
-        this.fileSystemManager = fileSystemManager;
+    public GeneralManager() throws Exception {
+        this.hearthBeatManager = new HearthBeatManager(generalManagerIpAddress);
+        this.clientCommunicationManager = new ClientCommunicationManager();
+        this.replicationManager = new ReplicationManager();
+        this.fileSystemManager = new FileSystemManager();
     }
 
+
+    /** -------- Main -------- **/
+    /**
+     * Functia care porneste toate activitatile managerilor;
+     * Apeluri de functii sau pornire de thread-uri
+     */
     public void startActivity() throws Exception {
         // Pornim thread-ul pe care va fi rulat mecanismul de heartbeats
         new Thread(hearthBeatManager).start();
@@ -59,10 +86,6 @@ public class GeneralManager{
         new Thread(replicationManager).start();
 
         clientCommunicationManager.clientCommunicationLoop(generalManagerIpAddress);
-    }
-
-    public static void readConfigParams(){
-        generalManagerIpAddress = AppConfig.getParam("generalManagerIpAddress");
     }
 
     /**
@@ -73,16 +96,11 @@ public class GeneralManager{
         readConfigParams();
 
         try {
-            HearthBeatManager hearthBeatManager = new HearthBeatManager(generalManagerIpAddress);
-            ClientCommunicationManager clientCommunicationManager = new ClientCommunicationManager();
-            ReplicationManager replicationManager = new ReplicationManager();
-            FileSystemManager editRequestManager = new FileSystemManager();
-
-            GeneralManager generalManager = new GeneralManager(hearthBeatManager, clientCommunicationManager, replicationManager, editRequestManager);
+            GeneralManager generalManager = new GeneralManager();
             generalManager.startActivity();
         }
         catch (Exception exception){
-            System.out.println("Exceptie la main : " + exception.getMessage());
+            System.out.println("Exceptie la GeneralManagerMain : " + exception.getMessage());
         }
     }
 }

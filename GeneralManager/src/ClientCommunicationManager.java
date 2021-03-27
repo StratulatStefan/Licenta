@@ -14,9 +14,15 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.List;
 
+/**
+ * Clasa care va incapsula toata interactiunea dintre nodul general si client (frontend).
+ * Principala actiune este de a asculta pentru cereri de prelucrare sau adaugare de fisiere si de a delega actiunea
+ * inapoi sau nodurilor interne.
+ */
 public class ClientCommunicationManager {
+    /** -------- Extra-descrieri -------- **/
     /**
-     * Enum care va cuprinde toate tipurile de interactiune cu clientul
+     * Enum care va cuprinde toate tipurile de operatii solicitate de client
      */
     public enum ClientRequest{
         NEW_FILE,
@@ -24,25 +30,57 @@ public class ClientCommunicationManager {
         RENAME_FILE
     }
 
+    /**
+     * Enum care va cuprinde statusul unui anumit fisier, raportat la tabela stocarii.
+     */
     public enum ClientRequestStatus{
         FILE_EXISTS,
         FILE_NOT_FOUND
     }
 
+
+    /** -------- Atribute -------- **/
     /**
      * Dimensiunea bufferului in care vor fi citite datele de la un nod adiacent
      */
     private static int bufferSize;
-
+    /**
+     * Port-ul de transmisie a datelor (client - nod general)
+     */
     private static int dataTransmissionPort;
 
+
+    /** -------- Constructor & Configurare -------- **/
+    /**
+     * Functie care citeste si initializeaza parametrii de configurare
+     */
+    public void readConfigParams(){
+        bufferSize = Integer.parseInt(AppConfig.getParam("buffersize"));
+        dataTransmissionPort = Integer.parseInt(AppConfig.getParam("dataTransmissionPort"));
+    }
+
+    /**
+     * Constructorul clasei;
+     * Citeste si instantiaza parametrii de configurare
+     */
     public ClientCommunicationManager(){
         readConfigParams();
     }
 
-    public void readConfigParams(){
-        bufferSize = Integer.parseInt(AppConfig.getParam("buffersize"));
-        dataTransmissionPort = Integer.parseInt(AppConfig.getParam("dataTransmissionPort"));
+
+    /** -------- Functii de validare -------- **/
+    /**
+     * Functie care verifica daca un anumit utilizator detine un anumit fisier;
+     * Cautarea se face in tabela de content;
+     * @param user Id-ul utilizatorului.
+     * @param filename Numele fisierului cautat.
+     */
+    public ClientRequestStatus checkFileStatus(String user, String filename){
+        boolean fileStatus = GeneralManager.contentTable.checkForUserFile(user, filename);
+        if(fileStatus){
+            return ClientRequestStatus.FILE_EXISTS;
+        }
+        return ClientRequestStatus.FILE_NOT_FOUND;
     }
 
     /**
@@ -63,6 +101,8 @@ public class ClientCommunicationManager {
         return null;
     }
 
+
+    /** -------- Functii de generare & inregistrare -------- **/
     /**
      * Functie care va genera lantul de noduri la care se va stoca un fisier nou aparut in sistem
      * @param filesize Dimensiunea fisierului ce va fi stocat
@@ -92,6 +132,13 @@ public class ClientCommunicationManager {
         return null;
     }
 
+    /**
+     * Functie apelata la adaugarea unui nou fisier;
+     * Aaauga fisierul in tabela de content (cea care descrie toate fisierele care ar trebui sa fie existe in sistem)
+     * @param user Id-ul utilizatorului care a adaugat fisierul.
+     * @param filename Numele fisierului.
+     * @param replication_factor Factorul de replicare al fisierului.
+     */
     public void registerUserNewFileRequest(String user, String filename, int replication_factor){
         synchronized (GeneralManager.contentTable){
             try {
@@ -113,14 +160,8 @@ public class ClientCommunicationManager {
         }
     }
 
-    public ClientRequestStatus checkFileStatus(String user, String filename){
-        boolean fileStatus = GeneralManager.contentTable.checkForUserFile(user, filename);
-        if(fileStatus){
-            return ClientRequestStatus.FILE_EXISTS;
-        }
-        return ClientRequestStatus.FILE_NOT_FOUND;
-    }
 
+    /** -------- Main -------- **/
     /** Functie care inglobeaza activitatea principala a fiecarui nod, aceea de a asigura comunicarea cu celelalte noduri
      * in vederea trimiterii si primirii de mesaje.
      */

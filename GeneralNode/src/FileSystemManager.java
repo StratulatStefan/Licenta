@@ -101,7 +101,7 @@ public class FileSystemManager implements Runnable{
                             else if(fileSystemRequest.getClass() == RenameRequest.class){
                                 System.out.println("Am primit comanda de redenumire. Dam drumu la treaba imediat");
                                 String originalPath = mainFilepath + address.getIpAddress() + "/" + userId + "/" + filename;
-                                String newPath = mainFilepath + address.getIpAddress() + "/" + userId + "/" + ((RenameRequest) fileSystemRequest).getNewname();
+                                String newPath = mainFilepath + address.getIpAddress() + "/" + userId + "/" + ((RenameRequest) fileSystemRequest).getNewName();
                                 FileSystem.renameFile(originalPath, newPath);
                             }
                         }

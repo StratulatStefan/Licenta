@@ -1,17 +1,22 @@
 package communication;
 
-
+/**
+ * Clasa care incapsuleaza o adresa de retea, formata din adresa IP si port.
+ * Se asigura si mecanisme de validare a celor doua atribute
+ */
 public class Address {
+    /** -------- Atribute -------- **/
     /**
      * Adresa IP
      */
     private String ipAddress;
-
     /**
      * Portul
      */
     private int port;
 
+
+    /** -------- Constructor -------- **/
     /**
      * Constructorul care, pe baza adresei ip si a portului specificate, va crea obiectul adresa.
      * Crearea este conditionata de formatul corect al acestor date.
@@ -26,6 +31,8 @@ public class Address {
             this.port = port;
     }
 
+
+    /** -------- Gettere & Settere -------- **/
     /**
      * Getter pentru port
      * @return numarul intreg ce reprezinta portul
@@ -40,6 +47,8 @@ public class Address {
      */
     public String getIpAddress() { return ipAddress; }
 
+
+    /** -------- Functii de validare -------- **/
     /**
      * Functie care valideaza daca un string furnizat respecta formatul unei adrese IP
      * Trebuie sa contina patru numere pozitive reprezentate pe maxim 8 biti, delimitate prin "."
@@ -84,6 +93,8 @@ public class Address {
         return true;
     }
 
+
+    /** -------- Functii de parsare -------- **/
     /**
      * Functie care transforma un string intr-o adresa, avand in vedere formatul ip : port (+- un spatiu).
      * Orice alta abatere de la format este respinsa.
@@ -105,6 +116,8 @@ public class Address {
         }
     }
 
+
+    /** -------- Functii de baza, supraincarcate -------- **/
     /**
      * Functie care verifica daca doua adrese sunt egale.
      * Egalitatea este determinata de egalitatea membrilor (ip si port)

@@ -5,13 +5,40 @@ import node_manager.NodeBeat;
 
 import java.util.*;
 
+/**
+ * Clasa care inglobeaza status-urile stocarii tuturor nodurilor interne conectate la nodul general.
+ * Va contine lista de utilizatori, impreuna cu fisierele fiecarui utilizator si nodurile la care sunt stocate
+ */
 public class StorageStatusTable {
+    /** -------- Atribute -------- **/
+    /**
+     * Tabela de inregistrari;
+     * Cheie : Id-ul utilizatorului
+     * Valoare : {
+     *     Cheie : Nume fisier
+     *     Valoare : Vector de adrese ale nodurilor la care se gaseste fisierul
+     * }
+     */
     private final HashMap<String, HashMap<String, List<String>>> statusTable;
 
+
+    /** -------- Constructori -------- **/
+    /**
+     * Constructorul clasei;
+     * Initializeaza tabela de inregistrari
+     */
     public StorageStatusTable(){
         this.statusTable = new HashMap<>();
     }
 
+
+    /** -------- Functii de prelucrare a tabelei -------- **/
+    /**
+     * Functie generala care modifica tabela, la sosirea unui nou heartbeat de la nodul intern;
+     * Se includ operatii de adaugare a unui fisier, de eliminare a unui fisier, de curatare.
+     * @param storageEntry Heartbeat de la nodul intern; Va contine adresa nodului, impreuna
+     *                     cu toti utilizatorii existenti si fisierele acestora
+     */
     public void updateTable(NodeBeat storageEntry){
         Address nodeAddress = Address.parseAddress(storageEntry.getNodeAddress());
         synchronized (this.statusTable){
@@ -61,6 +88,12 @@ public class StorageStatusTable {
         }
     }
 
+    /**
+     * Functie care elimina toate inregistrarile unui nod care tocmai s-a deconectat;
+     * Se elimina fisierele nodului deconectat; Daca pentru un user/fisier nu mai exista noduri
+     * care sa stocheze fisierul, atunci userul/fisierul se vor elimina din tabela;
+     * @param address Adresa nodului deconectat
+     */
     public void cleanUpAtNodeDisconnection(String address){
         synchronized (this.statusTable){
             List<String> users = new ArrayList<>(this.statusTable.keySet());
@@ -81,26 +114,10 @@ public class StorageStatusTable {
         }
     }
 
-    public List<String> getDeletedFiles(String user, String userAddress, String[] userFiles){
-        List<String> deletedFiles = new ArrayList<>();
-        boolean found;
-        synchronized (this.statusTable){
-            for(String availableFile : new ArrayList<>(this.statusTable.get(user).keySet())){
-                found = false;
-                for(String candidateFile : userFiles){
-                    if(availableFile.equals(candidateFile) && this.statusTable.get(user).get(availableFile).contains(userAddress)){
-                        found = true;
-                        break;
-                    }
-                }
-                if(!found){
-                    deletedFiles.add(availableFile);
-                }
-            }
-        }
-        return deletedFiles;
-    }
-
+    /**
+     * Functie de stergere a inregistrarilor, la eliminarea unui user de la un nod;
+     * !! are probleme !!
+     */
     public void cleanUpOnDeletedUser(String userAddress, List<String> users){
         boolean found;
         synchronized (this.statusTable){
@@ -128,6 +145,14 @@ public class StorageStatusTable {
         }
     }
 
+
+    /** -------- Functii de valiare -------- **/
+    /**
+     * Functie care verifica daca, pentru un anumit fisier al unui anumit utilizator, mai exista adresa unui nod.
+     * @param user Id-ul utilizatorului.
+     * @param file Numele fisierului.
+     * @param address Adresa cautata.
+     */
     public boolean checkAddress(String user, String file, String address){
         synchronized (this.statusTable){
             for(String candidate : this.statusTable.get(user).get(file)){
@@ -139,6 +164,11 @@ public class StorageStatusTable {
         return false;
     }
 
+    /**
+     * Functie care verifica daca un anumit utilizator detine un anumit fisier.
+     * @param user Id-ul utilizatorului.
+     * @param file Numele fisierului.
+     */
     public boolean checkFileForUser(String user, String file){
         synchronized (this.statusTable){
             if(!this.statusTable.containsKey(user)){
@@ -152,6 +182,44 @@ public class StorageStatusTable {
         return true;
     }
 
+
+    /** -------- Gettere -------- **/
+    /**
+     * Functie care verifica si returneaza (daca) anumite fisiere au fost eliminate de la anumite noduri;
+     * Functia se foloseste atunci ca dorim sa verificam daca, in heartbeat-ul curent, anumite fisiere nu se mai
+     * gasesc in stocarea nodului si trebuie eliminate.
+     * @param user Identificatorul utilizatorului.
+     * @param userAddress Adresa nodului intern.
+     * @param userFiles Fisierele existente in stocarea nodului curent; Daca gasim fisiere care nu se mai afla in stocare,
+     *                  dar se afla in tabela, acestea se doresc a fi eliminate.
+     * @return Fisierele eliminate.
+     */
+    public List<String> getDeletedFiles(String user, String userAddress, String[] userFiles){
+        List<String> deletedFiles = new ArrayList<>();
+        boolean found;
+        synchronized (this.statusTable){
+            for(String availableFile : new ArrayList<>(this.statusTable.get(user).keySet())){
+                found = false;
+                for(String candidateFile : userFiles){
+                    if(availableFile.equals(candidateFile) && this.statusTable.get(user).get(availableFile).contains(userAddress)){
+                        found = true;
+                        break;
+                    }
+                }
+                if(!found){
+                    deletedFiles.add(availableFile);
+                }
+            }
+        }
+        return deletedFiles;
+    }
+
+    /**
+     * Functie care returneaza lista adreselor nodurilor care stocheaza un anumit fisier.
+     * @param user Id-ul utilizatorului.
+     * @param file Numele fisierului.
+     * @return Lista de noduri.
+     */
     public List<String> getAvailableNodesForFile(String user, String file){
         synchronized (this.statusTable){
             try {
@@ -163,12 +231,19 @@ public class StorageStatusTable {
         }
     }
 
+    /**
+     * Functie care returneaza lista de utilizatori.
+     */
     public List<String> getUsers(){
         synchronized (this.statusTable) {
             return new ArrayList<>(this.statusTable.keySet());
         }
     }
 
+    /**
+     * Functie care returneaza numarul de noduri interne care stocheaza fiecare fisiers al unui anumit user.
+     * @param userId Id-ul utilizatorului.
+     */
     public HashMap<String, Integer> getUserFilesNodesCount(String userId){
         synchronized (this.statusTable) {
             HashMap<String, Integer> filesNodesCounts = new HashMap<>();
@@ -179,6 +254,8 @@ public class StorageStatusTable {
         }
     }
 
+
+    /** -------- Functii de baza, supraincarcate -------- **/
     @Override
     public String toString() {
         StringBuilder stringBuilder = new StringBuilder();

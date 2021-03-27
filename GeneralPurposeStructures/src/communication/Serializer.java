@@ -1,5 +1,4 @@
 package communication;
-
 import java.io.*;
 
 /**
@@ -7,8 +6,11 @@ import java.io.*;
  * Are rolul de serializa si deserializa obiectul
  */
 public class Serializer {
+    /** -------- Functiile de serializare si deserializare -------- **/
     /**
-     * Functia serializeaza un obiect primit ca parametru.
+     * Functia serializeaza un obiect primit ca parametru. Se tine cont de faptul ca orice mesaj
+     * trimis prin retea trebuie sa aiba 1024 octeti; Asadar, acolo unde este cazul, se completeaza
+     * cu zerouri.
      * Obiect -> Stream binar care poate fi transmis prin canalul de comunicatie
      * @param object Obiectul ce se doreste a fi serializat
      * @return Stream-ul binar.
@@ -18,11 +20,13 @@ public class Serializer {
         ObjectOutputStream objectOutputStream = new ObjectOutputStream(byteArrayOutputStream);
         objectOutputStream.writeObject(object);
         objectOutputStream.flush();
+
         byte[] content = byteArrayOutputStream.toByteArray();
         byte[] data = new byte[1024 - content.length];
         byte[] result = new byte[1024];
         System.arraycopy(content, 0, result, 0,  content.length);
         System.arraycopy(data, 0 , result, content.length, 1024 - content.length);
+
         objectOutputStream.close();
         byteArrayOutputStream.close();
 

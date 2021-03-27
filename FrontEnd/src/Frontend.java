@@ -105,6 +105,9 @@ public class Frontend {
         newFileRequest.setFilesize(12);
         newFileRequest.setReplication_factor(3);
 
+        //mainActivity(newFileRequest);
+
+
         DeleteFileRequest deleteFileRequest = new DeleteFileRequest();
         //deleteFileRequest.setFilename("D:/Facultate/Licenta/test_files/sss.pdf");
         deleteFileRequest.setFilename("D:/Facultate/Licenta/test_files/1917.mp4");

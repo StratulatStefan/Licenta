@@ -5,9 +5,11 @@ import java.util.HashMap;
 import java.util.Set;
 
 /**
- * Clasa care va ingloba mesajul de tip heartbeat, care va fi trimis de la nodul intern la managerul general
+ * Clasa care va ingloba mesajul de tip heartbeat, care va fi trimis de la nodul intern la managerul general.
+ *  * Obiectul care va instantia aceasta clasa va fi trimis prin retea, deci va trebui sa fie serializabil.
  */
 public class NodeBeat implements Serializable {
+    /** -------- Atribute -------- **/
     /**
      * Adresa nodului intern curent;
      */
@@ -18,6 +20,8 @@ public class NodeBeat implements Serializable {
      */
     private HashMap<String, String[]> userFiles;
 
+
+    /** -------- Constructor -------- **/
     /**
      * Constructorul clasei; Va initializa lista de fisiere pentru useri;
      */
@@ -26,6 +30,7 @@ public class NodeBeat implements Serializable {
     }
 
 
+    /** -------- Gettere & Settere -------- **/
     /**
      * Setter pentru lista de fisiere pentru useri;
      * Se va adauga o inregistrare ce va contine identificatorul userului si toate fisierele lui
@@ -76,6 +81,9 @@ public class NodeBeat implements Serializable {
         return this.address;
     }
 
+    /**
+     * Functie apelata cand se doreste citirea noului status al stocarii; Lista de fisiere disponibile trebuie sa fie curatata (goala)
+     */
     public void cleanUp(){
         this.userFiles.clear();
     }

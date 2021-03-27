@@ -7,7 +7,12 @@ import data.Pair;
 import communication.Address;
 import data.Time;
 
+/**
+ * Tabela de conexiuni; Va contine adresele tuturor nodurilor conectate la nodul general, impreuna cu
+ * momentul de timp la care s-a primit ultima confirmare a existentei.
+ */
 public class ConnectionTable {
+    /** -------- Atribute -------- **/
     /**
      * Aceasta clasa este un wrapper pentru o lista de perechi de adrese;
      * Obiectul asupra carora se fac toate operatiile este reprezentat de o lista;
@@ -15,6 +20,8 @@ public class ConnectionTable {
      */
     private final List<Pair<Address, Long>> connectionTable;
 
+
+    /** -------- Constructor -------- **/
     /**
      * Constructorul clasei, care initializeaza lista vida.
      */
@@ -22,9 +29,10 @@ public class ConnectionTable {
         this.connectionTable = Collections.synchronizedList(new ArrayList<>());
     }
 
+
+    /** -------- Getter -------- **/
     /**
      * Functie care returneaza lista de adrese din tabela de conexiuni
-     * @return
      */
     public List<String> getConnectionTable(){
         List<String> addresses = new ArrayList<String>();
@@ -34,6 +42,15 @@ public class ConnectionTable {
         return addresses;
     }
 
+    /**
+     * @return Dimensiunea listei de adrese.
+     */
+    public int size(){
+        return this.connectionTable.size();
+    }
+
+
+    /** -------- Functii de prelucrare a tabelei -------- **/
     /**
      * Functie de adaugare a unei adrese la lista de adrese.
      * Se considera ca orice adresa valida (o conexiune existenta) are contorul 0.
@@ -59,6 +76,29 @@ public class ConnectionTable {
         }
     }
 
+    /**
+     * Functie care confirma existenta conexiunii cu un anumit nod. Aceasta se indica prin setarea
+     * timestampului conexiunii respective cu timpul curent.
+     * @param address Adresa nodului cu care exista conexiune.
+     * @throws Exception generata daca adresa specificata nu exista
+     */
+    public void confirmAvailability(Address address) throws Exception {
+        if (!this.containsAddress(address)) {
+            throw new Exception("Address not found : " + address);
+        }
+        long currentTimestamp = Time.getCurrentTimestamp();
+        synchronized (this.connectionTable) {
+            for (Pair<Address, Long> connection : this.connectionTable) {
+                if (connection.getFirst().equals(address)) {
+                    connection.setSecond(currentTimestamp);
+                }
+            }
+        }
+    }
+
+
+
+    /** -------- Functii de validare a tabelei -------- **/
     /**
      * Functie de verificare a existentei unei anumite adrese in lista de adrese.
      * @param adddress Adresa cautata
@@ -91,33 +131,8 @@ public class ConnectionTable {
         return disconnected;
     }
 
-    /**
-     * Functie care confirma existenta conexiunii cu un anumit nod. Aceasta se indica prin setarea
-     * timestampului conexiunii respective cu timpul curent.
-     * @param address Adresa nodului cu care exista conexiune.
-     * @throws Exception generata daca adresa specificata nu exista
-     */
-    public void confirmAvailability(Address address) throws Exception {
-        if (!this.containsAddress(address)) {
-            throw new Exception("Address not found : " + address);
-        }
-        long currentTimestamp = Time.getCurrentTimestamp();
-        synchronized (this.connectionTable) {
-            for (Pair<Address, Long> connection : this.connectionTable) {
-                if (connection.getFirst().equals(address)) {
-                    connection.setSecond(currentTimestamp);
-                }
-            }
-        }
-    }
 
-    /**
-     * @return Dimensiunea listei de adrese.
-     */
-    public int size(){
-        return this.connectionTable.size();
-    }
-
+    /** -------- Functii de baza, supraincarcate -------- **/
     /**
      * Formatul afisarii listei de adrese.
      */
@@ -127,7 +142,7 @@ public class ConnectionTable {
         stringBuilder.append("------------------------------------\n");
         stringBuilder.append("Connection Table\n");
         for (Pair<Address, Long> connection : this.connectionTable) {
-            stringBuilder.append("\t" + connection.getFirst().toString() + "\n");
+            stringBuilder.append("\t").append(connection.getFirst().toString()).append("\n");
         }
         stringBuilder.append("------------------------------------\n");
         return stringBuilder.toString();

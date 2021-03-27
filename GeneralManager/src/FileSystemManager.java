@@ -1,5 +1,6 @@
 
 import communication.Serializer;
+import config.AppConfig;
 import node_manager.DeleteRequest;
 import node_manager.EditRequest;
 import node_manager.RenameRequest;
@@ -9,9 +10,64 @@ import java.io.DataOutputStream;
 import java.net.Socket;
 import java.util.List;
 
+/**
+ * Clasa care se ocupa de interactiunea cu nodurile generale, in ceea ce priveste prelucrarea fisierelor;
+ * Principalele activitati sunt crearea obiectului cererii si trimiterea acestuia catre nodul general.
+ */
 public class FileSystemManager {
-    private static int replicationPort = 8082;
+    /** -------- Atribute -------- **/
+    /**
+     * Portul pe care nodul general asculta pentru aceste prelucrari.
+     */
+    private static int replicationPort;
 
+
+    /** -------- Constructor & Configurare -------- **/
+    /**
+     * Functie care citeste si initializeaza parametrii de configurare
+     */
+    public static void readConfigParams(){
+        replicationPort = Integer.parseInt(AppConfig.getParam("replicationPort"));
+    }
+
+    /**
+     * Constructorul clasei;
+     * Citeste si instantiaza parametrii de configurare
+     */
+    public void FileSystemManager(){
+        readConfigParams();
+    }
+
+
+    /** -------- Trimitere cerere -------- **/
+    /**
+     * Functia care trimite un obiect de cerere de prelucrare catre nodul general.
+     * @param destionationAddress Adresa nodului intern.
+     * @param request Obiectul de cerere de prelucrare; Are tipul de baza al acestui tip de cerere de prelucrare (EditRequest)
+     */
+    public void makeRequestToFileSystem(String destionationAddress, EditRequest request){
+        try{
+            Socket deleteSocket = new Socket(destionationAddress, replicationPort);
+            DataOutputStream dataOutputStream = new DataOutputStream(deleteSocket.getOutputStream());
+            dataOutputStream.write(Serializer.serialize(request));
+            dataOutputStream.close();
+            deleteSocket.close();
+        }
+        catch (Exception exception){
+            System.out.println("MakeRequestToFileSystem  exception : " + request.getClass() + " : " + exception.getMessage());
+        }
+    }
+
+
+    /** -------- Construirea obiecte cerere & Trimitere -------- **/
+    /**
+     * Cerere de replicare;
+     * Construire obiect si trimitere.
+     * @param user Id-ul utilizatorului.
+     * @param filename Numele fisierului.
+     * @param sourceAddress Adresa nodului catre care se trimite si care va initia replicarea.
+     * @param destinationAddresses Adresa nodului la care se va stoca replica.
+     */
     public void replicateFile(String user, String filename, String sourceAddress, List<String> destinationAddresses){
         new Thread(new Runnable() {
             @Override
@@ -28,6 +84,14 @@ public class FileSystemManager {
         }).start();
     }
 
+    /**
+     * Cerere de eliminare;
+     * Construire obiect si trimitere.
+     * Se va trimite o cerere de eliminare catre fiecare nod din lista.
+     * @param user Id-ul utilizatorului.
+     * @param filename Numele fisierului.
+     * @param destinationAddresses Adresele nodurilor de la care se va elimina fisierului.
+     */
     public void deleteFile(String user, String filename, List<String> destinationAddresses){
         for(String destinationAddress : destinationAddresses){
             new Thread(new Runnable() {
@@ -45,6 +109,15 @@ public class FileSystemManager {
         }
     }
 
+    /**
+     * Cerere de redenumire;
+     * Construire obiect si trimitere.
+     * Se va trimite o cerere de redenumire catre fiecare nod din lista.
+     * @param userId Id-ul utilizatorului.
+     * @param filename Numele fisierului.
+     * @param newname Noul nume al fisierului
+     * @param candidates Adresele nodurilor de la care se va elimina fisierului.
+     */
     public void renameFile(String userId, String filename, String newname, List<String> candidates){
         for(String destinationAddress : candidates) {
             new Thread(new Runnable() {
@@ -53,25 +126,12 @@ public class FileSystemManager {
                     RenameRequest renameRequest = new RenameRequest();
                     renameRequest.setUserId(userId);
                     renameRequest.setFilename(filename);
-                    renameRequest.setNewname(newname);
+                    renameRequest.setNewName(newname);
                     System.out.println("dam drumu la treaba..");
 
                     makeRequestToFileSystem(destinationAddress, renameRequest);
                 }
             }).start();
-        }
-    }
-
-    public void makeRequestToFileSystem(String destionationAddress, EditRequest request){
-        try{
-            Socket deleteSocket = new Socket(destionationAddress, replicationPort);
-            DataOutputStream dataOutputStream = new DataOutputStream(deleteSocket.getOutputStream());
-            dataOutputStream.write(Serializer.serialize(request));
-            dataOutputStream.close();
-            deleteSocket.close();
-        }
-        catch (Exception exception){
-            System.out.println("MakeRequestToFileSystem  exception : " + request.getClass() + " : " + exception.getMessage());
         }
     }
 }

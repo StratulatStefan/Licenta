@@ -8,6 +8,7 @@ import java.text.SimpleDateFormat;
  * Clasa folosita pentru calcule/reprezentari cu timpi
  */
 public class Time {
+    /** -------- Atribute -------- **/
     /**
      * Timestamp-ul la care ne raportam, astfel incat sa nu obtinem o valoare foarte mare.
      */
@@ -23,6 +24,8 @@ public class Time {
      */
     private static SimpleDateFormat formattedTime = new SimpleDateFormat("dd-MM-yyyy | hh:mm:ss");
 
+
+    /** -------- Gettere -------- **/
     /**
      * Functie care returneaza timestamp-ul curent, raportat la timestampul de baza al clasei
      */

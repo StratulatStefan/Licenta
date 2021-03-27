@@ -8,17 +8,18 @@ import java.util.Objects;
  * @param <B> Tipul de date al celui de-al doilea membru al perechii.
  */
 public class Pair<A, B> {
+    /** -------- Atribute -------- **/
     /**
      * Primul membru al perechii.
      */
     private A first;
-
     /**
      * Al doilea membru al perechii.
      */
     private B second;
 
 
+    /** -------- Constructor -------- **/
     /**
      * Constructorul clasei, care initializeaza cei doi membri.
      * @param first Primul membru
@@ -29,6 +30,8 @@ public class Pair<A, B> {
         this.second = second;
     }
 
+
+    /** -------- Getter & Setter -------- **/
     /**
      * Getter pentru primul membru.
      * @return Primul membru.
@@ -59,6 +62,8 @@ public class Pair<A, B> {
         this.second = second;
     }
 
+
+    /** -------- Functii de baza, supraincarcate -------- **/
     /**
      * Functie care compara daca doua perechi sunt egale; se compara cei doi membro
      * @param o Obiectul cu care se face comparatia

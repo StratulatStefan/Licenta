@@ -37,12 +37,11 @@ public class GeneralNode{
 
     /**
      * Constructorul clasei
-     * @param hearthBeatManager Managerul de heartbeat-uri
      */
-    public GeneralNode(HearthBeatManager hearthBeatManager, ClientCommunicationManager clientCommunicationManager, FileSystemManager fileSystemManager){
-        this.hearthBeatManager = hearthBeatManager;
-        this.clientCommunicationManager = clientCommunicationManager;
-        this.fileSystemManager = fileSystemManager;
+    public GeneralNode(String ipAddress) throws Exception {
+        this.hearthBeatManager = new HearthBeatManager(ipAddress);
+        this.clientCommunicationManager = new ClientCommunicationManager(ipAddress);
+        this.fileSystemManager = new FileSystemManager(ipAddress);
     }
 
     public void StartActivity() throws Exception {
@@ -88,19 +87,12 @@ public class GeneralNode{
         try {
             ipAddress = args[0];
 
-            HearthBeatManager hearthBeatManager = new HearthBeatManager(ipAddress);
-
-            InternalNodeCommunicationManager internalCommunicationManager = new InternalNodeCommunicationManager();
-            ClientCommunicationManager clientCommunicationManager = new ClientCommunicationManager(ipAddress, internalCommunicationManager);
-
-            FileSystemManager fileSystemManager = new FileSystemManager(ipAddress);
-
-            GeneralNode generalManager = new GeneralNode(hearthBeatManager, clientCommunicationManager, fileSystemManager);
+            GeneralNode generalManager = new GeneralNode(ipAddress);
             generalManager.StartActivity();
         }
 
         catch (Exception exception){
-            System.out.println(exception.getMessage());
+            System.out.println("Exceptie la GeneralNode main : " + exception.getMessage());
         }
     }
 }

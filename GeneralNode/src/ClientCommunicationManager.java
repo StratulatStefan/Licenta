@@ -27,18 +27,15 @@ public class ClientCommunicationManager {
 
     private static int dataTransmissionPort;
 
-    private InternalNodeCommunicationManager internalCommunicationManager;
-
     public void readConfigParams(){
         bufferSize = Integer.parseInt(AppConfig.getParam("buffersize"));
         dataTransmissionPort = Integer.parseInt(AppConfig.getParam("dataTransmissionPort"));
         storagePath = AppConfig.getParam("storagePath");
     }
 
-    public ClientCommunicationManager(String address, InternalNodeCommunicationManager internalNodeCommunicationManager) throws Exception{
+    public ClientCommunicationManager(String address) throws Exception{
         readConfigParams();
         this.nodeAddress = new Address(address, dataTransmissionPort);
-        this.internalCommunicationManager = internalNodeCommunicationManager;
     }
 
     /**
@@ -62,6 +59,21 @@ public class ClientCommunicationManager {
             serverSocket.close();
             System.out.println(exception.getMessage());
         }
+    }
+
+    public Socket generateNewFileCommunication(String destinationIP, int port) throws IOException {
+        return new Socket(destinationIP, port);
+    }
+
+    public DataOutputStream generateNewFileDataStream(Socket socket, FileHeader header) throws IOException {
+        DataOutputStream dataOutputStream = new DataOutputStream(socket.getOutputStream());
+        System.out.println("Next node in chain header : " + header.getToken());
+        dataOutputStream.write(Serializer.serialize(header));
+        return dataOutputStream;
+    }
+
+    public void sendDataChunk(OutputStream dataOutputStream, byte[] buffer, int read) throws IOException {
+        dataOutputStream.write(buffer, 0, read);
     }
 
     /**
@@ -97,8 +109,8 @@ public class ClientCommunicationManager {
                                 if(token != null){
                                     header.setToken(token);
                                     String nextDestination = getDestinationIpAddress(token);
-                                    nextElementSocket = internalCommunicationManager.generateNewFileCommunication(nextDestination, nodeAddress.getPort());
-                                    dataOutputStream = internalCommunicationManager.generateNewFileDataStream(nextElementSocket, header);
+                                    nextElementSocket = generateNewFileCommunication(nextDestination, nodeAddress.getPort());
+                                    dataOutputStream = generateNewFileDataStream(nextElementSocket, header);
                                 }
                                 else{
                                     System.out.println("End of chain");
@@ -113,7 +125,7 @@ public class ClientCommunicationManager {
                             fileOutputStream.write(buffer, 0, read);
                         }
                         if(nextElementSocket != null){
-                            internalCommunicationManager.sendDataChunk(dataOutputStream, buffer, read);
+                            sendDataChunk(dataOutputStream, buffer, read);
                         }
                     }
                     System.out.println("File write done");

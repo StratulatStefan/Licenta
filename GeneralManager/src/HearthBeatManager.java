@@ -7,33 +7,45 @@ import java.net.InetAddress;
 import java.util.List;
 import data.Time;
 
-
+/**
+ * Clasa care se va ocupa de tot mecanismul de heartbeats.
+ * Va primi mesaje frecvent de la fiecare nod intern si va stoca statusul acestora.
+ */
 public class HearthBeatManager implements Runnable{
+    /** -------- Atribute -------- **/
     /**
      * Adresa de multicast
      */
     private static String multicastIPAddress;
-
     /**
      * Portul de multicast
      */
     private static int multicastPort;
-
     /**
      * Adresa pe care o va avea nodul curent.
      */
     private Address nodeAddress;
-
     /**
      * Frecventa heartbeat-urilor
      * Exprimat in secunde.
      */
     private double frequency;
-
     /**
      * Numarul de heart-beat-uri la care se face clean-up-ul tabelei de conexiuni
      */
     private static int cleanupFrequency;
+
+
+    /** -------- Constructor & Configurare -------- **/
+    /**
+     * Functie care citeste si initializeaza parametrii de configurare
+     */
+    public void readConfigParams(){
+        multicastIPAddress = AppConfig.getParam("multicastIPAddress");
+        multicastPort = Integer.parseInt(AppConfig.getParam("multicastPort"));
+        frequency = Integer.parseInt(AppConfig.getParam("hearthBeatFrequency"));
+        cleanupFrequency = Integer.parseInt(AppConfig.getParam("cleanupFrequency"));
+    }
 
     /**
      * Constructorul managerului de heartbeat-uri pentru nodul curent.
@@ -44,6 +56,8 @@ public class HearthBeatManager implements Runnable{
         this.nodeAddress = new Address(address, multicastPort);
     }
 
+
+    /** -------- Principalele actiuni -------- **/
     /**
      * Functie care se ocupa de secventa de trimitere a heart-beat-urilor, odata la frequency secunde.
      * Fiecare trimitere a beat-urilor este urmata de verificarea tabelei de conexiuni.
@@ -127,13 +141,8 @@ public class HearthBeatManager implements Runnable{
         };
     }
 
-    public void readConfigParams(){
-        multicastIPAddress = AppConfig.getParam("multicastIPAddress");
-        multicastPort = Integer.parseInt(AppConfig.getParam("multicastPort"));
-        frequency = Integer.parseInt(AppConfig.getParam("hearthBeatFrequency"));
-        cleanupFrequency = Integer.parseInt(AppConfig.getParam("cleanupFrequency"));
-    }
 
+    /** -------- Main -------- **/
     /**
      * Acest manager de hearbeat-uri va trebui sa fie executat pe un thread separat, astfel incat sa nu blocheze comunicarea
      * managerului general cu nodurile conectate. Asadar, trebuie implementata functia run, care se va executa la apelul start.

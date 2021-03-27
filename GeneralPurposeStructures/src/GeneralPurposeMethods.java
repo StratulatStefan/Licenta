@@ -5,6 +5,7 @@ import java.util.List;
  * Clasa care contine metode statice generice, care rezolva anume sarcini elementare cu structuri de date de baza
  */
 public class GeneralPurposeMethods {
+    /** -------- Functii generale -------- **/
     /**
      * Functie care calculeaza diferenta a doua liste generice.
      * @param <T> Tipul de date al membrilor listei.
