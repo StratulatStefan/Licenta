@@ -34,8 +34,7 @@ public class FileSystemManager {
      * Constructorul clasei;
      * Citeste si instantiaza parametrii de configurare
      */
-    public void FileSystemManager(){
-        readConfigParams();
+    public FileSystemManager(){
     }
 
 

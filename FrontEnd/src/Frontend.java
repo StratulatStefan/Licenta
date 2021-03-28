@@ -7,6 +7,7 @@ import client_manager.data.DeleteFileRequest;
 import client_manager.data.NewFileRequest;
 import client_manager.data.RenameFileRequest;
 import communication.Serializer;
+import os.FileSystem;
 
 public class Frontend {
     private static final int bufferSize = 1024;
@@ -98,29 +99,30 @@ public class Frontend {
 
     }
 
-    public static void main(String[] args){
+    public static void main(String[] args) throws IOException {
         NewFileRequest newFileRequest = new NewFileRequest();
         newFileRequest.setUserId("1");
-        newFileRequest.setFilename("D:/Facultate/Licenta/test_files/sss.pdf");
-        newFileRequest.setFilesize(12);
-        newFileRequest.setReplication_factor(3);
+        String filepath = "D:/Facultate/Licenta/test_files/sss.pdf";
+        newFileRequest.setFilename(filepath);
+        newFileRequest.setFilesize(FileSystem.getFileSize(filepath));
+        newFileRequest.setUserType("STANDARD");
 
-        //mainActivity(newFileRequest);
+       // mainActivity(newFileRequest);
 
 
         DeleteFileRequest deleteFileRequest = new DeleteFileRequest();
         //deleteFileRequest.setFilename("D:/Facultate/Licenta/test_files/sss.pdf");
-        deleteFileRequest.setFilename("D:/Facultate/Licenta/test_files/1917.mp4");
+        deleteFileRequest.setFilename("D:/Facultate/Licenta/test_files/sss.pdf");
         deleteFileRequest.setUserId("1");
 
-       // mainActivity(deleteFileRequest);
+        mainActivity(deleteFileRequest);
 
         RenameFileRequest renameFileRequest = new RenameFileRequest();
         renameFileRequest.setFilename("sss.pdf");
         renameFileRequest.setUserId("1");
         renameFileRequest.setNewName("sss1.pdf");
 
-        mainActivity(renameFileRequest);
+       // mainActivity(renameFileRequest);
 
 
         //userId = "1";

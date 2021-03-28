@@ -1,5 +1,7 @@
 package os;
 
+import data.Pair;
+
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -39,6 +41,9 @@ public class FileSystem {
         return directory.list();
     }
 
+    /**
+     * Functie care realizeaza stergerea unui fisier.
+     */
     public static void deleteFile(String filepath){
         File file = new File(filepath);
         if(file.delete()){
@@ -49,6 +54,9 @@ public class FileSystem {
         }
     }
 
+    /**
+     * Functie care realizeaza redenumirea unui fisier.
+     */
     public static void renameFile(String prevName, String newName){
         if(checkFileExistance(newName)){
            System.out.println("Nu se poate redenumi fisierul! Exista deja un fisier cu noul nume!");
@@ -61,6 +69,17 @@ public class FileSystem {
         catch (IOException e){
             System.out.println("Exceptie la redenumirea fisierului");
         }
+    }
+
+    /**
+     * Functie care determina dimensiunea unui fisier
+     */
+    public static long getFileSize(String filepath) throws IOException {
+        if(checkFileExistance(filepath)){
+            File file = new File(filepath);
+            return Files.size(Paths.get(filepath)) / 1024;
+        }
+        throw new IOException("File not found!");
     }
 
 }

@@ -11,37 +11,37 @@ public class NewFileRequest extends ClientManagerRequest {
     /**
      * Dimensiunea fisierului
      */
-    private int filesize;
+    private long filesize;
     /**
-     * Factorul de replicare al fisierului.
+     * Tipul utilizatorului.
      */
-    private int replication_factor;
+    private String userType;
 
 
     /** -------- Gettere & Settere -------- **/
     /**
      * Setter pentru dimensiunea fisierului.
      */
-    public void setFilesize(int filesize){
+    public void setFilesize(long filesize){
         this.filesize = filesize;
     }
     /**
      * Getter pentru dimensiunea fisierului.
      */
-    public int getFilesize() {
+    public long getFilesize() {
         return filesize;
     }
 
     /**
-     * Setter pentru factorul de replicare
+     * Setter pentru tipul utilizatorului
      */
-    public void setReplication_factor(int replication_factor) {
-        this.replication_factor = replication_factor;
+    public void setUserType(String userType) {
+        this.userType = userType;
     }
     /**
-     * Getter pentru factorul de replicare
+     * Getter pentru tipul utilizatorului
      */
-    public int getReplication_factor() {
-        return replication_factor;
+    public String getUserType() {
+        return userType;
     }
 }

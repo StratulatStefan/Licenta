@@ -3,6 +3,10 @@ import config.AppConfig;
 import model.ConnectionTable;
 import model.ContentTable;
 import model.StorageStatusTable;
+import model.UserDataTable;
+import storage_quantity.NodeStorageQuantityTable;
+import storage_quantity.StorageQuantityTable;
+import storage_quantity.UserStorageQuantityTable;
 
 import java.lang.*;
 
@@ -18,6 +22,10 @@ public class GeneralManager{
      * Adresa IP la care va fi mapat managerul general
      */
     private static String generalManagerIpAddress;
+    /**
+     * Calea de baza la care se vor stoca fisierele
+     */
+    public static String storagePath;
 
 
     /** -------- Tabele -------- **/
@@ -35,6 +43,21 @@ public class GeneralManager{
      * Tabela ce contine fisierele care ar trebui sa existe in sistem
      */
     public final static ContentTable contentTable = new ContentTable();
+
+    /**
+     * Tabela ce contine informatii despre cantitatea de memorie disponibila pentru fiecare nod.
+     */
+    public static NodeStorageQuantityTable nodeStorageQuantityTable;
+
+    /**
+     * Tabela ce contine informatii despre cantitatea de memorie disponibila pentru fiecare utilizator.
+     */
+    public static UserStorageQuantityTable userStorageQuantityTable;
+
+    /**
+     * Tabela ce contine datele utilizatorilor (id si tip)
+     */
+    public static UserDataTable userDataTable;
 
 
     /** -------- Managerii activitatilor -------- **/
@@ -56,7 +79,7 @@ public class GeneralManager{
     /**
      * Obiectul care se va ocupa de prelucrarea fisierelor
      */
-    public static FileSystemManager fileSystemManager;
+    public static FileSystemManager fileSystemManager = new FileSystemManager();
 
 
     /** -------- Functii de initializare -------- **/
@@ -65,6 +88,7 @@ public class GeneralManager{
      */
     public static void readConfigParams(){
         generalManagerIpAddress = AppConfig.getParam("generalManagerIpAddress");
+        storagePath = AppConfig.getParam("storagePath");
     }
 
     /**
@@ -74,7 +98,7 @@ public class GeneralManager{
         this.hearthBeatManager = new HearthBeatManager(generalManagerIpAddress);
         this.clientCommunicationManager = new ClientCommunicationManager();
         this.replicationManager = new ReplicationManager();
-        this.fileSystemManager = new FileSystemManager();
+        GeneralManager.fileSystemManager.readConfigParams();
     }
 
 
@@ -100,6 +124,10 @@ public class GeneralManager{
         readConfigParams();
 
         try {
+            nodeStorageQuantityTable = new NodeStorageQuantityTable();
+            userStorageQuantityTable = new UserStorageQuantityTable();
+            userDataTable = new UserDataTable();
+
             GeneralManager generalManager = new GeneralManager();
             generalManager.startActivity();
         }

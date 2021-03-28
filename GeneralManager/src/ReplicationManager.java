@@ -72,6 +72,8 @@ public class ReplicationManager implements Runnable{
         while(true) {
             System.out.println(GeneralManager.statusTable);
             System.out.println(GeneralManager.contentTable);
+            System.out.println(GeneralManager.nodeStorageQuantityTable);
+            System.out.println(GeneralManager.userStorageQuantityTable);
 
             System.out.println("------------------------------------");
             System.out.println("Replication Status");
