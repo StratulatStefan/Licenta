@@ -105,7 +105,7 @@ public class Frontend {
     public static void main(String[] args) throws IOException {
         NewFileRequest newFileRequest = new NewFileRequest();
         newFileRequest.setUserId("1");
-        String filepath = "D:/Facultate/Licenta/test_files/lab06.py";
+        String filepath = "D:/Facultate/Licenta/test_files/sss.pdf";
         //String filepath = "D:/Facultate/Licenta/test_files/curs.rar";
         newFileRequest.setFilename(filepath);
         newFileRequest.setFilesize(FileSystem.getFileSize(filepath));

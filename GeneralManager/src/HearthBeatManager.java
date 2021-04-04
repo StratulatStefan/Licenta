@@ -1,6 +1,7 @@
 import communication.Address;
 import communication.HearthBeatSocket;
 import config.AppConfig;
+import data.Pair;
 import node_manager.Beat.NodeBeat;
 import java.io.IOException;
 import java.net.InetAddress;
@@ -73,6 +74,7 @@ public class HearthBeatManager implements Runnable{
                 int cleanUpIndex = 1;
                 while(true) {
                     System.out.println(Time.getCurrentTimeWithFormat() + " ");
+                    checkForFileStatusChange();
                     try {
                         if(cleanUpIndex == cleanupFrequency){
                             disconnected = GeneralManager.connectionTable.checkDisconnection(frequency);
@@ -141,6 +143,20 @@ public class HearthBeatManager implements Runnable{
         };
     }
 
+    public void checkForFileStatusChange(){
+        for(int i = 0; i < 3; i++){
+            try {
+                Pair<String, String> updateRequest = GeneralManager.pendingQueue.popFromQueue();
+                GeneralManager.contentTable.updateFileStatus(updateRequest.getFirst(), updateRequest.getSecond(), "[VALID]");
+            }
+            catch (NullPointerException exception) {
+                break;
+            }
+            catch (Exception exception){
+                System.out.println("checkForFileStatusChange exception : " + exception.getMessage());
+            }
+        }
+    }
 
     /** -------- Main -------- **/
     /**

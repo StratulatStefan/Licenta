@@ -1,9 +1,6 @@
 import communication.Address;
 import config.AppConfig;
-import model.ConnectionTable;
-import model.ContentTable;
-import model.StorageStatusTable;
-import model.UserDataTable;
+import model.*;
 import storage_quantity.NodeStorageQuantityTable;
 import storage_quantity.StorageQuantityTable;
 import storage_quantity.UserStorageQuantityTable;
@@ -59,6 +56,8 @@ public class GeneralManager{
      */
     public static UserDataTable userDataTable;
 
+    public static PendingQueue pendingQueue;
+
 
     /** -------- Managerii activitatilor -------- **/
     /**
@@ -108,6 +107,7 @@ public class GeneralManager{
      * Apeluri de functii sau pornire de thread-uri
      */
     public void startActivity() throws Exception {
+        GeneralManager.pendingQueue = new PendingQueue();
         // Pornim thread-ul pe care va fi rulat mecanismul de heartbeats
         new Thread(hearthBeatManager).start();
 

@@ -125,6 +125,9 @@ public class ReplicationManager implements Runnable{
                                 GeneralManager.contentTable.updateFileStatus(userId, userFile, "[DELETED]");
                             }
                         }
+                        else{
+                            System.out.println("[UNKNOWN]\n");
+                        }
                     }
                 }
                 System.out.println("------------------------------------\n");

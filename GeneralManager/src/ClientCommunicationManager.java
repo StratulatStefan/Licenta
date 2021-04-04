@@ -7,6 +7,7 @@ import client_node.NewFileRequestFeedback;
 import communication.Address;
 import communication.Serializer;
 import config.AppConfig;
+import data.Pair;
 import os.FileSystem;
 
 import java.io.DataInputStream;
@@ -195,11 +196,11 @@ public class ClientCommunicationManager {
      * @param user Id-ul utilizatorului care a adaugat fisierul.
      * @param filename Numele fisierului.
      */
-    public void confirmNewFileStorage(String user, String filename) throws Exception{
+    public void confirmNewFileStorage(String user, String filename){
         synchronized (GeneralManager.contentTable){
             try {
                 System.out.println("Confirmam stocarea noului fisier.");
-                GeneralManager.contentTable.updateFileStatus(user, filename, "[VALID]");
+                GeneralManager.pendingQueue.addToQueue(user, filename);
             }
             catch (Exception exception){
                 System.out.println("confirmNewFileStorage exception : " + exception.getMessage());
