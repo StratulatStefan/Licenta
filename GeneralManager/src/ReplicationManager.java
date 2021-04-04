@@ -72,14 +72,14 @@ public class ReplicationManager implements Runnable{
         while(true) {
             System.out.println(GeneralManager.statusTable);
             System.out.println(GeneralManager.contentTable);
-            System.out.println(GeneralManager.nodeStorageQuantityTable);
-            System.out.println(GeneralManager.userStorageQuantityTable);
+            //System.out.println(GeneralManager.nodeStorageQuantityTable);
+            //System.out.println(GeneralManager.userStorageQuantityTable);
 
             System.out.println("------------------------------------");
             System.out.println("Replication Status");
             try {
                 for (String userId : GeneralManager.contentTable.getUsers()) {
-                    HashMap<String, Integer> userFiles = GeneralManager.contentTable.getUserFiles(userId);
+                    HashMap<String, Integer> userFiles = GeneralManager.contentTable.getUserFiless(userId);
                     for (String userFile : new ArrayList<>(userFiles.keySet())) {
                         int replication_factor = userFiles.get(userFile);
                         List<String> availableNodesForFile = GeneralManager.statusTable.getAvailableNodesForFile(userId, userFile);
@@ -91,7 +91,7 @@ public class ReplicationManager implements Runnable{
                         if (replication_factor == availableNodesForFile.size()) {
                             System.out.println("[OK].");
                         }
-                        else if (replication_factor > availableNodesForFile.size()) {
+                        else if (replication_factor > availableNodesForFile.size() && !GeneralManager.contentTable.getFileStatusForUser(userId, userFile).contains("PENDING")) {
                             System.out.println("[NEED REPLICATION].");
 
                             List<String> candidates = searchCandidatesForReplication(replication_factor, availableNodesForFile);
@@ -111,7 +111,7 @@ public class ReplicationManager implements Runnable{
                                 GeneralManager.fileSystemManager.replicateFile(userId, userFile, source, candidates);
                             }
                         }
-                        else {
+                        else if(replication_factor < availableNodesForFile.size()){
                             System.out.println("[NEED DELETION OF FILE FROM ONE NODE]");
 
                             List<String> candidates = searchCandidatesForDeletion(availableNodesForFile.size() - replication_factor, availableNodesForFile);
@@ -122,7 +122,7 @@ public class ReplicationManager implements Runnable{
                             System.out.println();
                             GeneralManager.fileSystemManager.deleteFile(userId, userFile, candidates);
                             if(replication_factor == 0) {
-                                GeneralManager.contentTable.deleteRegister(userId, userFile);
+                                GeneralManager.contentTable.updateFileStatus(userId, userFile, "[DELETED]");
                             }
                         }
                     }

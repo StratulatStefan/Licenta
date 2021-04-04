@@ -1,8 +1,11 @@
-package node_manager;
+package node_manager.Beat;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Set;
+
 
 /**
  * Clasa care va ingloba mesajul de tip heartbeat, care va fi trimis de la nodul intern la managerul general.
@@ -18,7 +21,7 @@ public class NodeBeat implements Serializable {
      * In interiorul unui heartbeat, va fi trimis si statusul stocarii;
      * Asadar, vom avea un hashmap care va contine fisierele disponibile in stocarea nodului curent, pentru toti userii
      */
-    private HashMap<String, String[]> userFiles;
+    private HashMap<String, List<FileAttribute>> userFiles;
 
 
     /** -------- Constructor -------- **/
@@ -26,7 +29,7 @@ public class NodeBeat implements Serializable {
      * Constructorul clasei; Va initializa lista de fisiere pentru useri;
      */
     public NodeBeat(){
-        this.userFiles = new HashMap<>();
+        this.userFiles = new HashMap<String, List<FileAttribute>>();
     }
 
 
@@ -37,7 +40,7 @@ public class NodeBeat implements Serializable {
      * @param userDir Id-ul utilizatorul.
      * @param userFiles Fisierele disponibile pentru utilizator.
      */
-    public void addUserFiles(String userDir, String[] userFiles){
+    public void addUserFiles(String userDir, List<FileAttribute> userFiles){
         this.userFiles.put(userDir, userFiles);
     }
 
@@ -46,7 +49,7 @@ public class NodeBeat implements Serializable {
      * @param userId Id-ul utilizatorului pentru care se doreste obtinerea fisierelor
      * @return Lista fisierelor pentru utilizatorul specificat
      */
-    public String[] getUserFilesById(String userId){
+    public List<FileAttribute> getUserFilesById(String userId){
         return this.userFiles.get(userId);
     }
 
@@ -54,14 +57,14 @@ public class NodeBeat implements Serializable {
      * Functie care returneaza lista utilizatorilor care au fisiere stocate pe acest nod
      * @return Lista utilizatorilor
      */
-    public Set<String> getUsers(){
-        return this.userFiles.keySet();
+    public List<String> getUsers(){
+        return new ArrayList<>(this.userFiles.keySet());
     }
 
     /**
      * Functie care returneaza intreaga tabela de status al stocarii
      */
-    public HashMap<String, String []> getUserFiles(){
+    public HashMap<String, List<FileAttribute>> getUserFiles(){
         return this.userFiles;
     }
 

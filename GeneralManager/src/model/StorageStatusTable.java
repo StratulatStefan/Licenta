@@ -1,9 +1,130 @@
 package model;
 
 import communication.Address;
-import node_manager.NodeBeat;
+import data.Pair;
+import node_manager.Beat.FileAttribute;
+import node_manager.Beat.NodeBeat;
 
 import java.util.*;
+
+/**
+ * Clasa care inglobeaza atributele fiecarui fisier
+ */
+class FileAttributesForStorage{
+    /** -------- Atribute -------- **/
+    /**
+     * Numele fisierului
+     */
+    private String filename;
+    /**
+     * CRC-ul fisierului
+     */
+    private long crc;
+    /**
+     * Lista nodurilor pe care se afla fisierului
+     */
+    private List<String> nodes;
+
+
+    /** -------- Constructor -------- **/
+    public FileAttributesForStorage(){
+        this.nodes = new ArrayList<>();
+    }
+
+
+    /** -------- Gettere & Settere -------- **/
+    /**
+     * Getter pentru numele fisierului
+     */
+    public String getFilename() {
+        return filename;
+    }
+    /**
+     * Setter pentru numele fisierului
+     */
+    public void setFilename(String filename) {
+        this.filename = filename;
+    }
+
+    /**
+     * Getter pentru CRC
+     */
+    public long getCrc() {
+        return crc;
+    }
+    /**
+     * Setter pentru CRC
+     */
+    public void setCrc(long crc) {
+        this.crc = crc;
+    }
+
+    /**
+     * Getter pentru lista nodurilor
+     */
+    public List<String> getNodes() {
+        return nodes;
+    }
+    /**
+     * Getter pentru dimensiunea listei de noduri
+     */
+    public int getNodeListSize(){
+        return this.nodes.size();
+    }
+    /**
+     * Setter pentru lista nodurilor.
+     */
+    public void setNodes(List<String> nodes) {
+        this.nodes = nodes;
+    }
+
+
+    /** -------- Functii de prelucrare -------- **/
+    /**
+     * Functie de adaugare a unui nou nod in lista
+     * @param nodeAddress Adresa nodului
+     */
+    public void addNode(String nodeAddress) throws Exception{
+        if(!this.containsAddress(nodeAddress))
+            this.nodes.add(nodeAddress);
+        else
+            throw new Exception("Node already exists!");
+    }
+
+    /**
+     * Functie de eliminare a unui nou nod in lista
+     * @param nodeAddress Adresa nodului
+     */
+    public void removeNode(String nodeAddress) throws NullPointerException{
+        if(this.containsAddress(nodeAddress))
+            this.nodes.remove(nodeAddress);
+        else
+            throw new NullPointerException("Node not found!");
+    }
+
+
+    /** -------- Functii de validare -------- **/
+    /**
+     * Functie care verifica daca un anumit nod se afla in lista
+     * @param nodeAddress Adresa nodului
+     */
+    public boolean containsAddress(String nodeAddress){
+        return this.nodes.contains(nodeAddress);
+    }
+
+
+    /** -------- Functii de baza, supraincarcate -------- **/
+    @Override
+    public String toString() {
+        StringBuilder stringBuilder = new StringBuilder();
+        stringBuilder.append("\tFilename : ").append(filename).append("\n");
+        stringBuilder.append("\t\tCRC : ").append(Long.toHexString(crc)).append("\n");
+        for (String address : this.nodes) {
+            stringBuilder.append("\t\t").append(address).append("\n");
+        }
+        return stringBuilder.toString();
+    }
+}
 
 /**
  * Clasa care inglobeaza status-urile stocarii tuturor nodurilor interne conectate la nodul general.
@@ -19,7 +140,7 @@ public class StorageStatusTable {
      *     Valoare : Vector de adrese ale nodurilor la care se gaseste fisierul
      * }
      */
-    private final HashMap<String, HashMap<String, List<String>>> statusTable;
+    private final HashMap<String, List<FileAttributesForStorage>> statusTable;
 
 
     /** -------- Constructori -------- **/
@@ -28,7 +149,7 @@ public class StorageStatusTable {
      * Initializeaza tabela de inregistrari
      */
     public StorageStatusTable(){
-        this.statusTable = new HashMap<>();
+        this.statusTable = new HashMap<String, List<FileAttributesForStorage>>();
     }
 
 
@@ -39,44 +160,66 @@ public class StorageStatusTable {
      * @param storageEntry Heartbeat de la nodul intern; Va contine adresa nodului, impreuna
      *                     cu toti utilizatorii existenti si fisierele acestora
      */
-    public void updateTable(NodeBeat storageEntry){
+    public void updateTable(NodeBeat storageEntry) throws Exception {
         Address nodeAddress = Address.parseAddress(storageEntry.getNodeAddress());
         synchronized (this.statusTable){
-            List<String> users = new ArrayList<>(storageEntry.getUsers());
-            for(String user : users){
-                String[] userFiles = storageEntry.getUserFilesById(user);
+            for(String user : storageEntry.getUsers()){
+                List<FileAttribute> userFiles = storageEntry.getUserFilesById(user);
 
                 if(!this.statusTable.containsKey(user)){
                     // daca utilizatorul nu exista, il adaugam.
-                    this.statusTable.put(user, new HashMap<String, List<String>>());
+                    this.statusTable.put(user, new ArrayList<FileAttributesForStorage>());
                 }
-                for(String userFile : userFiles){
+
+                for(FileAttribute userFile : userFiles){
                     // daca fisierul utilizatorului curent nu exista, il adaugam
-                    if(!this.statusTable.get(user).containsKey(userFile)){
-                        this.statusTable.get(user).put(userFile, new ArrayList<String>() {{
-                            add(nodeAddress.getIpAddress());
-                        }});
+                    if(!this.checkFileForUser(user, userFile.getFilename())){
+                        FileAttributesForStorage data = new FileAttributesForStorage();
+                        data.setFilename(userFile.getFilename());
+                        data.setCrc(userFile.getCrc());
+                        try{
+                            data.addNode(nodeAddress.getIpAddress());
+                        }
+                        catch (Exception exception){
+                            System.out.println("Node already contains address!");
+                        }
+                        this.statusTable.get(user).add(data);
                     }
                     else{
-                        if(!checkAddress(user, userFile, nodeAddress.getIpAddress())){
+                        if(!checkAddress(user, userFile.getFilename(), nodeAddress.getIpAddress())){
                             // daca fisierul utilizatorului curent exista, dar nu contine adresa nodului,
                             // adaugam adresa nodului
-                            this.statusTable.get(user).get(userFile).add(nodeAddress.getIpAddress());
+                            int candidate = this.getUserFile(user, userFile.getFilename());
+                            if(candidate != -1){
+                                this.statusTable.get(user).get(candidate).addNode(nodeAddress.getIpAddress());
+                            }
                         }
                     }
                 }
 
                 // verificam daca sunt useri stersi complet de la un nod; in acest caz;
                 // eliminam adresa nodului de la care a fost sters, sau intregul user
-                cleanUpOnDeletedUser(nodeAddress.getIpAddress(), new ArrayList<>(storageEntry.getUsers()));
+                cleanUpOnDeletedUser(nodeAddress.getIpAddress(), storageEntry.getUsers());
 
                 // verificam daca sunt fisiere care au fost sterse, si le eliminam;
                 // eliminam adresa nodului de la care a fost sters, sau fisierul daca nu se afla pe niciun nod
-                List<String> deletedFiles = getDeletedFiles(user, nodeAddress.getIpAddress(), storageEntry.getUserFilesById(user));
+                List<String> files = new ArrayList<>();
+                for(FileAttribute fileAttribute : storageEntry.getUserFilesById(user)){
+                    files.add(fileAttribute.getFilename());
+                }
+                List<String> deletedFiles = getDeletedFiles(user, nodeAddress.getIpAddress(), files);
+                if(deletedFiles.size() > 0){
+                    int x = 0;
+                }
                 for(String deletedFile : deletedFiles){
-                    this.statusTable.get(user).get(deletedFile).remove(nodeAddress.getIpAddress());
-                    if(this.statusTable.get(user).get(deletedFile).size() == 0){
-                        this.statusTable.get(user).remove(deletedFile);
+                    int index = getUserFile(user, deletedFile);
+                    try {
+                        this.statusTable.get(user).get(index).removeNode(nodeAddress.getIpAddress());
+                        if (this.statusTable.get(user).get(index).getNodeListSize() == 0)
+                            this.statusTable.get(user).remove(index);
+                    }
+                    catch (NullPointerException exception){
+                        System.out.println(exception.getMessage());
                     }
                 }
 
@@ -98,16 +241,15 @@ public class StorageStatusTable {
         synchronized (this.statusTable){
             List<String> users = new ArrayList<>(this.statusTable.keySet());
             for(String user : users){
-                List<String> filenames = new ArrayList<>(this.statusTable.get(user).keySet());
-                for(String filename : filenames){
-                    if(checkAddress(user, filename, address)){
-                        this.statusTable.get(user).get(filename).remove(address);
+                for(FileAttributesForStorage file : new ArrayList<>(this.statusTable.get(user))){
+                    if(checkAddress(user, file.getFilename(), address)){
+                        file.removeNode(address);
                     }
-                    if(this.statusTable.get(user).get(filename).size() == 0){
-                        this.statusTable.get(user).remove(filename);
+                    if(file.getNodeListSize() == 0){
+                        this.statusTable.get(user).remove(file);
                     }
                 }
-                if(this.statusTable.get(user).keySet().size() == 0){
+                if(this.statusTable.get(user).size() == 0){
                     this.statusTable.remove(user);
                 }
             }
@@ -121,7 +263,7 @@ public class StorageStatusTable {
     public void cleanUpOnDeletedUser(String userAddress, List<String> users){
         boolean found;
         synchronized (this.statusTable){
-            for(String availableUser : new ArrayList<>(this.statusTable.keySet())){
+            for(String availableUser : this.getUsers()){
                 found = false;
                 for(String existingUser : users){
                     if(availableUser.equals(existingUser)){
@@ -132,9 +274,9 @@ public class StorageStatusTable {
                 if(found){
                     continue;
                 }
-                for(String file : new ArrayList<>(this.statusTable.get(availableUser).keySet())){
-                    this.statusTable.get(availableUser).get(file).remove(userAddress);
-                    if(this.statusTable.get(availableUser).get(file).size() == 0){
+                for(FileAttributesForStorage file : this.statusTable.get(availableUser)){
+                    file.removeNode(userAddress);
+                    if(file.getNodeListSize() == 0){
                         this.statusTable.get(availableUser).remove(file);
                     }
                 }
@@ -148,6 +290,13 @@ public class StorageStatusTable {
 
     /** -------- Functii de valiare -------- **/
     /**
+     * Functie care verifica daca tabela contine un anumit utilizator
+     */
+    public boolean checkUser(String user){
+        return new ArrayList<>(this.statusTable.keySet()).contains(user);
+    }
+
+    /**
      * Functie care verifica daca, pentru un anumit fisier al unui anumit utilizator, mai exista adresa unui nod.
      * @param user Id-ul utilizatorului.
      * @param file Numele fisierului.
@@ -155,8 +304,8 @@ public class StorageStatusTable {
      */
     public boolean checkAddress(String user, String file, String address){
         synchronized (this.statusTable){
-            for(String candidate : this.statusTable.get(user).get(file)){
-                if(candidate.equals(address)){
+            for(FileAttributesForStorage candidate : this.statusTable.get(user)){
+                if(candidate.getFilename().equals(file) && candidate.getNodes().contains(address)){
                     return true;
                 }
             }
@@ -171,15 +320,15 @@ public class StorageStatusTable {
      */
     public boolean checkFileForUser(String user, String file){
         synchronized (this.statusTable){
-            if(!this.statusTable.containsKey(user)){
+            if(!checkUser(user))
                 return false;
-            }
-            List<String> userFiles = new ArrayList<>(this.statusTable.get(user).keySet());
-            if(!userFiles.contains(file)){
-                return false;
+            List<FileAttributesForStorage> userFiles = this.statusTable.get(user);
+            for(FileAttributesForStorage userFile : userFiles) {
+                if(userFile.getFilename().equals(file))
+                    return true;
             }
         }
-        return true;
+        return false;
     }
 
 
@@ -194,20 +343,12 @@ public class StorageStatusTable {
      *                  dar se afla in tabela, acestea se doresc a fi eliminate.
      * @return Fisierele eliminate.
      */
-    public List<String> getDeletedFiles(String user, String userAddress, String[] userFiles){
+    public List<String> getDeletedFiles(String user, String userAddress, List<String> userFiles){
         List<String> deletedFiles = new ArrayList<>();
-        boolean found;
         synchronized (this.statusTable){
-            for(String availableFile : new ArrayList<>(this.statusTable.get(user).keySet())){
-                found = false;
-                for(String candidateFile : userFiles){
-                    if(availableFile.equals(candidateFile) && this.statusTable.get(user).get(availableFile).contains(userAddress)){
-                        found = true;
-                        break;
-                    }
-                }
-                if(!found){
-                    deletedFiles.add(availableFile);
+            for(FileAttributesForStorage availableFile : this.statusTable.get(user)){
+                if(!userFiles.contains(availableFile.getFilename()) && availableFile.containsAddress(userAddress)){
+                    deletedFiles.add(availableFile.getFilename());
                 }
             }
         }
@@ -223,12 +364,49 @@ public class StorageStatusTable {
     public List<String> getAvailableNodesForFile(String user, String file){
         synchronized (this.statusTable){
             try {
-                return statusTable.get(user).get(file);
+                int candidate = this.getUserFile(user, file);
+                if(candidate == -1)
+                    return null;
+                return this.statusTable.get(user).get(candidate).getNodes();
             }
             catch (NullPointerException exception){
                 return null;
             }
         }
+    }
+
+    /**
+     * Functie care returneaza CRC-ul unui anumit fisier.
+     * @param user Id-ul utilizatorului.
+     * @param file Numele fisierului.
+     * @return CRC-ul fisierului.
+     */
+    public long getCRCForFile(String user, String file){
+        synchronized (this.statusTable){
+            try {
+                int candidate = this.getUserFile(user, file);
+                if(candidate == -1)
+                    return -1;
+                return this.statusTable.get(user).get(candidate).getCrc();
+            }
+            catch (NullPointerException exception){
+                return -1;
+            }
+        }
+    }
+
+    /**
+     * Functie care returneaza o referinta la un fisier
+     */
+    public int getUserFile(String userId, String filename) {
+        if (!checkUser(userId))
+            return -1;
+
+        for (FileAttributesForStorage userfile : this.statusTable.get(userId)) {
+            if (userfile.getFilename().equals(filename))
+                return this.statusTable.get(userId).indexOf(userfile);
+        }
+        return -1;
     }
 
     /**
@@ -246,9 +424,27 @@ public class StorageStatusTable {
      */
     public HashMap<String, Integer> getUserFilesNodesCount(String userId){
         synchronized (this.statusTable) {
+            if(!this.checkUser(userId))
+                return null;
             HashMap<String, Integer> filesNodesCounts = new HashMap<>();
-            for (String filename : new ArrayList<>(this.statusTable.get(userId).keySet())) {
-                filesNodesCounts.put(filename, this.statusTable.get(userId).get(filename).size());
+            for (FileAttributesForStorage userfile : this.statusTable.get(userId)) {
+                filesNodesCounts.put(userfile.getFilename(), userfile.getNodes().size());
+            }
+            return filesNodesCounts;
+        }
+    }
+
+    /**
+     * Functie care returneaza crc-ul fiecarui fisier al unui anumit user.
+     * @param userId Id-ul utilizatorului.
+     */
+    public HashMap<String, Long> getUserFilesCRC(String userId){
+        synchronized (this.statusTable) {
+            if(!this.checkUser(userId))
+                return null;
+            HashMap<String, Long> filesNodesCounts = new HashMap<>();
+            for (FileAttributesForStorage userfile : this.statusTable.get(userId)) {
+                filesNodesCounts.put(userfile.getFilename(), userfile.getCrc());
             }
             return filesNodesCounts;
         }
@@ -264,11 +460,8 @@ public class StorageStatusTable {
         synchronized (this.statusTable) {
             for (String user : this.statusTable.keySet()) {
                 stringBuilder.append("User id  : ").append(user).append("\n");
-                for (String file : this.statusTable.get(user).keySet()) {
-                    stringBuilder.append("\tFilename : ").append(file).append("\n");
-                    for (String address : this.statusTable.get(user).get(file)) {
-                        stringBuilder.append("\t\t").append(address).append("\n");
-                    }
+                for (FileAttributesForStorage file : this.statusTable.get(user)) {
+                    stringBuilder.append(file);
                 }
                 stringBuilder.append("\n");
             }

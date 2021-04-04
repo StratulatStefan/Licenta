@@ -1,7 +1,7 @@
 import communication.Address;
 import communication.HearthBeatSocket;
 import config.AppConfig;
-import node_manager.NodeBeat;
+import node_manager.Beat.NodeBeat;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.util.List;

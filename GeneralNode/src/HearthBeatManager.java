@@ -6,7 +6,7 @@ import java.net.InetAddress;
 
 import communication.Serializer;
 import config.AppConfig;
-import node_manager.NodeBeat;
+import node_manager.Beat.NodeBeat;
 import data.Time;
 
 /**
@@ -71,6 +71,8 @@ public class HearthBeatManager implements Runnable{
                     System.out.println(Time.getCurrentTimeWithFormat() + " Se trimite un hearthbeat ...");
                     try {
                         NodeBeat clientStorageStatus = GeneralNode.getStorageStatus();
+                        if(clientStorageStatus == null)
+                            continue;
                         clientStorageStatus.setNodeAddress(nodeAddress.toString());
                         socket.sendBinaryMessage(group, Serializer.serialize(clientStorageStatus));
                         Thread.sleep((int) (frequency * 1e3));

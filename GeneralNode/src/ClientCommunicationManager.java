@@ -1,7 +1,9 @@
+import client_node.NewFileRequestFeedback;
 import communication.Address;
 import client_node.FileHeader;
 import communication.Serializer;
 import config.AppConfig;
+import os.FileSystem;
 
 import java.io.*;
 import java.net.InetSocketAddress;
@@ -145,24 +147,26 @@ public class ClientCommunicationManager {
                     OutputStream dataOutputStream = null;
                     FileOutputStream fileOutputStream = null;
                     Socket nextElementSocket = null;
+                    FileHeader fileHeader = null;
+                    String filepath = null;
                     byte[] buffer = new byte[bufferSize];
                     int read;
                     boolean header_found = false;
                     while((read = dataInputStream.read(buffer, 0, bufferSize)) > 0){
                         if(!header_found) {
                             try {
-                                FileHeader header = (FileHeader) Serializer.deserialize(buffer);
-                                String filepath = storagePath + serverAddress + "/" + header.getUserId();
+                                fileHeader = (FileHeader) Serializer.deserialize(buffer);
+                                filepath = storagePath + serverAddress + "/" + fileHeader.getUserId();
                                 if(!Files.exists(Paths.get(filepath)))
                                     Files.createDirectories(Paths.get(filepath));
-                                filepath += "/" + header.getFilename();
+                                filepath += "/" + fileHeader.getFilename();
                                 fileOutputStream = new FileOutputStream(filepath);
-                                String token = cleanChain(header.getToken());
+                                String token = cleanChain(fileHeader.getToken());
                                 if(token != null){
-                                    header.setToken(token);
+                                    fileHeader.setToken(token);
                                     String nextDestination = getDestinationIpAddress(token);
                                     nextElementSocket = new Socket(nextDestination, nodeAddress.getPort());
-                                    dataOutputStream = generateNewFileDataStream(nextElementSocket, header);
+                                    dataOutputStream = generateNewFileDataStream(nextElementSocket, fileHeader);
                                 }
                                 else{
                                     System.out.println("End of chain");
@@ -181,6 +185,7 @@ public class ClientCommunicationManager {
                         }
                     }
                     System.out.println("File write done");
+                    // send feedback to frontend
                     dataInputStream.close();
                     fileOutputStream.close();
                     if(nextElementSocket != null) {
@@ -188,6 +193,10 @@ public class ClientCommunicationManager {
                         dataOutputStream.close();
                     }
                     clientSocket.close();
+
+                    long filecrc = FileSystem.calculateCRC(filepath);
+                    sendFeedbackToFrontend(fileHeader, filecrc);
+
                 }
                 catch (Exception exception){
                     System.out.println(exception.getMessage());
@@ -195,8 +204,6 @@ public class ClientCommunicationManager {
                             clientSocket.getLocalAddress(),
                             clientSocket.getLocalPort()));
                 }
-                System.out.println("sunt aici.. chill!");
-                System.out.println("gata");
             }
         };
     }
@@ -221,6 +228,27 @@ public class ClientCommunicationManager {
         catch (Exception exception){
             serverSocket.close();
             System.out.println(exception.getMessage());
+        }
+    }
+
+    public void sendFeedbackToFrontend(FileHeader fileHeader, long crc){
+        NewFileRequestFeedback feedback = new NewFileRequestFeedback();
+        feedback.setFilename(fileHeader.getFilename());
+        feedback.setUserId(fileHeader.getUserId());
+        feedback.setNodeAddress(nodeAddress.getIpAddress());
+        feedback.setCrc(crc);
+
+        try{
+            Socket frontendSocket = new Socket("127.0.0.100", 8010);
+            DataOutputStream dataOutputStream = new DataOutputStream(frontendSocket.getOutputStream());
+
+            dataOutputStream.write(Serializer.serialize(feedback));
+
+            dataOutputStream.close();
+            frontendSocket.close();
+        }
+        catch (IOException exception){
+            System.out.println("Exceptie IO la sendFeedBackToFrontend : " + exception.getMessage());
         }
     }
 }

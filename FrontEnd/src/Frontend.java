@@ -81,8 +81,11 @@ public class Frontend {
                         String token = response;
                         System.out.println("New file request : " + requestData.getFilename() + " -> " + token);
                         requestData.setFilename(fullPath);
-
+                        long start = System.currentTimeMillis();
                         FileSender.sendFile(requestData.getUserId(), token, requestData.getFilename());
+                        long timeElapsed = System.currentTimeMillis() - start;
+                        long fileCRC = FileSystem.calculateCRC(requestData.getFilename());
+                        FileSender.waitForFeedback(requestData.getUserId(), token, requestData.getFilename(), timeElapsed, fileCRC);
                     }
                     else if(operation == DeleteFileRequest.class){
                         System.out.println("Delete file request : " + requestData.getFilename() + " -> " + response);
@@ -103,11 +106,13 @@ public class Frontend {
         NewFileRequest newFileRequest = new NewFileRequest();
         newFileRequest.setUserId("1");
         String filepath = "D:/Facultate/Licenta/test_files/sss.pdf";
+        //String filepath = "D:/Facultate/Licenta/test_files/curs.rar";
         newFileRequest.setFilename(filepath);
         newFileRequest.setFilesize(FileSystem.getFileSize(filepath));
+        newFileRequest.setCrc(FileSystem.calculateCRC(filepath));
         newFileRequest.setUserType("STANDARD");
 
-       // mainActivity(newFileRequest);
+        mainActivity(newFileRequest);
 
 
         DeleteFileRequest deleteFileRequest = new DeleteFileRequest();
@@ -115,14 +120,14 @@ public class Frontend {
         deleteFileRequest.setFilename("D:/Facultate/Licenta/test_files/sss.pdf");
         deleteFileRequest.setUserId("1");
 
-        mainActivity(deleteFileRequest);
+        //mainActivity(deleteFileRequest);
 
         RenameFileRequest renameFileRequest = new RenameFileRequest();
         renameFileRequest.setFilename("sss.pdf");
         renameFileRequest.setUserId("1");
         renameFileRequest.setNewName("sss1.pdf");
 
-       // mainActivity(renameFileRequest);
+        //mainActivity(renameFileRequest);
 
 
         //userId = "1";

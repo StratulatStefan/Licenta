@@ -1,10 +1,13 @@
 import communication.Address;
 import config.AppConfig;
-import node_manager.NodeBeat;
+import node_manager.Beat.FileAttribute;
+import node_manager.Beat.NodeBeat;
 import os.FileSystem;
 
 import java.io.*;
 import java.lang.*;
+import java.util.ArrayList;
+import java.util.List;
 
 /* https://docs.oracle.com/en/java/javase/11/docs/api/java.base/java/net/MulticastSocket.html */
 /* https://tldp.org/HOWTO/Multicast-HOWTO.html#toc1 */
@@ -84,7 +87,14 @@ public class GeneralNode{
 
         for (String userDir : usersDirectories) {
             String[] userFiles = FileSystem.getDirContent(path + "\\" + userDir);
-            storageStatus.addUserFiles(userDir, userFiles);
+            List<FileAttribute> fileAttributes = new ArrayList<>();
+            for(String file : userFiles){
+                FileAttribute f = new FileAttribute();
+                f.setFilename(file);
+                f.setCrc(FileSystem.calculateCRC(path + "\\" + userDir + "\\" + file));
+                fileAttributes.add(f);
+            }
+            storageStatus.addUserFiles(userDir, fileAttributes);
         }
         return storageStatus;
     }

@@ -3,6 +3,7 @@ import client_manager.data.ClientManagerRequest;
 import client_manager.data.DeleteFileRequest;
 import client_manager.data.NewFileRequest;
 import client_manager.data.RenameFileRequest;
+import client_node.NewFileRequestFeedback;
 import communication.Address;
 import communication.Serializer;
 import config.AppConfig;
@@ -13,6 +14,9 @@ import java.io.DataOutputStream;
 import java.net.InetSocketAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.net.SocketTimeoutException;
+import java.util.Arrays;
+import java.util.LinkedList;
 import java.util.List;
 
 /**
@@ -76,11 +80,19 @@ public class ClientCommunicationManager {
      * @param filename Numele fisierului cautat.
      */
     public ClientRequestStatus checkFileStatus(String user, String filename){
-        boolean fileStatus = GeneralManager.contentTable.checkForUserFile(user, filename);
-        if(fileStatus){
-            return ClientRequestStatus.FILE_EXISTS;
+        try{
+            boolean fileStatus = GeneralManager.contentTable.checkForUserFile(user, filename);
+            if(fileStatus){
+                String status = GeneralManager.contentTable.getFileStatusForUser(user, filename);
+                if(status.contains("DELETED"))
+                    return ClientRequestStatus.FILE_NOT_FOUND;
+                return ClientRequestStatus.FILE_EXISTS;
+            }
+            return ClientRequestStatus.FILE_NOT_FOUND;
         }
-        return ClientRequestStatus.FILE_NOT_FOUND;
+        catch (Exception exception){
+            return ClientRequestStatus.FILE_NOT_FOUND;
+        }
     }
 
     /**
@@ -149,29 +161,48 @@ public class ClientCommunicationManager {
 
     /**
      * Functie apelata la adaugarea unui nou fisier;
-     * Aaauga fisierul in tabela de content (cea care descrie toate fisierele care ar trebui sa fie existe in sistem);
+     * Aadauga fisierul in tabela de content (cea care descrie toate fisierele care ar trebui sa fie existe in sistem);
+     * Aceasta functie se apeleaza cand apare un nou fisier in sistem; se va pune inregistrarea in starea de PENDING;
+     * Fisierul nu va fi considerat de catre mecanismul de replicare in aceasta stare (se asteapta pana se primeste confirmare,
+     * adica se schimba starea in valid)
      * @param user Id-ul utilizatorului care a adaugat fisierul.
      * @param filename Numele fisierului.
      * @param userType Tipul utilizatorului, pe baza caruia se va determina si factorul de replicare, din fisierul de config.
      */
-    public void registerUserNewFileRequest(String user, String filename, long filesize, String userType) throws Exception{
+    public void registerUserNewFileRequest(String user, String filename, long crc, long filesize, String userType) throws Exception{
         synchronized (GeneralManager.contentTable){
             try {
-                new Thread(new Runnable() {
-                    @Override
-                    public void run() {
-                        try {
-                            Thread.sleep((int) (5 * 1e3));
-                            int replication_factor = getReplicationFactor(userType);
-                            GeneralManager.contentTable.addRegister(user, filename, replication_factor);
-                        } catch (Exception exception) {
-                            exception.printStackTrace();
-                        }
-                    }
-                }).start();
+                System.out.println("Inregistram noul fisier.");
+                int replication_factor = getReplicationFactor(userType);
+                String newFileStatus = "[PENDING]";
+                if(!GeneralManager.contentTable.checkForUserFile(user, filename)){
+                    GeneralManager.contentTable.addRegister(user, filename, replication_factor, crc, newFileStatus);
+                }
+                else{
+                    GeneralManager.contentTable.updateFileStatus(user, filename, newFileStatus);
+                    GeneralManager.contentTable.updateReplicationFactor(user, filename, replication_factor);
+                }
             }
             catch (Exception exception){
                 System.out.println("registerUserNewFileRequest exception : " + exception.getMessage());
+            }
+        }
+    }
+
+    /**
+     * Functie apelata la confirmarea stocarii unui nou fisier
+     * Schimba starea fisierului din pending in valid.
+     * @param user Id-ul utilizatorului care a adaugat fisierul.
+     * @param filename Numele fisierului.
+     */
+    public void confirmNewFileStorage(String user, String filename) throws Exception{
+        synchronized (GeneralManager.contentTable){
+            try {
+                System.out.println("Confirmam stocarea noului fisier.");
+                GeneralManager.contentTable.updateFileStatus(user, filename, "[VALID]");
+            }
+            catch (Exception exception){
+                System.out.println("confirmNewFileStorage exception : " + exception.getMessage());
             }
         }
     }
@@ -230,20 +261,22 @@ public class ClientCommunicationManager {
                                     }
                                     case FILE_NOT_FOUND: {
                                         long filesize = ((NewFileRequest)clientManagerRequest).getFilesize();
+                                        long crc = ((NewFileRequest)clientManagerRequest).getCrc();
                                         String usertype = ((NewFileRequest) clientManagerRequest).getUserType();
                                         int replication_factor = getReplicationFactor(usertype);
                                         chain = generateChain(filesize, replication_factor);
                                         if (chain != null) {
                                             response.setResponse(chain);
                                             System.out.println("Token-ul a fost trimis catre client : " + chain);
-                                            registerUserNewFileRequest(userId, filename, filesize, usertype);
+                                            registerUserNewFileRequest(userId, filename, crc, filesize, usertype);
+                                            waitForFeedbackFromClient(userId, filename, filesize, usertype);
                                             try {
                                                 GeneralManager.userDataTable.addUser(userId, usertype);
                                             }
                                             catch (Exception exception){
                                                 System.out.println(exception.getMessage());
                                             }
-                                            GeneralManager.userStorageQuantityTable.registerMemoryConsumption(userId, usertype, filesize);
+                                            //GeneralManager.userStorageQuantityTable.registerMemoryConsumption(userId, usertype, filesize);
                                         }
                                         else {
                                             response.setException("eroare");
@@ -280,7 +313,7 @@ public class ClientCommunicationManager {
                                         String candidateAddress = GeneralManager.statusTable.getAvailableNodesForFile(userId, filename).get(0);
                                         String filepath = GeneralManager.storagePath + candidateAddress + "/" + userId + "/" + filename;
                                         long filesize = FileSystem.getFileSize(filepath);
-                                        GeneralManager.userStorageQuantityTable.registerMemoryRelease(clientManagerRequest.getUserId(), filesize);
+                                        //GeneralManager.userStorageQuantityTable.registerMemoryRelease(clientManagerRequest.getUserId(), filesize);
                                         GeneralManager.contentTable.updateReplicationFactor(userId, filename, 0);
                                         response.setResponse("OK");
                                         break;
@@ -304,5 +337,48 @@ public class ClientCommunicationManager {
                 }
             }
         };
+    }
+
+    public void waitForFeedbackFromClient(String userId, String filename, long filesize, String userType){
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    ServerSocket feedbackSocket = new ServerSocket();
+                    feedbackSocket.setSoTimeout((int)(filesize * 50));
+                    feedbackSocket.bind(new InetSocketAddress("127.0.0.1", 8010));
+                    Socket frontendSocket = feedbackSocket.accept();
+                    try{
+                        DataInputStream dataInputStream = new DataInputStream(frontendSocket.getInputStream());
+                        byte[] buffer = new byte[bufferSize];
+                        while(dataInputStream.read(buffer, 0, bufferSize) > 0) {
+                            NewFileRequestFeedback feedback = (NewFileRequestFeedback)Serializer.deserialize(buffer);
+                            String status = feedback.getStatus();
+                            String fileName = feedback.getFilename();
+                            String userID = feedback.getUserId();
+                            if(status.equals("OK") && fileName.equals(filename) && userID.equals(userId)) {
+                                System.out.println("Feedback valid de la frontend!");
+                                confirmNewFileStorage(userId, filename);
+                            }
+                            else{
+                                System.out.println("Nu putem inregistra fisierul!");
+                            }
+                        }
+                        dataInputStream.close();
+                        frontendSocket.close();
+                        feedbackSocket.close();
+                    }
+                    catch (Exception exception){
+                        System.out.println("Exceptie la primirea feedback-ului! : " + exception.getMessage());
+                    }
+                }
+                catch (SocketTimeoutException timeoutException){
+                    System.out.println("timeout");
+                }
+                catch (Exception exception){
+                    System.out.println("Exceptie : " + exception.getMessage());
+                }
+            }
+        }).start();
     }
 }

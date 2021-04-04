@@ -16,6 +16,10 @@ public class NewFileRequest extends ClientManagerRequest {
      * Tipul utilizatorului.
      */
     private String userType;
+    /**
+     * CRC-ul fisierului ; folosit doar de la frontend la managerul general.
+     */
+    private long crc;
 
 
     /** -------- Gettere & Settere -------- **/
@@ -43,5 +47,18 @@ public class NewFileRequest extends ClientManagerRequest {
      */
     public String getUserType() {
         return userType;
+    }
+
+    /**
+     * Getter pentru CRC
+     */
+    public long getCrc() {
+        return crc;
+    }
+    /**
+     * Setter pentru CRC
+     */
+    public void setCrc(long crc) {
+        this.crc = crc;
     }
 }

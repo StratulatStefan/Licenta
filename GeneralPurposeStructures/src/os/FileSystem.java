@@ -2,10 +2,10 @@ package os;
 
 import data.Pair;
 
-import java.io.File;
-import java.io.IOException;
+import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.util.zip.CRC32;
 
 /**
  * Clasa care adreseaza unele functionalitati disponibile la nivelul sistemului de operare.
@@ -82,4 +82,17 @@ public class FileSystem {
         throw new IOException("File not found!");
     }
 
+    /**
+     * Functie care calculeaza CRC-ul unui fisier
+     */
+    public static long calculateCRC(String filename) throws IOException{
+        InputStream inputStream = new BufferedInputStream(new FileInputStream(filename));
+        CRC32 crc = new CRC32();
+        int count;
+        byte[] buffer = new byte[4096];
+        while((count = inputStream.read(buffer)) != -1)
+            crc.update(buffer, 0, count);
+        inputStream.close();
+        return crc.getValue();
+    }
 }

@@ -99,4 +99,5 @@ public class FileHeader implements Serializable {
     public void setFilesize(long filesize){
         this.filesize = filesize;
     }
+
 }
