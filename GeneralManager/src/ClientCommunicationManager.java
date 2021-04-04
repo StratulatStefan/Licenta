@@ -345,7 +345,7 @@ public class ClientCommunicationManager {
             public void run() {
                 try {
                     ServerSocket feedbackSocket = new ServerSocket();
-                    feedbackSocket.setSoTimeout((int)(filesize * 50));
+                    feedbackSocket.setSoTimeout((int)(filesize * 60));
                     feedbackSocket.bind(new InetSocketAddress("127.0.0.1", 8010));
                     Socket frontendSocket = feedbackSocket.accept();
                     try{

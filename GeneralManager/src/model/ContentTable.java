@@ -142,10 +142,10 @@ public class ContentTable {
         synchronized (this.contentTable) {
             for (String user : storageStatusTable.getUsers()) {
                 HashMap<String, Integer> userFilesNodesCount = storageStatusTable.getUserFilesNodesCount(user);
-                HashMap<String, Long> userFilesCRC = storageStatusTable.getUserFilesCRC(user);
+                HashMap<String, List<Long>> userFilesCRC = storageStatusTable.getUserFilesCRC(user);
                 for (String filename : new ArrayList<>(userFilesNodesCount.keySet())) {
                     try {
-                        this.addRegister(user, filename, userFilesNodesCount.get(filename), userFilesCRC.get(filename), "[VALID]");
+                        this.addRegister(user, filename, userFilesNodesCount.get(filename), userFilesCRC.get(filename).get(0), "[VALID]");
                     }
                     catch (Exception exception){
                         // nu prea avem cum sa ajunge aici la init intrucat exceptia se genereaza doar daca inregistrarea exista deja

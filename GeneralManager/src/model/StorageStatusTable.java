@@ -17,18 +17,14 @@ class FileAttributesForStorage{
      */
     private String filename;
     /**
-     * CRC-ul fisierului
-     */
-    private long crc;
-    /**
      * Lista nodurilor pe care se afla fisierului
      */
-    private List<String> nodes;
+    private List<Pair<String, Long>> nodes;
 
 
     /** -------- Constructor -------- **/
     public FileAttributesForStorage(){
-        this.nodes = new ArrayList<>();
+        this.nodes = new ArrayList<Pair<String, Long>>();
     }
 
 
@@ -49,21 +45,51 @@ class FileAttributesForStorage{
     /**
      * Getter pentru CRC
      */
-    public long getCrc() {
-        return crc;
+    public long getCrc(String nodeAddress) throws NullPointerException{
+        for(Pair<String, Long> node : nodes){
+            if(node.getFirst().equals(nodeAddress)){
+                return node.getSecond();
+            }
+        }
+        throw new NullPointerException("getCRC : Node not found!");
     }
     /**
      * Setter pentru CRC
      */
-    public void setCrc(long crc) {
-        this.crc = crc;
+    public void setCrc(String nodeAddress, long crc) throws NullPointerException{
+        for(Pair<String, Long> node : nodes){
+            if(node.getFirst().equals(nodeAddress)){
+                node.setSecond(crc);
+            }
+        }
+        throw new NullPointerException("setCRC : Node not found!");
     }
 
     /**
      * Getter pentru lista nodurilor
      */
-    public List<String> getNodes() {
+    public List<Pair<String, Long>> getNodes() {
         return nodes;
+    }
+    /**
+     * Getter pentru adresele nodurilor
+     */
+    public List<String> getNodesAddresses(){
+        List<String> addresses = new ArrayList<>();
+        for(Pair<String, Long> node : this.nodes){
+            addresses.add(node.getFirst());
+        }
+        return addresses;
+    }
+    /**
+     * Getter pentru CRC pentru fisierul de la fiecare nod
+     */
+    public List<Long> getNodesCRCs(){
+        List<Long> crcs = new ArrayList<>();
+        for(Pair<String, Long> node : this.nodes){
+            crcs.add(node.getSecond());
+        }
+        return crcs;
     }
     /**
      * Getter pentru dimensiunea listei de noduri
@@ -74,7 +100,7 @@ class FileAttributesForStorage{
     /**
      * Setter pentru lista nodurilor.
      */
-    public void setNodes(List<String> nodes) {
+    public void setNodes(List<Pair<String, Long>> nodes) {
         this.nodes = nodes;
     }
 
@@ -84,9 +110,9 @@ class FileAttributesForStorage{
      * Functie de adaugare a unui nou nod in lista
      * @param nodeAddress Adresa nodului
      */
-    public void addNode(String nodeAddress) throws Exception{
+    public void addNode(String nodeAddress, long crc) throws Exception{
         if(!this.containsAddress(nodeAddress))
-            this.nodes.add(nodeAddress);
+            this.nodes.add(new Pair<String, Long>(nodeAddress, crc));
         else
             throw new Exception("Node already exists!");
     }
@@ -96,8 +122,9 @@ class FileAttributesForStorage{
      * @param nodeAddress Adresa nodului
      */
     public void removeNode(String nodeAddress) throws NullPointerException{
-        if(this.containsAddress(nodeAddress))
-            this.nodes.remove(nodeAddress);
+        if(this.containsAddress(nodeAddress)) {
+            this.nodes.removeIf(node -> node.getFirst().equals(nodeAddress));
+        }
         else
             throw new NullPointerException("Node not found!");
     }
@@ -109,7 +136,12 @@ class FileAttributesForStorage{
      * @param nodeAddress Adresa nodului
      */
     public boolean containsAddress(String nodeAddress){
-        return this.nodes.contains(nodeAddress);
+        for(Pair<String, Long> node : this.nodes){
+            if(node.getFirst().equals(nodeAddress)){
+                return true;
+            }
+        }
+        return false;
     }
 
 
@@ -118,9 +150,8 @@ class FileAttributesForStorage{
     public String toString() {
         StringBuilder stringBuilder = new StringBuilder();
         stringBuilder.append("\tFilename : ").append(filename).append("\n");
-        stringBuilder.append("\t\tCRC : ").append(Long.toHexString(crc)).append("\n");
-        for (String address : this.nodes) {
-            stringBuilder.append("\t\t").append(address).append("\n");
+        for (Pair<String, Long> node : this.nodes) {
+            stringBuilder.append("\t\t").append(node.getFirst()).append("  [CRC : ").append(Long.toHexString(node.getSecond())).append("]\n");
         }
         return stringBuilder.toString();
     }
@@ -176,9 +207,8 @@ public class StorageStatusTable {
                     if(!this.checkFileForUser(user, userFile.getFilename())){
                         FileAttributesForStorage data = new FileAttributesForStorage();
                         data.setFilename(userFile.getFilename());
-                        data.setCrc(userFile.getCrc());
                         try{
-                            data.addNode(nodeAddress.getIpAddress());
+                            data.addNode(nodeAddress.getIpAddress(), userFile.getCrc());
                         }
                         catch (Exception exception){
                             System.out.println("Node already contains address!");
@@ -191,7 +221,18 @@ public class StorageStatusTable {
                             // adaugam adresa nodului
                             int candidate = this.getUserFile(user, userFile.getFilename());
                             if(candidate != -1){
-                                this.statusTable.get(user).get(candidate).addNode(nodeAddress.getIpAddress());
+                                this.statusTable.get(user).get(candidate).addNode(nodeAddress.getIpAddress(), userFile.getCrc());
+                            }
+                        }
+                        else{
+                            int candidate = this.getUserFile(user, userFile.getFilename());
+                            try {
+                                if (this.statusTable.get(user).get(candidate).getCrc(nodeAddress.getIpAddress()) != userFile.getCrc())
+                                    this.statusTable.get(user).get(candidate).setCrc(nodeAddress.getIpAddress(), userFile.getCrc());
+                            }
+                            catch (NullPointerException exception){
+                                System.out.println("File " + this.statusTable.get(user).get(candidate).getFilename() + " of user " + nodeAddress.getIpAddress() + " skipped!" +
+                                        "Perhaps it was edited in the same time!");
                             }
                         }
                     }
@@ -305,7 +346,7 @@ public class StorageStatusTable {
     public boolean checkAddress(String user, String file, String address){
         synchronized (this.statusTable){
             for(FileAttributesForStorage candidate : this.statusTable.get(user)){
-                if(candidate.getFilename().equals(file) && candidate.getNodes().contains(address)){
+                if(candidate.getFilename().equals(file) && candidate.getNodesAddresses().contains(address)){
                     return true;
                 }
             }
@@ -367,7 +408,7 @@ public class StorageStatusTable {
                 int candidate = this.getUserFile(user, file);
                 if(candidate == -1)
                     return null;
-                return this.statusTable.get(user).get(candidate).getNodes();
+                return this.statusTable.get(user).get(candidate).getNodesAddresses();
             }
             catch (NullPointerException exception){
                 return null;
@@ -381,16 +422,16 @@ public class StorageStatusTable {
      * @param file Numele fisierului.
      * @return CRC-ul fisierului.
      */
-    public long getCRCForFile(String user, String file){
+    public List<Long> getCRCsForFile(String user, String file){
         synchronized (this.statusTable){
             try {
                 int candidate = this.getUserFile(user, file);
                 if(candidate == -1)
-                    return -1;
-                return this.statusTable.get(user).get(candidate).getCrc();
+                    return null;
+                return this.statusTable.get(user).get(candidate).getNodesCRCs();
             }
             catch (NullPointerException exception){
-                return -1;
+                return null;
             }
         }
     }
@@ -438,13 +479,13 @@ public class StorageStatusTable {
      * Functie care returneaza crc-ul fiecarui fisier al unui anumit user.
      * @param userId Id-ul utilizatorului.
      */
-    public HashMap<String, Long> getUserFilesCRC(String userId){
+    public HashMap<String, List<Long>> getUserFilesCRC(String userId){
         synchronized (this.statusTable) {
             if(!this.checkUser(userId))
                 return null;
-            HashMap<String, Long> filesNodesCounts = new HashMap<>();
+            HashMap<String, List<Long>> filesNodesCounts = new HashMap<>();
             for (FileAttributesForStorage userfile : this.statusTable.get(userId)) {
-                filesNodesCounts.put(userfile.getFilename(), userfile.getCrc());
+                filesNodesCounts.put(userfile.getFilename(), userfile.getNodesCRCs());
             }
             return filesNodesCounts;
         }
