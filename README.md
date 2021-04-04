@@ -1,5 +1,5 @@
 # TODO
-## Urgent
+### Urgent
 - ~~Fiecare nod sa trimita informatii despre statusul memoriei sale; informatiile vor fi mentionate in hearthbeat-uri~~
 - ~~Nodul general sa aiba un alt thread care verifica daca se pastreaza numarul de replici si sa dea comenzi de replicare la nevoie~~
 - ~~Trimitere status operatie inapoi catre frontend (la editare si redenumire)~~
@@ -8,12 +8,12 @@
 - ~~In storagestatustable, crc tre sa fie per nod, nu per fisier~~
 - Replicarea unui fisier daca nu mai corespunde CRC-u
 
-## Future work
+### Future work
 - Mirror  (anycast) pentru managerul general
 - Componenta de versionare
 - Tratare eficienta exceptii
 
-## Mofturi
+### Mofturi
 - Informatii in heartbeat care sa ma ajute sa evidentiez progresul trimiterii fisierului (progress bar in interfata)
 - Culoare diferentiatoare mesaj exceptii
 
