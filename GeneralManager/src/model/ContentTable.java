@@ -384,6 +384,20 @@ public class ContentTable {
         return null;
     }
 
+    public long getCRCForUser(String userId, String filename){
+        try {
+            for(FileAttributes file : this.getUserFiles(userId)){
+                if(file.getFilename().equals(filename)){
+                    return file.getCrc();
+                }
+            }
+        }
+        catch (Exception exception){
+            System.out.println("User not found!");
+        }
+        return -1;
+    }
+
 
     /** -------- Functii de baza, supraincarcate -------- **/
     @Override

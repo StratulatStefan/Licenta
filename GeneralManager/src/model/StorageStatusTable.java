@@ -402,13 +402,33 @@ public class StorageStatusTable {
      * @param file Numele fisierului.
      * @return Lista de noduri.
      */
-    public List<String> getAvailableNodesForFile(String user, String file){
+    public List<String> getAvailableNodesAddressesForFile(String user, String file){
         synchronized (this.statusTable){
             try {
                 int candidate = this.getUserFile(user, file);
                 if(candidate == -1)
                     return null;
                 return this.statusTable.get(user).get(candidate).getNodesAddresses();
+            }
+            catch (NullPointerException exception){
+                return null;
+            }
+        }
+    }
+
+    /**
+     * Functie care returneaza lista adreselor nodurilor care stocheaza un anumit fisier.
+     * @param user Id-ul utilizatorului.
+     * @param file Numele fisierului.
+     * @return Lista de noduri.
+     */
+    public List<Pair<String, Long>> getAvailableNodesForFile(String user, String file){
+        synchronized (this.statusTable){
+            try {
+                int candidate = this.getUserFile(user, file);
+                if(candidate == -1)
+                    return null;
+                return this.statusTable.get(user).get(candidate).getNodes();
             }
             catch (NullPointerException exception){
                 return null;

@@ -295,7 +295,7 @@ public class ClientCommunicationManager {
                                     }
                                     case FILE_EXISTS:{
                                         String newName = ((RenameFileRequest)clientManagerRequest).getNewName();
-                                        List<String> candidateNodes = GeneralManager.statusTable.getAvailableNodesForFile(userId, filename);
+                                        List<String> candidateNodes = GeneralManager.statusTable.getAvailableNodesAddressesForFile(userId, filename);
                                         GeneralManager.fileSystemManager.renameFile(userId, filename, newName, candidateNodes);
                                         GeneralManager.contentTable.updateFileName(userId, filename, newName);
                                         response.setResponse("Se rezolva!");
@@ -311,7 +311,7 @@ public class ClientCommunicationManager {
                                         break;
                                     }
                                     case FILE_EXISTS:{
-                                        String candidateAddress = GeneralManager.statusTable.getAvailableNodesForFile(userId, filename).get(0);
+                                        String candidateAddress = GeneralManager.statusTable.getAvailableNodesAddressesForFile(userId, filename).get(0);
                                         String filepath = GeneralManager.storagePath + candidateAddress + "/" + userId + "/" + filename;
                                         long filesize = FileSystem.getFileSize(filepath);
                                         //GeneralManager.userStorageQuantityTable.registerMemoryRelease(clientManagerRequest.getUserId(), filesize);

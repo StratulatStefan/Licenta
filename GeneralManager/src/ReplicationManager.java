@@ -1,4 +1,6 @@
 import config.AppConfig;
+import data.Pair;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -82,48 +84,32 @@ public class ReplicationManager implements Runnable{
                     HashMap<String, Integer> userFiles = GeneralManager.contentTable.getUserFiless(userId);
                     for (String userFile : new ArrayList<>(userFiles.keySet())) {
                         int replication_factor = userFiles.get(userFile);
-                        List<String> availableNodesForFile = GeneralManager.statusTable.getAvailableNodesForFile(userId, userFile);
+                        List<Pair<String, Long>> availableNodesForFile = GeneralManager.statusTable.getAvailableNodesForFile(userId, userFile);
+                        List<String> availableNodesAddressesForFile = GeneralManager.statusTable.getAvailableNodesAddressesForFile(userId, userFile);
                         if(availableNodesForFile ==  null){
                             // eroare de sincronizare; se va rezolva la iteratia urmatoare a for-ului prin useri
                             continue;
                         }
                         System.out.print("\t User " + userId + " | File : " + userFile + "  -->  ");
                         if (replication_factor == availableNodesForFile.size()) {
-                            System.out.println("[OK].");
+                            String corruptedFileAddress = this.checkForFileCorruption(GeneralManager.contentTable.getCRCForUser(userId, userFile), availableNodesForFile);
+                            if(corruptedFileAddress == null) {
+                                System.out.println("[OK].");
+                            }
+                            else{
+                                List<String> candidatesForDeletion = new ArrayList<String>(){{
+                                    add(corruptedFileAddress);
+                                }};
+                                this.deletion(replication_factor, userId, userFile, candidatesForDeletion);
+                                continue;
+                            }
                         }
                         else if (replication_factor > availableNodesForFile.size() && !GeneralManager.contentTable.getFileStatusForUser(userId, userFile).contains("PENDING")) {
-                            System.out.println("[NEED REPLICATION].");
-
-                            List<String> candidates = searchCandidatesForReplication(replication_factor, availableNodesForFile);
-                            if(replication_factor == 1 || candidates == null){
-                                System.out.println("Nu se poate realiza replicarea pentru fisierul curent. " +
-                                        "Nu exista suficiente noduri pe care sa se faca replicarea.");
-                            }
-                            else {
-                                // cautam un criteriu pe baza caruia selectam nodul de la care se face copierea
-                                String source = availableNodesForFile.get(0);
-                                System.out.println("\t\tFound source of replication : " + source);
-                                System.out.print("\t\tFound candidates for replication : ");
-                                for (String candidate : candidates) {
-                                    System.out.print("[" + candidate + "] ");
-                                }
-                                System.out.println();
-                                GeneralManager.fileSystemManager.replicateFile(userId, userFile, source, candidates);
-                            }
+                            this.replication(replication_factor, userId, userFile, availableNodesAddressesForFile);
                         }
                         else if(replication_factor < availableNodesForFile.size()){
-                            System.out.println("[NEED DELETION OF FILE FROM ONE NODE]");
-
-                            List<String> candidates = searchCandidatesForDeletion(availableNodesForFile.size() - replication_factor, availableNodesForFile);
-                            System.out.print("\t\tFound nodes to delete file : ");
-                            for (String candidate : candidates) {
-                                System.out.print("[" + candidate + "] ");
-                            }
-                            System.out.println();
-                            GeneralManager.fileSystemManager.deleteFile(userId, userFile, candidates);
-                            if(replication_factor == 0) {
-                                GeneralManager.contentTable.updateFileStatus(userId, userFile, "[DELETED]");
-                            }
+                            List<String> candidates = searchCandidatesForDeletion(availableNodesForFile.size() - replication_factor, availableNodesAddressesForFile);
+                            this.deletion(replication_factor, userId, userFile, candidates);
                         }
                         else{
                             System.out.println("[UNKNOWN]\n");
@@ -139,4 +125,46 @@ public class ReplicationManager implements Runnable{
         }
     }
 
+    private String checkForFileCorruption(long crc, List<Pair<String, Long>> availableNodesForFile){
+        for(Pair<String, Long> file : availableNodesForFile){
+            if(file.getSecond() != crc){
+                System.out.println("Found corrupted file at address : " + file.getFirst());
+                return file.getFirst();
+            }
+        }
+        return null;
+    }
+
+    private void replication(int replication_factor, String userId, String userFile, List<String> availableNodesAddressesForFile){
+        System.out.println("[NEED REPLICATION].");
+        List<String> candidates = searchCandidatesForReplication(replication_factor, availableNodesAddressesForFile);
+        if(replication_factor == 1 || candidates == null){
+            System.out.println("Nu se poate realiza replicarea pentru fisierul curent. " +
+                    "Nu exista suficiente noduri pe care sa se faca replicarea.");
+        }
+        else {
+            // cautam un criteriu pe baza caruia selectam nodul de la care se face copierea
+            String source = availableNodesAddressesForFile.get(0);
+            System.out.println("\t\tFound source of replication : " + source);
+            System.out.print("\t\tFound candidates for replication : ");
+            for (String candidate : candidates) {
+                System.out.print("[" + candidate + "] ");
+            }
+            System.out.println();
+            GeneralManager.fileSystemManager.replicateFile(userId, userFile, source, candidates);
+        }
+    }
+
+    public void deletion(int replication_factor, String userId, String userFile, List<String> candidates) throws Exception {
+        System.out.println("[NEED DELETION OF FILE FROM ONE NODE]");
+        System.out.print("\t\tFound nodes to delete file : ");
+        for (String candidate : candidates) {
+            System.out.print("[" + candidate + "] ");
+        }
+        System.out.println();
+        GeneralManager.fileSystemManager.deleteFile(userId, userFile, candidates);
+        if(replication_factor == 0) {
+            GeneralManager.contentTable.updateFileStatus(userId, userFile, "[DELETED]");
+        }
+    }
 }

@@ -6,7 +6,7 @@
 - ~~Coada pentru sync~~
 - ~~Probleme CRC~~
 - ~~In storagestatustable, crc tre sa fie per nod, nu per fisier~~
-- Replicarea unui fisier daca nu mai corespunde CRC-u
+- ~~Replicarea unui fisier daca nu mai corespunde CRC-u~~
 
 ### Future work
 - Mirror  (anycast) pentru managerul general
@@ -21,7 +21,7 @@
 # LASTADDED
 - Mecanismul de sincronizare
 - La stergerea unui fisier, factorul de replicare devine 0 si starea fisierului devine DELETED; daca cumva invie vreo replica, este stearsa; Daca userul face cerere sa stocheze din nou fisierul, se inlocuieste inregistrarea (factorul de replicare devine noul factor si starea devine valid
-
+- CRC : validarea statusului unui fisier pe baza CRC-ului
 
 # TOASK
 - ~~Cum sa tratam refacerea starii nodului general ?~~
