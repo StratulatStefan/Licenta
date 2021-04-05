@@ -232,7 +232,7 @@ public class StorageStatusTable {
                             }
                             catch (NullPointerException exception){
                                 System.out.println("File " + this.statusTable.get(user).get(candidate).getFilename() + " of user " + nodeAddress.getIpAddress() + " skipped!" +
-                                        "Perhaps it was edited in the same time!");
+                                        "Suprapunere de operatii..");
                             }
                         }
                     }

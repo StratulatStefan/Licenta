@@ -18,6 +18,10 @@ public class NodeBeat implements Serializable {
      */
     private String address;
     /**
+     * Cantitatea de memorie ocupata la nodul curent; in kilobytes
+     */
+    private long memoryQuantity;
+    /**
      * In interiorul unui heartbeat, va fi trimis si statusul stocarii;
      * Asadar, vom avea un hashmap care va contine fisierele disponibile in stocarea nodului curent, pentru toti userii
      */
@@ -34,6 +38,19 @@ public class NodeBeat implements Serializable {
 
 
     /** -------- Gettere & Settere -------- **/
+    /**
+     * Getter pentru cantitatea de memorie
+     */
+    public long getMemoryQuantity() {
+        return memoryQuantity;
+    }
+    /**
+     * Setter pentru cantitatea de memorie
+     */
+    public void setMemoryQuantity(long memoryQuantity) {
+        this.memoryQuantity = memoryQuantity;
+    }
+
     /**
      * Setter pentru lista de fisiere pentru useri;
      * Se va adauga o inregistrare ce va contine identificatorul userului si toate fisierele lui

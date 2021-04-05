@@ -11,11 +11,11 @@ public class UserStorageQuantityTable extends StorageQuantityTable {
     /**
      * Cantitatea de memorie disponibila pentru un utilizator obisnuit
      */
-    private long standardUserStorageQuantity;
+    private long standardUserTotalStorageQuantity;
     /**
      * Cantitatea de memorie disponibila pentru un utilizator premium
      */
-    private long premiumUserStorageQuantity;
+    private long premiumUserTotalStorageQuantity;
 
 
     /** -------- Constructor & Configurare -------- **/
@@ -23,8 +23,8 @@ public class UserStorageQuantityTable extends StorageQuantityTable {
      * Functie care citeste si initializeaza parametrii de configurare
      */
     public void readConfigParams(){
-        standardUserStorageQuantity = convertGBytesToKiloBytes(Integer.parseInt(AppConfig.getParam("basicUserStorageQuantity")));
-        premiumUserStorageQuantity = convertGBytesToKiloBytes(Integer.parseInt(AppConfig.getParam("premiumUserStorageQuantity")));
+        standardUserTotalStorageQuantity = convertGBtoBytes(Integer.parseInt(AppConfig.getParam("basicUserStorageQuantity")));
+        premiumUserTotalStorageQuantity = convertGBtoBytes(Integer.parseInt(AppConfig.getParam("premiumUserStorageQuantity")));
     }
 
     /**
@@ -45,11 +45,11 @@ public class UserStorageQuantityTable extends StorageQuantityTable {
         long totalStorage = 0;
         switch (userType){
             case "PREMIUM": {
-                totalStorage = premiumUserStorageQuantity;
+                totalStorage = premiumUserTotalStorageQuantity;
                 break;
             }
             case "STANDARD" : {
-                totalStorage = standardUserStorageQuantity;
+                totalStorage = standardUserTotalStorageQuantity;
                 break;
             }
         }

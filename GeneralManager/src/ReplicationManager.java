@@ -74,8 +74,8 @@ public class ReplicationManager implements Runnable{
         while(true) {
             System.out.println(GeneralManager.statusTable);
             System.out.println(GeneralManager.contentTable);
-            //System.out.println(GeneralManager.nodeStorageQuantityTable);
-            //System.out.println(GeneralManager.userStorageQuantityTable);
+            System.out.println(GeneralManager.nodeStorageQuantityTable);
+            System.out.println(GeneralManager.userStorageQuantityTable);
 
             System.out.println("------------------------------------");
             System.out.println("Replication Status");
@@ -92,6 +92,10 @@ public class ReplicationManager implements Runnable{
                         }
                         System.out.print("\t User " + userId + " | File : " + userFile + "  -->  ");
                         if (replication_factor == availableNodesForFile.size()) {
+                            if(GeneralManager.contentTable.getFileStatusForUser(userId, userFile).contains("PENDING")) {
+                                System.out.println("[UNKNOWN]\n");
+                                continue;
+                            }
                             String corruptedFileAddress = this.checkForFileCorruption(GeneralManager.contentTable.getCRCForUser(userId, userFile), availableNodesForFile);
                             if(corruptedFileAddress == null) {
                                 System.out.println("[OK].");

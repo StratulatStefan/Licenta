@@ -159,6 +159,7 @@ public class ClientCommunicationManager {
                                 filepath = storagePath + serverAddress + "/" + fileHeader.getUserId();
                                 if(!Files.exists(Paths.get(filepath)))
                                     Files.createDirectories(Paths.get(filepath));
+                                GeneralNode.pendingList.addToList(fileHeader.getUserId(), fileHeader.getFilename());
                                 filepath += "/" + fileHeader.getFilename();
                                 fileOutputStream = new FileOutputStream(filepath);
                                 String token = cleanChain(fileHeader.getToken());
@@ -193,7 +194,7 @@ public class ClientCommunicationManager {
                         dataOutputStream.close();
                     }
                     clientSocket.close();
-
+                    GeneralNode.pendingList.removeFromList(fileHeader.getUserId(), fileHeader.getFilename());
                     long filecrc = FileSystem.calculateCRC(filepath);
                     sendFeedbackToFrontend(fileHeader, filecrc);
 

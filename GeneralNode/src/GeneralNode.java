@@ -31,6 +31,8 @@ public class GeneralNode{
     private final static NodeBeat storageStatus = new NodeBeat();
 
 
+    public final static PendingList pendingList = new PendingList();
+
     /** -------- Managerii activitatilor -------- **/
     /**
      * Obiectul care se ocupa de mecanismul de hearbeats
@@ -83,6 +85,13 @@ public class GeneralNode{
             System.out.println("No status defined yet!");
             return null;
         }
+
+        /*try {
+            storageStatus.setMemoryQuantity(FileSystem.getFileSize(path));
+        }
+        catch (IOException exception){
+            // fuck off!
+        }*/
         String [] usersDirectories = FileSystem.getDirContent(path);
 
         for (String userDir : usersDirectories) {
@@ -91,7 +100,16 @@ public class GeneralNode{
             for(String file : userFiles){
                 FileAttribute f = new FileAttribute();
                 f.setFilename(file);
-                f.setCrc(FileSystem.calculateCRC(path + "\\" + userDir + "\\" + file));
+                if(!pendingList.containsRegister(userDir, file)) {
+                    long startTime = System.currentTimeMillis();
+                    f.setCrc(FileSystem.calculateCRC(path + "\\" + userDir + "\\" + file));
+                    long estimatedTime = System.currentTimeMillis() - startTime;
+                    System.out.println("CRC for " + file + " : " + estimatedTime + " ms");
+                }
+                else{
+                    System.out.println("File ignored in CRC calculation : " + file);
+                    f.setCrc(0);
+                }
                 fileAttributes.add(f);
             }
             storageStatus.addUserFiles(userDir, fileAttributes);

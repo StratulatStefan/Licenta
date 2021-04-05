@@ -152,7 +152,6 @@ public class ClientCommunicationManager {
                 }
                 token.append(address).append("-");
                 replication_factor -= 1;
-                GeneralManager.nodeStorageQuantityTable.registerMemoryConsumption(address, filesize);
             }
             token = new StringBuilder(token.substring(0, token.length() - 1));
             return token.toString();
@@ -277,7 +276,7 @@ public class ClientCommunicationManager {
                                             catch (Exception exception){
                                                 System.out.println(exception.getMessage());
                                             }
-                                            //GeneralManager.userStorageQuantityTable.registerMemoryConsumption(userId, usertype, filesize);
+                                            GeneralManager.userStorageQuantityTable.registerMemoryConsumption(userId, usertype, filesize);
                                         }
                                         else {
                                             response.setException("eroare");
@@ -314,7 +313,7 @@ public class ClientCommunicationManager {
                                         String candidateAddress = GeneralManager.statusTable.getAvailableNodesAddressesForFile(userId, filename).get(0);
                                         String filepath = GeneralManager.storagePath + candidateAddress + "/" + userId + "/" + filename;
                                         long filesize = FileSystem.getFileSize(filepath);
-                                        //GeneralManager.userStorageQuantityTable.registerMemoryRelease(clientManagerRequest.getUserId(), filesize);
+                                        GeneralManager.userStorageQuantityTable.registerMemoryRelease(clientManagerRequest.getUserId(), filesize);
                                         GeneralManager.contentTable.updateReplicationFactor(userId, filename, 0);
                                         response.setResponse("OK");
                                         break;

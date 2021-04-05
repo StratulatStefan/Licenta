@@ -1,5 +1,7 @@
 package storage_quantity;
 
+import data.Pair;
+
 /**
  * Clasa care descrie cantitatea stocarii unei entitati;
  * Entitate : user/nod intern
@@ -13,25 +15,25 @@ class StorageQuantity{
     /**
      * Cantitatea de memorie ramasa disponibila pentru o entitate
      */
-    private long availableStorage = -1;
-
+    private long usedStorage = 0;
 
     /** -------- Gettere & Settere -------- **/
     /**
      * Getter pentru cantitatea ramasa de memorie
      */
-    public long getAvailableStorage() {
-        return availableStorage;
+    public long getUsedStorage() {
+        return usedStorage;
     }
+
     /**
      * Setter pentru cantitatea ramasa de memorie
      * @param consumedStorage Cantitatea de memorie consumata.
      *
      */
-    public void updateAvailableStorage(long consumedStorage) {
-        if(this.availableStorage == -1)
-            this.availableStorage = this.totalStorage;
-        this.availableStorage -= consumedStorage;
+    public void updateUsedStorage(long consumedStorage) {
+        //if(this.availableStorage == -1)
+        //    this.availableStorage = this.totalStorage;
+        this.usedStorage = consumedStorage;
     }
 
     /**

@@ -1,5 +1,6 @@
 package storage_quantity;
 import config.AppConfig;
+import data.Pair;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -12,7 +13,7 @@ import java.util.HashMap;
 public abstract class StorageQuantityTable {
     /** -------- Tabele -------- **/
     /**
-     * Tabela de status a memoriei utilizatorilor;
+     * Tabela de status a memoriei;
      */
     private final HashMap<String, StorageQuantity> storageStatus;
 
@@ -33,21 +34,17 @@ public abstract class StorageQuantityTable {
 
 
     /** -------- Functii generale de prelucrare -------- **/
-    /**
-     * Functie de conversie din GigaBytes in KiloBytes
-     */
-    protected Long convertGBytesToKiloBytes(int gigabytes){
-        return (long) (gigabytes * (1 << 20));
+    protected long convertGBtoBytes(long gbytes){
+        return gbytes * (1 << 30);
     }
 
-    /**
-     * Funtie de conversie din KiloBytes in MegaBytes
-     */
-    protected double convertKiloBytesToMBytes(long kilobytes){
-        double mbytes = (double) (kilobytes / 1024.);
-        return Math.round(mbytes * 100.0) / 100.0;
+    protected Pair<Double, String> convertToBestScale(double bytes, int scale){
+        if(bytes / 1024. < 1){
+            String[] units = new String[]{"", "K", "M", "G"};
+            return new Pair<Double, String>((double) Math.round(bytes * 100) / 100, units[scale] + "B");
+        }
+        return convertToBestScale(bytes / 1024., scale + 1);
     }
-
 
 
     /** -------- Functii de prelucrare a tabelei -------- **/
@@ -65,7 +62,7 @@ public abstract class StorageQuantityTable {
             }
             StorageQuantity memory = new StorageQuantity();
             memory.setTotalStorage(totalStorage);
-            memory.updateAvailableStorage(consumedStorage);
+            memory.updateUsedStorage(consumedStorage);
             this.storageStatus.put(key, memory);
         }
     }
@@ -79,7 +76,7 @@ public abstract class StorageQuantityTable {
             if(!checkIfContainsKey(key)){
                 throw new Exception("Inregistrarea " + key + " nu a fost gasita.");
             }
-            this.storageStatus.get(key).updateAvailableStorage(consumedStorage);
+            this.storageStatus.get(key).updateUsedStorage(consumedStorage);
         }
     }
 
@@ -100,16 +97,15 @@ public abstract class StorageQuantityTable {
     @Override
     public String toString() {
         StorageQuantity storageRecord;
+        Pair<Double, String> converted = null;
         synchronized (this.storageStatus) {
             StringBuilder stringBuilder = new StringBuilder();
             for (String key : new ArrayList<>(this.storageStatus.keySet())) {
                 storageRecord = this.storageStatus.get(key);
-                stringBuilder.append("\t")
-                        .append(key).append(" --> ")
-                        .append(storageRecord.getAvailableStorage())
-                        .append("/")
-                        .append(storageRecord.getTotalStorage())
-                        .append(" KB \n");
+                converted = this.convertToBestScale(storageRecord.getUsedStorage(), 0);
+                stringBuilder.append("\t").append(key).append(" --> ").append(converted.getFirst()).append(" ").append(converted.getSecond());
+                converted = this.convertToBestScale(storageRecord.getTotalStorage(), 0);
+                stringBuilder.append("/").append(converted.getFirst()).append(" ").append(converted.getSecond()).append("  \n");
             }
             stringBuilder.append("------------------------------------\n\n");
             return stringBuilder.toString();

@@ -16,7 +16,6 @@ public class FileAttribute implements Serializable {
      */
     private long crc;
 
-
     /** -------- Gettere & Settere -------- **/
     /**
      * Getter pentru numele fisierului
