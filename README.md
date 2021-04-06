@@ -7,6 +7,8 @@
     - ~~Probleme CRC~~
     - ~~In storagestatustable, crc tre sa fie per nod, nu per fisier~~
     - ~~Replicarea unui fisier daca nu mai corespunde CRC-u~~
+    - ~~Feedback status operatie de la client la frontend~~
+    - la operatia de redenumire, daca am un nod inchis care contine fisierul, la deschidere sa ne dam seama pe baza crc-ului ca este acelasi fisier
 
 - Future work
     - Calcularea si afisarea cantitatii de stocare disponibile pentru un user/nod
@@ -32,6 +34,9 @@ costisitoare; ne asiguram la nodul general ca nu bagam in seama acest crc cand t
 ___
 
 # TO ASK
+- O solutie mai buna pentru a oferi feedback de la nodul intern la frontend pentru o operatie de stergere/redenumire (de ex) ? 
+In loc sa deschid un socket in care sa astept pentru feedback, nu as putea cumva sa iau pe baza beat-urilor ? (asta de la managerul general la nodul intern, ca de la
+frontend la managerul general tre bucla de feedback)
 - Mare parte din sistem imi este dat peste cap de calcularea crc-ului
 - Unde sa tin evidenta de cantitatea de memorie disponibila la un nod sau pentru un anumit utilizator, astfel
 incat sa aleg in mod cat mai eficient nodurile care sa stocheze un anumit fisier (de ex.).

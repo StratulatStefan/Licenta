@@ -112,21 +112,19 @@ public class Frontend {
         newFileRequest.setCrc(FileSystem.calculateCRC(filepath));
         newFileRequest.setUserType("STANDARD");
 
-        //mainActivity(newFileRequest);
-
 
         DeleteFileRequest deleteFileRequest = new DeleteFileRequest();
         //deleteFileRequest.setFilename("D:/Facultate/Licenta/test_files/sss.pdf");
         deleteFileRequest.setFilename("D:/Facultate/Licenta/test_files/curs.rar");
         deleteFileRequest.setUserId("1");
 
-        mainActivity(deleteFileRequest);
-
         RenameFileRequest renameFileRequest = new RenameFileRequest();
-        renameFileRequest.setFilename("sss.pdf");
+        renameFileRequest.setFilename("curs1.rar");
         renameFileRequest.setUserId("1");
-        renameFileRequest.setNewName("sss1.pdf");
+        renameFileRequest.setNewName("curs2.rar");
 
+        mainActivity(newFileRequest);
+        //mainActivity(deleteFileRequest);
         //mainActivity(renameFileRequest);
 
 

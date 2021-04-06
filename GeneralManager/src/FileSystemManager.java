@@ -1,13 +1,13 @@
 
 import communication.Serializer;
 import config.AppConfig;
-import node_manager.DeleteRequest;
-import node_manager.EditRequest;
-import node_manager.RenameRequest;
-import node_manager.ReplicationRequest;
+import node_manager.*;
 
+import java.awt.datatransfer.FlavorEvent;
+import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.net.Socket;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -39,22 +39,38 @@ public class FileSystemManager {
 
 
     /** -------- Trimitere cerere -------- **/
+    /* TODO schimba nume obiecte */
     /**
      * Functia care trimite un obiect de cerere de prelucrare catre nodul general.
      * @param destionationAddress Adresa nodului intern.
      * @param request Obiectul de cerere de prelucrare; Are tipul de baza al acestui tip de cerere de prelucrare (EditRequest)
      */
-    public void makeRequestToFileSystem(String destionationAddress, EditRequest request){
+    public FeedbackResponse makeRequestToFileSystem(String destionationAddress, EditRequest request){
         try{
             Socket deleteSocket = new Socket(destionationAddress, replicationPort);
             DataOutputStream dataOutputStream = new DataOutputStream(deleteSocket.getOutputStream());
             dataOutputStream.write(Serializer.serialize(request));
+            FeedbackResponse feedbackResponse = null;
+            if(request.getClass() != ReplicationRequest.class){
+                /* la replicare nu am nevoie de feedback de la nodul intern ;
+                se cere feedback doar in cazul operatiilor la care am de trimis raspuns la client
+                 */
+                DataInputStream dataInputStream = new DataInputStream(deleteSocket.getInputStream());
+                byte[] buffer = new byte[1024];
+                while(dataInputStream.read(buffer, 0, 1024) > 0){
+                    feedbackResponse = (FeedbackResponse)Serializer.deserialize(buffer);
+                    break;
+                }
+                dataInputStream.close();
+            }
             dataOutputStream.close();
             deleteSocket.close();
+            return feedbackResponse;
         }
         catch (Exception exception){
             System.out.println("MakeRequestToFileSystem  exception : " + request.getClass() + " : " + exception.getMessage());
         }
+        return null;
     }
 
 
@@ -117,20 +133,51 @@ public class FileSystemManager {
      * @param newname Noul nume al fisierului
      * @param candidates Adresele nodurilor de la care se va elimina fisierului.
      */
-    public void renameFile(String userId, String filename, String newname, List<String> candidates){
+    public FeedbackResponse renameFile(String userId, String filename, String newname, List<String> candidates){
+        List<FeedbackResponse> feedbackResponses = new ArrayList<FeedbackResponse>();
+        List<Thread> threadPool = new ArrayList<>();
         for(String destinationAddress : candidates) {
-            new Thread(new Runnable() {
+            Thread thread = new Thread(new Runnable() {
                 @Override
                 public void run() {
                     RenameRequest renameRequest = new RenameRequest();
                     renameRequest.setUserId(userId);
                     renameRequest.setFilename(filename);
                     renameRequest.setNewName(newname);
-                    System.out.println("dam drumu la treaba..");
+                    System.out.println("Trimitem cerere de replicare catre " + destinationAddress);
 
-                    makeRequestToFileSystem(destinationAddress, renameRequest);
+                    feedbackResponses.add(makeRequestToFileSystem(destinationAddress, renameRequest));
+                    System.out.println("Am primis feedback de la " + destinationAddress);
+
                 }
-            }).start();
+            });
+            threadPool.add(thread);
+            thread.start();
         }
+        for(Thread thread : threadPool){
+            if(thread.isAlive()) {
+                try {
+                    thread.join();
+                }
+                catch (InterruptedException exception){
+                    System.out.println("Interrupt exception la renameFile thread!");
+                }
+            }
+        }
+        return getOverallFeedback(feedbackResponses);
+
+    }
+
+    public FeedbackResponse getOverallFeedback(List<FeedbackResponse> feedbackResponses){
+        /*  TODO verifica cu socket-urile inchise si deschise */
+        FeedbackResponse feedbackResponse = new FeedbackResponse();
+        for(FeedbackResponse feedback : feedbackResponses){
+            feedbackResponse.setSuccess(feedback.isSuccess());
+            feedbackResponse.setStatus(feedback.getStatus());
+            if(feedbackResponse.isSuccess())
+                break;
+        }
+        System.out.println("Status overall : " + feedbackResponse.getStatus());
+        return feedbackResponse;
     }
 }

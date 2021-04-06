@@ -45,30 +45,32 @@ public class FileSystem {
     /**
      * Functie care realizeaza stergerea unui fisier.
      */
-    public static void deleteFile(String filepath){
+    public static int deleteFile(String filepath){
         File file = new File(filepath);
         if(file.delete()){
             System.out.println("Fisierul a fost eliminat cu succes!");
+            return 1;
         }
-        else{
-            System.out.println("Fisierul nu poate fi eliminat");
-        }
+        System.out.println("Fisierul nu poate fi eliminat");
+        return 0;
     }
 
     /**
      * Functie care realizeaza redenumirea unui fisier.
      */
-    public static void renameFile(String prevName, String newName){
+    public static int renameFile(String prevName, String newName){
         if(checkFileExistance(newName)){
            System.out.println("Nu se poate redenumi fisierul! Exista deja un fisier cu noul nume!");
-           return;
+           return 2;
         }
 
         try {
             Files.move(Paths.get(prevName), Paths.get(newName));
+            return 1;
         }
         catch (IOException e){
             System.out.println("Exceptie la redenumirea fisierului");
+            return 0;
         }
     }
 

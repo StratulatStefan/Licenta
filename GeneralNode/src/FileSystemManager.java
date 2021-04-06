@@ -1,4 +1,5 @@
 import client_node.FileHeader;
+import client_node.NewFileRequestFeedback;
 import communication.Address;
 import communication.Serializer;
 import config.AppConfig;
@@ -130,13 +131,46 @@ public class FileSystemManager implements Runnable{
                             else if(fileSystemRequest.getClass() == DeleteRequest.class){
                                 System.out.println("Am primit comanda de eliminare a fisierului.");
                                 String filepath = mainFilepath + address.getIpAddress() + "/" + userId + "/" + filename;
-                                FileSystem.deleteFile(filepath);
+                                int operation_status = FileSystem.deleteFile(filepath);
+                                FeedbackResponse feedbackResponse = new FeedbackResponse();
+                                switch (operation_status){
+                                    case 0 : {
+                                        feedbackResponse.setStatus("Fisierul nu poate fi eliminat");
+                                        feedbackResponse.setSuccess(false);
+                                        break;
+                                    }
+                                    case 1 : {
+                                        feedbackResponse.setStatus("Fisierul a fost eliminat cu succes!");
+                                        feedbackResponse.setSuccess(true);
+                                        break;
+                                    }
+                                }
+                                sendFeedbackToGeneraManage(dataOutputStream, feedbackResponse);
                             }
                             else if(fileSystemRequest.getClass() == RenameRequest.class){
                                 System.out.println("Am primit comanda de redenumire. Dam drumu la treaba imediat");
                                 String originalPath = mainFilepath + address.getIpAddress() + "/" + userId + "/" + filename;
                                 String newPath = mainFilepath + address.getIpAddress() + "/" + userId + "/" + ((RenameRequest) fileSystemRequest).getNewName();
-                                FileSystem.renameFile(originalPath, newPath);
+                                int operation_status = FileSystem.renameFile(originalPath, newPath);
+                                FeedbackResponse feedbackResponse = new FeedbackResponse();
+                                switch (operation_status){
+                                    case 0 : {
+                                        feedbackResponse.setStatus("Eroare la redenumirea fisierului!");
+                                        feedbackResponse.setSuccess(false);
+                                        break;
+                                    }
+                                    case 1 : {
+                                        feedbackResponse.setStatus("Fisierul a fost redenumit cu succes!");
+                                        feedbackResponse.setSuccess(true);
+                                        break;
+                                    }
+                                    case 2 : {
+                                        feedbackResponse.setStatus("Nu se poate redenumi fisierul! Exista deja un fisier cu noul nume!");
+                                        feedbackResponse.setSuccess(false);
+                                        break;
+                                    }
+                                }
+                                sendFeedbackToGeneraManage(dataOutputStream, feedbackResponse);
                             }
                         }
                         catch (ClassCastException exception){
@@ -170,6 +204,15 @@ public class FileSystemManager implements Runnable{
                 }
             }
         };
+    }
+
+    public void sendFeedbackToGeneraManage(DataOutputStream dataOutputStream, FeedbackResponse feedbackResponse){
+        try{
+            dataOutputStream.write(Serializer.serialize(feedbackResponse));
+        }
+        catch (IOException exception){
+            System.out.println("Exceptie IO la sendFeedbackToGeneraManage : " + exception.getMessage());
+        }
     }
 
     /**

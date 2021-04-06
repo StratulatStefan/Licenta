@@ -75,6 +75,8 @@ public class GeneralManager{
      */
     private ReplicationManager replicationManager;
 
+    private FeedbackManager feedbackManager;
+
     /**
      * Obiectul care se va ocupa de prelucrarea fisierelor
      */
@@ -94,6 +96,7 @@ public class GeneralManager{
      * Constructorul clasei
      */
     public GeneralManager() throws Exception {
+        this.feedbackManager = new FeedbackManager();
         this.hearthBeatManager = new HearthBeatManager(generalManagerIpAddress);
         this.clientCommunicationManager = new ClientCommunicationManager();
         this.replicationManager = new ReplicationManager();

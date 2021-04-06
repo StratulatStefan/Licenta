@@ -86,12 +86,12 @@ public class GeneralNode{
             return null;
         }
 
-        /*try {
+        try {
             storageStatus.setMemoryQuantity(FileSystem.getFileSize(path));
         }
         catch (IOException exception){
             // fuck off!
-        }*/
+        }
         String [] usersDirectories = FileSystem.getDirContent(path);
 
         for (String userDir : usersDirectories) {
@@ -100,6 +100,7 @@ public class GeneralNode{
             for(String file : userFiles){
                 FileAttribute f = new FileAttribute();
                 f.setFilename(file);
+                /* TODO sincronizare la replication : poate fi de aici */
                 if(!pendingList.containsRegister(userDir, file)) {
                     long startTime = System.currentTimeMillis();
                     f.setCrc(FileSystem.calculateCRC(path + "\\" + userDir + "\\" + file));

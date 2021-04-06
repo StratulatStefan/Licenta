@@ -79,6 +79,7 @@ public class ReplicationManager implements Runnable{
 
             System.out.println("------------------------------------");
             System.out.println("Replication Status");
+            /* TODO rezolvare problema replicare .. */
             try {
                 for (String userId : GeneralManager.contentTable.getUsers()) {
                     HashMap<String, Integer> userFiles = GeneralManager.contentTable.getUserFiless(userId);
@@ -147,6 +148,12 @@ public class ReplicationManager implements Runnable{
                     "Nu exista suficiente noduri pe care sa se faca replicarea.");
         }
         else {
+            try{
+                GeneralManager.contentTable.updateFileStatus(userId, userFile, "[PENDING]");
+            }
+            catch (Exception exception){
+                System.out.println("Replication : updatefilestatus1 : " + exception.getMessage());
+            }
             // cautam un criteriu pe baza caruia selectam nodul de la care se face copierea
             String source = availableNodesAddressesForFile.get(0);
             System.out.println("\t\tFound source of replication : " + source);
@@ -156,7 +163,16 @@ public class ReplicationManager implements Runnable{
             }
             System.out.println();
             GeneralManager.fileSystemManager.replicateFile(userId, userFile, source, candidates);
+
+            try{
+                GeneralManager.contentTable.updateFileStatus(userId, userFile, "[VALID]");
+            }
+            catch (Exception exception){
+                System.out.println("Replication : updatefilestatus1 : " + exception.getMessage());
+            }
+
         }
+
     }
 
     public void deletion(int replication_factor, String userId, String userFile, List<String> candidates) throws Exception {

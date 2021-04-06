@@ -8,6 +8,7 @@ import communication.Address;
 import communication.Serializer;
 import config.AppConfig;
 import data.Pair;
+import node_manager.FeedbackResponse;
 import os.FileSystem;
 
 import java.io.DataInputStream;
@@ -160,6 +161,7 @@ public class ClientCommunicationManager {
     }
 
     /**
+     * TODO rework description
      * Functie apelata la adaugarea unui nou fisier;
      * Aadauga fisierul in tabela de content (cea care descrie toate fisierele care ar trebui sa fie existe in sistem);
      * Aceasta functie se apeleaza cand apare un nou fisier in sistem; se va pune inregistrarea in starea de PENDING;
@@ -169,16 +171,17 @@ public class ClientCommunicationManager {
      * @param filename Numele fisierului.
      * @param userType Tipul utilizatorului, pe baza caruia se va determina si factorul de replicare, din fisierul de config.
      */
-    public void registerUserNewFileRequest(String user, String filename, long crc, long filesize, String userType) throws Exception{
+    public void registerFileRequest(String user, String filename, long crc, long filesize, String userType) throws Exception{
         synchronized (GeneralManager.contentTable){
             try {
-                System.out.println("Inregistram noul fisier.");
                 int replication_factor = getReplicationFactor(userType);
                 String newFileStatus = "[PENDING]";
                 if(!GeneralManager.contentTable.checkForUserFile(user, filename)){
+                    // aici putem ajunge doar la adaugarea unui nou fisier
                     GeneralManager.contentTable.addRegister(user, filename, replication_factor, crc, newFileStatus);
                 }
                 else{
+                    // aici putem ajunge si rename si alte operatii asupra fisierului
                     GeneralManager.contentTable.updateFileStatus(user, filename, newFileStatus);
                     GeneralManager.contentTable.updateReplicationFactor(user, filename, replication_factor);
                 }
@@ -190,15 +193,15 @@ public class ClientCommunicationManager {
     }
 
     /**
+     * TODO rework description
      * Functie apelata la confirmarea stocarii unui nou fisier
      * Schimba starea fisierului din pending in valid.
      * @param user Id-ul utilizatorului care a adaugat fisierul.
      * @param filename Numele fisierului.
      */
-    public void confirmNewFileStorage(String user, String filename){
+    public void confirmUserRequest(String user, String filename){
         synchronized (GeneralManager.contentTable){
             try {
-                System.out.println("Confirmam stocarea noului fisier.");
                 GeneralManager.pendingQueue.addToQueue(user, filename);
             }
             catch (Exception exception){
@@ -254,6 +257,7 @@ public class ClientCommunicationManager {
                         ClientRequestStatus fileStatus = checkFileStatus(userId, filename);
                         switch (clientRequest){
                             case NEW_FILE:{
+                                /* TODO trimitem inapoi la frontend ok la stocarea fisierului ? */
                                 switch (fileStatus){
                                     case FILE_EXISTS: {
                                         response.setException("FILE ALREADY EXISTS!");
@@ -268,7 +272,8 @@ public class ClientCommunicationManager {
                                         if (chain != null) {
                                             response.setResponse(chain);
                                             System.out.println("Token-ul a fost trimis catre client : " + chain);
-                                            registerUserNewFileRequest(userId, filename, crc, filesize, usertype);
+                                            System.out.println("Inregistram noul fisier.");
+                                            registerFileRequest(userId, filename, crc, filesize, usertype);
                                             waitForFeedbackFromClient(userId, filename, filesize, usertype);
                                             try {
                                                 GeneralManager.userDataTable.addUser(userId, usertype);
@@ -293,11 +298,13 @@ public class ClientCommunicationManager {
                                         break;
                                     }
                                     case FILE_EXISTS:{
+                                        GeneralManager.contentTable.updateFileStatus(userId, filename, "[PENDING]");
                                         String newName = ((RenameFileRequest)clientManagerRequest).getNewName();
                                         List<String> candidateNodes = GeneralManager.statusTable.getAvailableNodesAddressesForFile(userId, filename);
-                                        GeneralManager.fileSystemManager.renameFile(userId, filename, newName, candidateNodes);
+                                        FeedbackResponse feedbackResponse = GeneralManager.fileSystemManager.renameFile(userId, filename, newName, candidateNodes);
                                         GeneralManager.contentTable.updateFileName(userId, filename, newName);
-                                        response.setResponse("Se rezolva!");
+                                        response.setResponse(feedbackResponse.getStatus());
+                                        GeneralManager.contentTable.updateFileStatus(userId, newName, "[VALID]");
                                         break;
                                     }
                                 }
@@ -310,12 +317,14 @@ public class ClientCommunicationManager {
                                         break;
                                     }
                                     case FILE_EXISTS:{
+                                        GeneralManager.contentTable.updateFileStatus(userId, filename, "[PENDING]");
                                         String candidateAddress = GeneralManager.statusTable.getAvailableNodesAddressesForFile(userId, filename).get(0);
                                         String filepath = GeneralManager.storagePath + candidateAddress + "/" + userId + "/" + filename;
                                         long filesize = FileSystem.getFileSize(filepath);
                                         GeneralManager.userStorageQuantityTable.registerMemoryRelease(clientManagerRequest.getUserId(), filesize);
                                         GeneralManager.contentTable.updateReplicationFactor(userId, filename, 0);
                                         response.setResponse("OK");
+                                        GeneralManager.contentTable.updateFileStatus(userId, filename, "[VALID]");
                                         break;
                                     }
                                 }
@@ -358,7 +367,8 @@ public class ClientCommunicationManager {
                             String userID = feedback.getUserId();
                             if(status.equals("OK") && fileName.equals(filename) && userID.equals(userId)) {
                                 System.out.println("Feedback valid de la frontend!");
-                                confirmNewFileStorage(userId, filename);
+                                System.out.println("Confirmam stocarea noului fisier.");
+                                confirmUserRequest(userId, filename);
                             }
                             else{
                                 System.out.println("Nu putem inregistra fisierul!");

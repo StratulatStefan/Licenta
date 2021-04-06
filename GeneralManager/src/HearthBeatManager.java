@@ -126,7 +126,7 @@ public class HearthBeatManager implements Runnable{
                         message = (NodeBeat) socket.receiveMessage();
                         receivedAddress = Address.parseAddress(message.getNodeAddress());
                         GeneralManager.statusTable.updateTable(message);
-                        GeneralManager.nodeStorageQuantityTable.updateRegister(receivedAddress.getIpAddress(), message.getMemoryQuantity());
+                        registerNodeStorageQuantity(receivedAddress.getIpAddress(), message.getMemoryQuantity());
                         System.out.println("Am primit un hearthbeat de la " + receivedAddress + " ...");
                         if(!GeneralManager.connectionTable.containsAddress(receivedAddress)){
                             System.out.println(" >>> [Adresa noua] : " + receivedAddress);
@@ -157,6 +157,19 @@ public class HearthBeatManager implements Runnable{
                 System.out.println("checkForFileStatusChange exception : " + exception.getMessage());
             }
         }
+    }
+
+    public void registerNodeStorageQuantity(String nodeAddress, long quantity){
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    GeneralManager.nodeStorageQuantityTable.updateRegister(nodeAddress, quantity);
+                } catch (Exception exception) {
+                    System.out.println("registerNodeStorageQuantity exception : " + exception.getMessage());
+                }
+            }
+        }).start();
     }
 
     /** -------- Main -------- **/
