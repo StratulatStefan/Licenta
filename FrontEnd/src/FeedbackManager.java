@@ -12,6 +12,7 @@ import java.util.List;
 public class FeedbackManager implements Runnable{
     private final List<NewFileRequestFeedback> feedbackList;
     private final static int bufferSize = 1024;
+
     public FeedbackManager(){
         this.feedbackList = new ArrayList<NewFileRequestFeedback>();
     }
@@ -25,8 +26,9 @@ public class FeedbackManager implements Runnable{
                     byte[] buffer = new byte[bufferSize];
                     while (dataInputStream.read(buffer, 0, bufferSize) > 0) {
                         synchronized (feedbackList) {
-                            System.out.println("Am primit feedback si il adaugam in lista!");
+                            System.out.println("Adaugam feedback-ul in lista!");
                             feedbackList.add((NewFileRequestFeedback) Serializer.deserialize(buffer));
+                            System.out.println(feedbackList.size());
                         }
                         break;
                     }
@@ -60,9 +62,9 @@ public class FeedbackManager implements Runnable{
     public void run() {
         try {
             ServerSocket feedbackSocket = new ServerSocket();
-            feedbackSocket.bind(new InetSocketAddress("127.0.0.1", 8010));
+            feedbackSocket.bind(new InetSocketAddress("127.0.0.100", 8010));
             while(true) {
-                System.out.println("Feedback nou de la frontend!");
+                System.out.println("Feedback nou de la un nod!");
                 Socket socket = feedbackSocket.accept();
                 new Thread(feedbackThread(socket)).start();
             }

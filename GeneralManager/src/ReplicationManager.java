@@ -163,7 +163,6 @@ public class ReplicationManager implements Runnable{
             }
             System.out.println();
             GeneralManager.fileSystemManager.replicateFile(userId, userFile, source, candidates);
-
         }
 
     }

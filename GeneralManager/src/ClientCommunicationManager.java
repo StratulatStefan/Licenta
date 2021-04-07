@@ -352,37 +352,19 @@ public class ClientCommunicationManager {
         new Thread(new Runnable() {
             @Override
             public void run() {
-                try {
-                    ServerSocket feedbackSocket = new ServerSocket();
-                    feedbackSocket.setSoTimeout((int)(filesize * 60));
-                    feedbackSocket.bind(new InetSocketAddress("127.0.0.1", 8010));
-                    Socket frontendSocket = feedbackSocket.accept();
-                    DataInputStream dataInputStream = new DataInputStream(frontendSocket.getInputStream());
-                    byte[] buffer = new byte[bufferSize];
-                    while(dataInputStream.read(buffer, 0, bufferSize) > 0) {
-                        NewFileRequestFeedback feedback = (NewFileRequestFeedback)Serializer.deserialize(buffer);
-                        String status = feedback.getStatus();
-                        String fileName = feedback.getFilename();
-                        String userID = feedback.getUserId();
-                        if(status.equals("OK") && fileName.equals(filename) && userID.equals(userId)) {
-                            System.out.println("Feedback valid de la frontend!");
-                            System.out.println("Confirmam stocarea noului fisier.");
-                            confirmUserRequest(userId, filename);
-                        }
-                        else{
-                            System.out.println("Nu putem inregistra fisierul!");
-                        }
-                        break;
-                    }
-                    dataInputStream.close();
-                    frontendSocket.close();
-                    feedbackSocket.close();
+                /* TODO adaugare timeout */
+                NewFileRequestFeedback feedback;
+                while((feedback = GeneralManager.feedbackManager.getFeedback(userId, filename)) == null);
+                String status = feedback.getStatus();
+                String fileName = feedback.getFilename();
+                String userID = feedback.getUserId();
+                if(status.equals("OK") && fileName.equals(filename) && userID.equals(userId)) {
+                    System.out.println("Feedback valid de la frontend!");
+                    System.out.println("Confirmam stocarea noului fisier.");
+                    confirmUserRequest(userId, filename);
                 }
-                catch (SocketTimeoutException timeoutException){
-                    System.out.println("timeout");
-                }
-                catch (Exception exception){
-                    System.out.println("Exceptie la primirea feedback-ului!: " + exception.getMessage());
+                else{
+                    System.out.println("Nu putem inregistra fisierul!");
                 }
             }
         }).start();

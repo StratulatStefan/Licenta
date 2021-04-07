@@ -25,7 +25,7 @@ ___
 - ~~In storagestatustable, crc tre sa fie per nod, nu per fisier~~
 - ~~Replicarea unui fisier daca nu mai corespunde CRC-u~~
 - ~~Feedback status operatie de la client la frontend~~
-- reparare probleme socket-uri
+- ~~reparare probleme socket-uri~~
 - la operatia de redenumire, daca am un nod inchis care contine fisierul, la deschidere sa ne dam seama pe baza crc-ului ca este acelasi fisier
     - <span style="color:red"><b>Intrebare : </b> Daca am un fisier in care a fost schimbat un octet.. Mecanismul de replicare va vedea ca nu mai corespunde CRC-ul, si va solicita replicare; 
     dar, daca se face undo la operatie (se schimba la loc octetul), eliminam o replica, nu?</span>

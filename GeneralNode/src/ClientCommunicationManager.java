@@ -234,35 +234,40 @@ public class ClientCommunicationManager {
     }
 
     public void sendFeedbackToFrontend(FileHeader fileHeader, long crc){
-        NewFileRequestFeedback feedback = new NewFileRequestFeedback();
-        feedback.setFilename(fileHeader.getFilename());
-        feedback.setUserId(fileHeader.getUserId());
-        feedback.setNodeAddress(nodeAddress.getIpAddress());
-        feedback.setCrc(crc);
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                NewFileRequestFeedback feedback = new NewFileRequestFeedback();
+                feedback.setFilename(fileHeader.getFilename());
+                feedback.setUserId(fileHeader.getUserId());
+                feedback.setNodeAddress(nodeAddress.getIpAddress());
+                feedback.setCrc(crc);
 
-        Socket frontendSocket = null;
-        DataOutputStream dataOutputStream = null;
+                Socket frontendSocket = null;
+                DataOutputStream dataOutputStream = null;
 
-        try{
-            frontendSocket = new Socket("127.0.0.100", 8010);
-            dataOutputStream = new DataOutputStream(frontendSocket.getOutputStream());
+                try{
+                    frontendSocket = new Socket("127.0.0.100", 8010);
+                    dataOutputStream = new DataOutputStream(frontendSocket.getOutputStream());
 
-            dataOutputStream.write(Serializer.serialize(feedback));
+                    dataOutputStream.write(Serializer.serialize(feedback));
 
-            dataOutputStream.close();
-            frontendSocket.close();
-        }
-        catch (IOException exception){
-            System.out.println("Exceptie IO la sendFeedBackToFrontend : " + exception.getMessage());
-        }
-        finally {
-            try{
-                dataOutputStream.close();
-                frontendSocket.close();
+                    dataOutputStream.close();
+                    frontendSocket.close();
+                }
+                catch (IOException exception){
+                    System.out.println("Exceptie IO la sendFeedBackToFrontend : " + exception.getMessage());
+                }
+                finally {
+                    try{
+                        dataOutputStream.close();
+                        frontendSocket.close();
+                    }
+                    catch(IOException exception){
+                        System.out.println("sendFeedBackToFrontend exceptie la inchidere socket-uri");
+                    }
+                }
             }
-            catch(IOException exception){
-                System.out.println("sendFeedBackToFrontend exceptie la inchidere socket-uri");
-            }
-        }
+        }).start();
     }
 }

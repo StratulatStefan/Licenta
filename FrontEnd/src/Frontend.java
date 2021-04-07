@@ -16,6 +16,8 @@ public class Frontend {
 
     private static int generalManagerPort = 8081;
 
+    public static FeedbackManager feedbackManager = new FeedbackManager();
+
     public static String managerOperationRequest(ClientManagerRequest clientRequest) throws NullPointerException, IOException, ClassNotFoundException {
         String[] fname = clientRequest.getFilename().split("/");
         clientRequest.setFilename(fname[fname.length - 1]);
@@ -103,6 +105,9 @@ public class Frontend {
     }
 
     public static void main(String[] args) throws IOException {
+        feedbackManager = new FeedbackManager();
+        new Thread(feedbackManager).start();
+
         NewFileRequest newFileRequest = new NewFileRequest();
         newFileRequest.setUserId("1");
         String filepath = "D:/Facultate/Licenta/test_files/lab06.py";
@@ -111,7 +116,7 @@ public class Frontend {
         newFileRequest.setFilesize(FileSystem.getFileSize(filepath));
         newFileRequest.setCrc(FileSystem.calculateCRC(filepath));
         newFileRequest.setUserType("STANDARD");
-        //mainActivity(newFileRequest);
+        mainActivity(newFileRequest);
 
         newFileRequest = new NewFileRequest();
         newFileRequest.setUserId("2");
@@ -129,7 +134,7 @@ public class Frontend {
         newFileRequest.setFilesize(FileSystem.getFileSize(filepath));
         newFileRequest.setCrc(FileSystem.calculateCRC(filepath));
         newFileRequest.setUserType("STANDARD");
-        //mainActivity(newFileRequest);
+        mainActivity(newFileRequest);
 
 
 

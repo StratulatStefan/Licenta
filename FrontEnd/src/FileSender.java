@@ -20,7 +20,6 @@ public class FileSender {
 
     private static int generalManagerPort = 8081;
 
-    private static int feedbackPort = 8010;
 
     private static boolean validateToken(String token) throws Exception{
         if(token.length() == 0)
@@ -92,38 +91,28 @@ public class FileSender {
         String[] fnamelist = filename.split("/");
         final String fname = fnamelist[fnamelist.length - 1];
         final List<Thread> threads = new ArrayList<>();
-        ServerSocket feedbackSocket = null;
         try {
             final List<String> addresses = new LinkedList<String>(Arrays.asList(getAddressesFromToken(token)));
             total_nodes = addresses.size();
-            feedbackSocket = new ServerSocket();
-            feedbackSocket.setSoTimeout((int)(timeout * 500));
-            feedbackSocket.bind(new InetSocketAddress(ipAddress, feedbackPort));
             while(received_nodes != total_nodes){
-                Socket internalNodeSocket = feedbackSocket.accept();
                 received_nodes += 1;
                 Thread thread = new Thread(new Runnable() {
                     @Override
                     public void run() {
                         try{
-                            DataInputStream dataInputStream = new DataInputStream(internalNodeSocket.getInputStream());
-                            byte[] buffer = new byte[bufferSize];
-                            while(dataInputStream.read(buffer, 0, bufferSize) > 0) {
-                                NewFileRequestFeedback feedback = (NewFileRequestFeedback) Serializer.deserialize(buffer);
-                                String nodeAddress = feedback.getNodeAddress();
-                                String fileName = feedback.getFilename();
-                                String userID = feedback.getUserId();
-                                long crc = feedback.getCrc();
-                                System.out.print(String.format("Feedback primit de la : [%s]\n", nodeAddress));
-                                if (fileName.equals(fname) && userID.equals(userId) && CRC == crc) {
-                                    System.out.println(" >> [OK]");
-                                    valid_nodes[0] += 1;
-                                } else {
-                                    System.out.println(" >> [INVALID]");
-                                }
+                            NewFileRequestFeedback feedback;
+                            while ((feedback = Frontend.feedbackManager.getFeedback(userId, fname)) == null);
+                            String nodeAddress = feedback.getNodeAddress();
+                            String fileName = feedback.getFilename();
+                            String userID = feedback.getUserId();
+                            long crc = feedback.getCrc();
+                            System.out.print(String.format("Feedback primit de la : [%s]\n", nodeAddress));
+                            if (fileName.equals(fname) && userID.equals(userId) && CRC == crc) {
+                                System.out.println(" >> [OK]");
+                                valid_nodes[0] += 1;
+                            } else {
+                                System.out.println(" >> [INVALID]");
                             }
-                            dataInputStream.close();
-                            internalNodeSocket.close();
                         }
                         catch (Exception exception){
                             System.out.println("Exceptie la primirea feedback-ului! : " + exception.getMessage());
@@ -134,20 +123,11 @@ public class FileSender {
                 thread.start();
             }
         }
-        catch (SocketTimeoutException timeoutException){
-            System.out.println("timeout");
-        }
         catch (Exception exception){
             System.out.println("Exceptie : " + exception.getMessage());
             another_exception = true;
         }
         finally {
-            try{
-                feedbackSocket.close();
-            }
-            catch (Exception exception){
-                System.out.println("waitForFeedback : could not close feedbackSocket" + exception.getMessage());
-            }
             System.out.println("Am primit feedback de la " + received_nodes + "/" + total_nodes);
             for(Thread thread : threads){
                 if(thread.isAlive()){
@@ -166,21 +146,26 @@ public class FileSender {
     }
 
     public static void sendFeedbackToGM(String userId, String filename, String status){
-        NewFileRequestFeedback feedback = new NewFileRequestFeedback();
-        feedback.setFilename(filename);
-        feedback.setUserId(userId);
-        feedback.setStatus(status);
-        try{
-            Socket frontendSocket = new Socket("127.0.0.1", 8010);
-            DataOutputStream dataOutputStream = new DataOutputStream(frontendSocket.getOutputStream());
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                NewFileRequestFeedback feedback = new NewFileRequestFeedback();
+                feedback.setFilename(filename);
+                feedback.setUserId(userId);
+                feedback.setStatus(status);
+                try{
+                    Socket frontendSocket = new Socket("127.0.0.1", 8010);
+                    DataOutputStream dataOutputStream = new DataOutputStream(frontendSocket.getOutputStream());
 
-            dataOutputStream.write(Serializer.serialize(feedback));
+                    dataOutputStream.write(Serializer.serialize(feedback));
 
-            dataOutputStream.close();
-            frontendSocket.close();
-        }
-        catch (IOException exception){
-            System.out.println("Exceptie IO la sendFeedBackToFrontend : " + exception.getMessage());
-        }
+                    dataOutputStream.close();
+                    frontendSocket.close();
+                }
+                catch (IOException exception){
+                    System.out.println("Exceptie IO la sendFeedBackToGM : " + exception.getMessage());
+                }
+            }
+        }).start();
     }
 }

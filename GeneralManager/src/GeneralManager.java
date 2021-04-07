@@ -75,7 +75,7 @@ public class GeneralManager{
      */
     private ReplicationManager replicationManager;
 
-    private FeedbackManager feedbackManager;
+    public static FeedbackManager feedbackManager;
 
     /**
      * Obiectul care se va ocupa de prelucrarea fisierelor
@@ -115,6 +115,8 @@ public class GeneralManager{
         new Thread(hearthBeatManager).start();
 
         new Thread(replicationManager).start();
+
+        new Thread(feedbackManager).start();
 
         clientCommunicationManager.clientCommunicationLoop(generalManagerIpAddress);
     }

@@ -74,9 +74,9 @@ public class HearthBeatManager implements Runnable{
                 int cleanUpIndex = 1;
                 while(true) {
                     System.out.println(Time.getCurrentTimeWithFormat() + " ");
-                    checkForFileStatusChange();
                     try {
                         if(cleanUpIndex == cleanupFrequency){
+                            checkForFileStatusChange();
                             disconnected = GeneralManager.connectionTable.checkDisconnection(frequency);
                             if(disconnected.size() != 0){
                                 for (Address disconnectedAddres : disconnected) {
