@@ -116,11 +116,13 @@ public class FileSystemManager implements Runnable{
                     boolean file_header_found = false;
                     FileOutputStream fileOutputStream = null;
                     int read;
+                    String userId = "";
+                    String filename = "";
                     while((read = dataInputStream.read(buffer, 0, bufferSize)) > 0){
                         try {
                             EditRequest fileSystemRequest = (EditRequest) Serializer.deserialize(buffer);
-                            String userId = fileSystemRequest.getUserId();
-                            String filename = fileSystemRequest.getFilename();
+                            userId = fileSystemRequest.getUserId();
+                            filename = fileSystemRequest.getFilename();
 
                             if(fileSystemRequest.getClass() == ReplicationRequest.class){
                                 System.out.println("Am primit comanda de replicare si trimit fisierul mai departe.");
@@ -231,6 +233,8 @@ public class FileSystemManager implements Runnable{
         }
         catch (IOException exception){
             System.out.println("File System manager exception : " + exception.getMessage());
+        }
+        finally {
             try {
                 serverSocket.close();
             }

@@ -92,10 +92,11 @@ public class FileSender {
         String[] fnamelist = filename.split("/");
         final String fname = fnamelist[fnamelist.length - 1];
         final List<Thread> threads = new ArrayList<>();
+        ServerSocket feedbackSocket = null;
         try {
             final List<String> addresses = new LinkedList<String>(Arrays.asList(getAddressesFromToken(token)));
             total_nodes = addresses.size();
-            ServerSocket feedbackSocket = new ServerSocket();
+            feedbackSocket = new ServerSocket();
             feedbackSocket.setSoTimeout((int)(timeout * 500));
             feedbackSocket.bind(new InetSocketAddress(ipAddress, feedbackPort));
             while(received_nodes != total_nodes){
@@ -141,6 +142,12 @@ public class FileSender {
             another_exception = true;
         }
         finally {
+            try{
+                feedbackSocket.close();
+            }
+            catch (Exception exception){
+                System.out.println("waitForFeedback : could not close feedbackSocket" + exception.getMessage());
+            }
             System.out.println("Am primit feedback de la " + received_nodes + "/" + total_nodes);
             for(Thread thread : threads){
                 if(thread.isAlive()){

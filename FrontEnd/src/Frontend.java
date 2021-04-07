@@ -105,27 +105,51 @@ public class Frontend {
     public static void main(String[] args) throws IOException {
         NewFileRequest newFileRequest = new NewFileRequest();
         newFileRequest.setUserId("1");
-        //String filepath = "D:/Facultate/Licenta/test_files/lab06.py";
-        String filepath = "D:/Facultate/Licenta/test_files/curs.rar";
+        String filepath = "D:/Facultate/Licenta/test_files/lab06.py";
+        //String filepath = "D:/Facultate/Licenta/test_files/curs.rar";
         newFileRequest.setFilename(filepath);
         newFileRequest.setFilesize(FileSystem.getFileSize(filepath));
         newFileRequest.setCrc(FileSystem.calculateCRC(filepath));
         newFileRequest.setUserType("STANDARD");
+        //mainActivity(newFileRequest);
+
+        newFileRequest = new NewFileRequest();
+        newFileRequest.setUserId("2");
+        filepath = "D:/Facultate/Licenta/test_files/curs.rar";
+        newFileRequest.setFilename(filepath);
+        newFileRequest.setFilesize(FileSystem.getFileSize(filepath));
+        newFileRequest.setCrc(FileSystem.calculateCRC(filepath));
+        newFileRequest.setUserType("STANDARD");
+        mainActivity(newFileRequest);
+
+        newFileRequest = new NewFileRequest();
+        newFileRequest.setUserId("3");
+        filepath = "D:/Facultate/Licenta/test_files/sss.pdf";
+        newFileRequest.setFilename(filepath);
+        newFileRequest.setFilesize(FileSystem.getFileSize(filepath));
+        newFileRequest.setCrc(FileSystem.calculateCRC(filepath));
+        newFileRequest.setUserType("STANDARD");
+        //mainActivity(newFileRequest);
+
+
 
 
         DeleteFileRequest deleteFileRequest = new DeleteFileRequest();
         //deleteFileRequest.setFilename("D:/Facultate/Licenta/test_files/sss.pdf");
-        deleteFileRequest.setFilename("D:/Facultate/Licenta/test_files/curs.rar");
+        deleteFileRequest.setFilename("D:/Facultate/Licenta/test_files/lab06.py");
         deleteFileRequest.setUserId("1");
+        //mainActivity(deleteFileRequest);
+
+
+
 
         RenameFileRequest renameFileRequest = new RenameFileRequest();
         renameFileRequest.setFilename("curs1.rar");
         renameFileRequest.setUserId("1");
         renameFileRequest.setNewName("curs2.rar");
-
-        mainActivity(newFileRequest);
-        //mainActivity(deleteFileRequest);
         //mainActivity(renameFileRequest);
+
+
 
 
         //userId = "1";

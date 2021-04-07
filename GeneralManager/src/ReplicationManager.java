@@ -164,13 +164,6 @@ public class ReplicationManager implements Runnable{
             System.out.println();
             GeneralManager.fileSystemManager.replicateFile(userId, userFile, source, candidates);
 
-            try{
-                GeneralManager.contentTable.updateFileStatus(userId, userFile, "[VALID]");
-            }
-            catch (Exception exception){
-                System.out.println("Replication : updatefilestatus1 : " + exception.getMessage());
-            }
-
         }
 
     }

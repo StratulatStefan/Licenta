@@ -13,6 +13,7 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.sql.Struct;
+import java.time.Year;
 
 /**
  * Clasa care va incapsula toata interactiunea dintre nodul intern si client (frontend).
@@ -239,9 +240,12 @@ public class ClientCommunicationManager {
         feedback.setNodeAddress(nodeAddress.getIpAddress());
         feedback.setCrc(crc);
 
+        Socket frontendSocket = null;
+        DataOutputStream dataOutputStream = null;
+
         try{
-            Socket frontendSocket = new Socket("127.0.0.100", 8010);
-            DataOutputStream dataOutputStream = new DataOutputStream(frontendSocket.getOutputStream());
+            frontendSocket = new Socket("127.0.0.100", 8010);
+            dataOutputStream = new DataOutputStream(frontendSocket.getOutputStream());
 
             dataOutputStream.write(Serializer.serialize(feedback));
 
@@ -250,6 +254,15 @@ public class ClientCommunicationManager {
         }
         catch (IOException exception){
             System.out.println("Exceptie IO la sendFeedBackToFrontend : " + exception.getMessage());
+        }
+        finally {
+            try{
+                dataOutputStream.close();
+                frontendSocket.close();
+            }
+            catch(IOException exception){
+                System.out.println("sendFeedBackToFrontend exceptie la inchidere socket-uri");
+            }
         }
     }
 }

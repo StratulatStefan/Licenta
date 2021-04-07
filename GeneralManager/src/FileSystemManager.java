@@ -95,6 +95,12 @@ public class FileSystemManager {
                 replicationRequest.setDestionationAddress(destinationAddresses);
 
                 makeRequestToFileSystem(sourceAddress, replicationRequest);
+                try{
+                    GeneralManager.pendingQueue.addToQueue(user, filename);
+                }
+                catch (Exception exception){
+                    System.out.println("Replication : updatefilestatus1 : " + exception.getMessage());
+                }
             }
         }).start();
     }
@@ -169,7 +175,6 @@ public class FileSystemManager {
     }
 
     public FeedbackResponse getOverallFeedback(List<FeedbackResponse> feedbackResponses){
-        /*  TODO verifica cu socket-urile inchise si deschise */
         FeedbackResponse feedbackResponse = new FeedbackResponse();
         for(FeedbackResponse feedback : feedbackResponses){
             feedbackResponse.setSuccess(feedback.isSuccess());

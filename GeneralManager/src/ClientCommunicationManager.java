@@ -275,13 +275,13 @@ public class ClientCommunicationManager {
                                             System.out.println("Inregistram noul fisier.");
                                             registerFileRequest(userId, filename, crc, filesize, usertype);
                                             waitForFeedbackFromClient(userId, filename, filesize, usertype);
-                                            try {
+                                            /*try {
                                                 GeneralManager.userDataTable.addUser(userId, usertype);
                                             }
                                             catch (Exception exception){
                                                 System.out.println(exception.getMessage());
-                                            }
-                                            GeneralManager.userStorageQuantityTable.registerMemoryConsumption(userId, usertype, filesize);
+                                            }*/
+                                            //GeneralManager.userStorageQuantityTable.registerMemoryConsumption(userId, usertype, filesize);
                                         }
                                         else {
                                             response.setException("eroare");
@@ -321,7 +321,7 @@ public class ClientCommunicationManager {
                                         String candidateAddress = GeneralManager.statusTable.getAvailableNodesAddressesForFile(userId, filename).get(0);
                                         String filepath = GeneralManager.storagePath + candidateAddress + "/" + userId + "/" + filename;
                                         long filesize = FileSystem.getFileSize(filepath);
-                                        GeneralManager.userStorageQuantityTable.registerMemoryRelease(clientManagerRequest.getUserId(), filesize);
+                                       // GeneralManager.userStorageQuantityTable.registerMemoryRelease(clientManagerRequest.getUserId(), filesize);
                                         GeneralManager.contentTable.updateReplicationFactor(userId, filename, 0);
                                         response.setResponse("OK");
                                         GeneralManager.contentTable.updateFileStatus(userId, filename, "[VALID]");
@@ -357,36 +357,32 @@ public class ClientCommunicationManager {
                     feedbackSocket.setSoTimeout((int)(filesize * 60));
                     feedbackSocket.bind(new InetSocketAddress("127.0.0.1", 8010));
                     Socket frontendSocket = feedbackSocket.accept();
-                    try{
-                        DataInputStream dataInputStream = new DataInputStream(frontendSocket.getInputStream());
-                        byte[] buffer = new byte[bufferSize];
-                        while(dataInputStream.read(buffer, 0, bufferSize) > 0) {
-                            NewFileRequestFeedback feedback = (NewFileRequestFeedback)Serializer.deserialize(buffer);
-                            String status = feedback.getStatus();
-                            String fileName = feedback.getFilename();
-                            String userID = feedback.getUserId();
-                            if(status.equals("OK") && fileName.equals(filename) && userID.equals(userId)) {
-                                System.out.println("Feedback valid de la frontend!");
-                                System.out.println("Confirmam stocarea noului fisier.");
-                                confirmUserRequest(userId, filename);
-                            }
-                            else{
-                                System.out.println("Nu putem inregistra fisierul!");
-                            }
+                    DataInputStream dataInputStream = new DataInputStream(frontendSocket.getInputStream());
+                    byte[] buffer = new byte[bufferSize];
+                    while(dataInputStream.read(buffer, 0, bufferSize) > 0) {
+                        NewFileRequestFeedback feedback = (NewFileRequestFeedback)Serializer.deserialize(buffer);
+                        String status = feedback.getStatus();
+                        String fileName = feedback.getFilename();
+                        String userID = feedback.getUserId();
+                        if(status.equals("OK") && fileName.equals(filename) && userID.equals(userId)) {
+                            System.out.println("Feedback valid de la frontend!");
+                            System.out.println("Confirmam stocarea noului fisier.");
+                            confirmUserRequest(userId, filename);
                         }
-                        dataInputStream.close();
-                        frontendSocket.close();
-                        feedbackSocket.close();
+                        else{
+                            System.out.println("Nu putem inregistra fisierul!");
+                        }
+                        break;
                     }
-                    catch (Exception exception){
-                        System.out.println("Exceptie la primirea feedback-ului! : " + exception.getMessage());
-                    }
+                    dataInputStream.close();
+                    frontendSocket.close();
+                    feedbackSocket.close();
                 }
                 catch (SocketTimeoutException timeoutException){
                     System.out.println("timeout");
                 }
                 catch (Exception exception){
-                    System.out.println("Exceptie : " + exception.getMessage());
+                    System.out.println("Exceptie la primirea feedback-ului!: " + exception.getMessage());
                 }
             }
         }).start();
