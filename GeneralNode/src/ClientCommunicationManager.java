@@ -3,6 +3,7 @@ import communication.Address;
 import client_node.FileHeader;
 import communication.Serializer;
 import config.AppConfig;
+import log.ProfiPrinter;
 import os.FileSystem;
 
 import java.io.*;
@@ -176,7 +177,7 @@ public class ClientCommunicationManager {
                                 header_found = true;
                                 continue;
                             } catch (Exception exception) {
-                                System.out.println("Exceptie : " + exception.getMessage());
+                                ProfiPrinter.PrintException("Exceptie : " + exception.getMessage());
                             }
                         }
                         else {
@@ -201,8 +202,8 @@ public class ClientCommunicationManager {
 
                 }
                 catch (Exception exception){
-                    System.out.println(exception.getMessage());
-                    System.out.println(String.format("Could not properly close connection with my friend : [%s : %d]",
+                    ProfiPrinter.PrintException(exception.getMessage());
+                    ProfiPrinter.PrintException(String.format("Could not properly close connection with my friend : [%s : %d]",
                             clientSocket.getLocalAddress(),
                             clientSocket.getLocalPort()));
                 }
@@ -229,7 +230,7 @@ public class ClientCommunicationManager {
         }
         catch (Exception exception){
             serverSocket.close();
-            System.out.println(exception.getMessage());
+            ProfiPrinter.PrintException(exception.getMessage());
         }
     }
 
@@ -256,7 +257,7 @@ public class ClientCommunicationManager {
                     frontendSocket.close();
                 }
                 catch (IOException exception){
-                    System.out.println("Exceptie IO la sendFeedBackToFrontend : " + exception.getMessage());
+                    ProfiPrinter.PrintException("Exceptie IO la sendFeedBackToFrontend : " + exception.getMessage());
                 }
                 finally {
                     try{
@@ -264,7 +265,7 @@ public class ClientCommunicationManager {
                         frontendSocket.close();
                     }
                     catch(IOException exception){
-                        System.out.println("sendFeedBackToFrontend exceptie la inchidere socket-uri");
+                        ProfiPrinter.PrintException("sendFeedBackToFrontend exceptie la inchidere socket-uri");
                     }
                 }
             }

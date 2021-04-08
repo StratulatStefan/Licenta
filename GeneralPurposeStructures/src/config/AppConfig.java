@@ -1,5 +1,7 @@
 package config;
 
+import log.ProfiPrinter;
+
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
@@ -42,7 +44,7 @@ public class AppConfig {
             reader.close();
         }
         catch (IOException exception){
-            System.out.println("Eroare la citirea fisierului de config");
+            ProfiPrinter.PrintException("Eroare la citirea fisierului de config");
         }
     }
 

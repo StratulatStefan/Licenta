@@ -1,6 +1,7 @@
 import client_node.FileHeader;
 import client_node.NewFileRequestFeedback;
 import communication.Serializer;
+import log.ProfiPrinter;
 
 import java.io.*;
 import java.net.InetSocketAddress;
@@ -79,7 +80,7 @@ public class FileSender {
             socket.close();
         }
         catch (Exception exception){
-            System.out.println("Exceptie la trimiterea unui nou fisier: " + exception.getMessage());
+            ProfiPrinter.PrintException("Exceptie la trimiterea unui nou fisier: " + exception.getMessage());
         }
     }
 
@@ -115,7 +116,7 @@ public class FileSender {
                             }
                         }
                         catch (Exception exception){
-                            System.out.println("Exceptie la primirea feedback-ului! : " + exception.getMessage());
+                            ProfiPrinter.PrintException("Exceptie la primirea feedback-ului! : " + exception.getMessage());
                         }
                     }
                 });
@@ -124,7 +125,7 @@ public class FileSender {
             }
         }
         catch (Exception exception){
-            System.out.println("Exceptie : " + exception.getMessage());
+            ProfiPrinter.PrintException("Exceptie : " + exception.getMessage());
             another_exception = true;
         }
         finally {
@@ -163,7 +164,7 @@ public class FileSender {
                     frontendSocket.close();
                 }
                 catch (IOException exception){
-                    System.out.println("Exceptie IO la sendFeedBackToGM : " + exception.getMessage());
+                    ProfiPrinter.PrintException("Exceptie IO la sendFeedBackToGM : " + exception.getMessage());
                 }
             }
         }).start();

@@ -7,6 +7,7 @@ import client_manager.data.DeleteFileRequest;
 import client_manager.data.NewFileRequest;
 import client_manager.data.RenameFileRequest;
 import communication.Serializer;
+import log.ProfiPrinter;
 import os.FileSystem;
 
 public class Frontend {
@@ -65,7 +66,7 @@ public class Frontend {
             if(exception.getClass() == NullPointerException.class){
                 throw exception;
             }
-            System.out.println("Eroare de IO la socketOutputStream : " + exception.getMessage());
+            ProfiPrinter.PrintException("Eroare de IO la socketOutputStream : " + exception.getMessage());
         }
         return null;
     }
@@ -97,7 +98,7 @@ public class Frontend {
                     }
                 }
                 catch (Exception exception){
-                    System.out.println("Exceptie : " + exception.getMessage());
+                    ProfiPrinter.PrintException("Exceptie : " + exception.getMessage());
                 }
             }
         }).start();

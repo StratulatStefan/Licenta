@@ -1,6 +1,7 @@
 package os;
 
 import data.Pair;
+import log.ProfiPrinter;
 
 import java.io.*;
 import java.nio.file.Files;
@@ -60,7 +61,7 @@ public class FileSystem {
      */
     public static int renameFile(String prevName, String newName){
         if(checkFileExistance(newName)){
-           System.out.println("Nu se poate redenumi fisierul! Exista deja un fisier cu noul nume!");
+            ProfiPrinter.PrintException("Nu se poate redenumi fisierul! Exista deja un fisier cu noul nume!");
            return 2;
         }
 
@@ -69,7 +70,7 @@ public class FileSystem {
             return 1;
         }
         catch (IOException e){
-            System.out.println("Exceptie la redenumirea fisierului");
+            ProfiPrinter.PrintException("Exceptie la redenumirea fisierului");
             return 0;
         }
     }
@@ -121,7 +122,7 @@ public class FileSystem {
                     crcValue[0] = crc.getValue();
                 }
                 catch (IOException exception){
-                    System.out.println("IOException la calculateCRC : " + exception.getMessage());
+                    ProfiPrinter.PrintException("IOException la calculateCRC : " + exception.getMessage());
                 }
             }
         });
@@ -131,7 +132,7 @@ public class FileSystem {
                 thread.join();
         }
         catch (InterruptedException exception){
-            System.out.println("calculateCRC thread interrupt..");
+            ProfiPrinter.PrintException("calculateCRC thread interrupt..");
         }
         return crcValue[0];
     }

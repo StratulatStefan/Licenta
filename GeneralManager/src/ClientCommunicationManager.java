@@ -8,6 +8,7 @@ import communication.Address;
 import communication.Serializer;
 import config.AppConfig;
 import data.Pair;
+import log.ProfiPrinter;
 import node_manager.FeedbackResponse;
 import os.FileSystem;
 
@@ -196,7 +197,7 @@ public class ClientCommunicationManager {
                 }
             }
             catch (Exception exception){
-                System.out.println("registerUserNewFileRequest exception : " + exception.getMessage());
+                ProfiPrinter.PrintException("registerUserNewFileRequest exception : " + exception.getMessage());
             }
         }
     }
@@ -214,7 +215,7 @@ public class ClientCommunicationManager {
                 GeneralManager.pendingQueue.addToQueue(user, filename);
             }
             catch (Exception exception){
-                System.out.println("confirmNewFileStorage exception : " + exception.getMessage());
+                ProfiPrinter.PrintException("confirmNewFileStorage exception : " + exception.getMessage());
             }
         }
     }
@@ -237,7 +238,7 @@ public class ClientCommunicationManager {
         }
         catch (Exception exception){
             serverSocket.close();
-            System.out.println("Client communication loop exception : " + exception.getMessage());
+            ProfiPrinter.PrintException("Client communication loop exception : " + exception.getMessage());
         }
     }
 
@@ -288,7 +289,7 @@ public class ClientCommunicationManager {
                                                 GeneralManager.userDataTable.addUser(userId, usertype);
                                             }
                                             catch (Exception exception){
-                                                System.out.println(exception.getMessage());
+                                                ProfiPrinter.PrintException(exception.getMessage());
                                             }*/
                                             //GeneralManager.userStorageQuantityTable.registerMemoryConsumption(userId, usertype, filesize);
                                         }
@@ -348,8 +349,8 @@ public class ClientCommunicationManager {
                     clientSocket.close();
                 }
                 catch (Exception exception){
-                    System.out.println(exception.getMessage());
-                    System.out.println(String.format("Could not properly close connection with my friend : [%s : %d]",
+                    ProfiPrinter.PrintException(exception.getMessage());
+                    ProfiPrinter.PrintException(String.format("Could not properly close connection with my friend : [%s : %d]",
                             clientSocket.getLocalAddress(),
                             clientSocket.getLocalPort()));
                 }

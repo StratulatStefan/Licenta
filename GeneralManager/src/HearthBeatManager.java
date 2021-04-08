@@ -2,6 +2,7 @@ import communication.Address;
 import communication.HearthBeatSocket;
 import config.AppConfig;
 import data.Pair;
+import log.ProfiPrinter;
 import node_manager.Beat.NodeBeat;
 import java.io.IOException;
 import java.net.InetAddress;
@@ -101,7 +102,7 @@ public class HearthBeatManager implements Runnable{
                         }
                     } catch (InterruptedException exception) {
                         socket.close();
-                        System.out.println("InterruptedException occured. : " + exception.getMessage());
+                        ProfiPrinter.PrintException("InterruptedException occured. : " + exception.getMessage());
                     }
                     System.out.println("\n");
                 }
@@ -137,7 +138,7 @@ public class HearthBeatManager implements Runnable{
                         registerNodeStorageQuantity(receivedAddress.getIpAddress(), message.getMemoryQuantity());
                     }
                     catch (Exception exception){
-                        System.out.println("Hearthbeatmanager receiveloop : " + exception.getMessage());
+                        ProfiPrinter.PrintException("Hearthbeatmanager receiveloop : " + exception.getMessage());
                     }
                 }
             }
@@ -154,7 +155,7 @@ public class HearthBeatManager implements Runnable{
                 break;
             }
             catch (Exception exception){
-                System.out.println("checkForFileStatusChange exception : " + exception.getMessage());
+                ProfiPrinter.PrintException("checkForFileStatusChange exception : " + exception.getMessage());
             }
         }
     }
@@ -166,7 +167,7 @@ public class HearthBeatManager implements Runnable{
                 try {
                     GeneralManager.nodeStorageQuantityTable.updateRegister(nodeAddress, quantity);
                 } catch (Exception exception) {
-                    System.out.println("registerNodeStorageQuantity exception : " + exception.getMessage());
+                    ProfiPrinter.PrintException("registerNodeStorageQuantity exception : " + exception.getMessage());
                 }
             }
         }).start();
@@ -192,7 +193,7 @@ public class HearthBeatManager implements Runnable{
             receivingThread.start();
         }
         catch (IOException exception){
-            System.out.println(exception.getMessage());
+            ProfiPrinter.PrintException(exception.getMessage());
         }
     }
 }

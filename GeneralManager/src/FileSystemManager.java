@@ -1,6 +1,7 @@
 
 import communication.Serializer;
 import config.AppConfig;
+import log.ProfiPrinter;
 import node_manager.*;
 
 import java.awt.datatransfer.FlavorEvent;
@@ -68,7 +69,7 @@ public class FileSystemManager {
             return feedbackResponse;
         }
         catch (Exception exception){
-            System.out.println("MakeRequestToFileSystem  exception : " + request.getClass() + " : " + exception.getMessage());
+            ProfiPrinter.PrintException("MakeRequestToFileSystem  exception : " + request.getClass() + " : " + exception.getMessage());
         }
         return null;
     }
@@ -99,7 +100,7 @@ public class FileSystemManager {
                     GeneralManager.pendingQueue.addToQueue(user, filename);
                 }
                 catch (Exception exception){
-                    System.out.println("Replication : updatefilestatus1 : " + exception.getMessage());
+                    ProfiPrinter.PrintException("Replication : updatefilestatus1 : " + exception.getMessage());
                 }
             }
         }).start();
@@ -166,7 +167,7 @@ public class FileSystemManager {
                     thread.join();
                 }
                 catch (InterruptedException exception){
-                    System.out.println("Interrupt exception la renameFile thread!");
+                    ProfiPrinter.PrintException("Interrupt exception la renameFile thread!");
                 }
             }
         }

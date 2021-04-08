@@ -1,5 +1,6 @@
 import communication.Address;
 import config.AppConfig;
+import log.ProfiPrinter;
 import node_manager.Beat.FileAttribute;
 import node_manager.Beat.NodeBeat;
 import os.FileSystem;
@@ -148,7 +149,7 @@ public class GeneralNode{
         }
 
         catch (Exception exception){
-            System.out.println("Exceptie la GeneralNode main : " + exception.getMessage());
+            ProfiPrinter.PrintException("Exceptie la GeneralNode main : " + exception.getMessage());
         }
     }
 }

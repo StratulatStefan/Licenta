@@ -6,6 +6,7 @@ import java.net.InetAddress;
 
 import communication.Serializer;
 import config.AppConfig;
+import log.ProfiPrinter;
 import node_manager.Beat.NodeBeat;
 import data.Time;
 
@@ -78,10 +79,10 @@ public class HearthBeatManager implements Runnable{
                         Thread.sleep((int) (frequency * 1e3));
                     } catch (IOException exception) {
                         socket.close();
-                        System.out.println("IOException occured. : " + exception.getMessage());
+                        ProfiPrinter.PrintException("IOException occured. : " + exception.getMessage());
                     } catch (InterruptedException exception) {
                         socket.close();
-                        System.out.println("InterruptedException occured. : " + exception.getMessage());
+                        ProfiPrinter.PrintException("InterruptedException occured. : " + exception.getMessage());
                     }
                     System.out.println("\n");
                 }
@@ -114,7 +115,7 @@ public class HearthBeatManager implements Runnable{
                     // }
                 }
                 catch (Exception exception){
-                    System.out.println(exception.getMessage());
+                    ProfiPrinter.PrintException(exception.getMessage());
                 }
                 // }
             }
@@ -140,7 +141,7 @@ public class HearthBeatManager implements Runnable{
             //receivingThread.start();
         }
         catch (IOException exception){
-            System.out.println(exception.getMessage());
+            ProfiPrinter.PrintException(exception.getMessage());
         }
     }
 }

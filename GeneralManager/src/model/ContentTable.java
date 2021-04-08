@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import data.Pair;
+import log.ProfiPrinter;
 import node_manager.Beat.FileAttribute;
 
 /** -------- Extra-descrieri -------- **/
@@ -379,7 +380,7 @@ public class ContentTable {
             }
         }
         catch (Exception exception){
-            System.out.println("User not found!");
+            ProfiPrinter.PrintException("User not found!");
         }
         return null;
     }
@@ -393,7 +394,7 @@ public class ContentTable {
             }
         }
         catch (Exception exception){
-            System.out.println("User not found!");
+            ProfiPrinter.PrintException("User not found!");
         }
         return -1;
     }

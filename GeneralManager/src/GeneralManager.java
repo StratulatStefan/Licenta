@@ -1,5 +1,6 @@
 import communication.Address;
 import config.AppConfig;
+import log.ProfiPrinter;
 import model.*;
 import storage_quantity.NodeStorageQuantityTable;
 import storage_quantity.StorageQuantityTable;
@@ -137,7 +138,7 @@ public class GeneralManager{
             generalManager.startActivity();
         }
         catch (Exception exception){
-            System.out.println("Exceptie la GeneralManagerMain : " + exception.getMessage());
+            ProfiPrinter.PrintException("Exceptie la GeneralManagerMain : " + exception.getMessage());
         }
     }
 }

@@ -37,4 +37,4 @@ ___
 - Componenta de versionare
 - Tratare eficienta exceptii
 - Informatii in heartbeat care sa ma ajute sa evidentiez progresul trimiterii fisierului (progress bar in interfata)
-- Culoare diferentiatoare mesaj exceptii
+- ~~Culoare diferentiatoare mesaj exceptii~~

@@ -1,6 +1,8 @@
 import config.AppConfig;
 import data.Pair;
+import log.ProfiPrinter;
 
+import javax.swing.*;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -125,7 +127,7 @@ public class ReplicationManager implements Runnable{
                 Thread.sleep((int) (replicationFrequency * 1e3));
             }
             catch (Exception exception){
-                System.out.println("Replication loop interrupted exception : " + exception.getMessage());
+                ProfiPrinter.PrintException("Replication loop interrupted exception : " + exception.getMessage());
             }
         }
     }
@@ -152,7 +154,7 @@ public class ReplicationManager implements Runnable{
                 GeneralManager.contentTable.updateFileStatus(userId, userFile, "[PENDING]");
             }
             catch (Exception exception){
-                System.out.println("Replication : updatefilestatus1 : " + exception.getMessage());
+                ProfiPrinter.PrintException("Replication : updatefilestatus1 : " + exception.getMessage());
             }
             // cautam un criteriu pe baza caruia selectam nodul de la care se face copierea
             String source = availableNodesAddressesForFile.get(0);

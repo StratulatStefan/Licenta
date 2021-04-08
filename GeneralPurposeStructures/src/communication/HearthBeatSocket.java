@@ -1,4 +1,6 @@
 package communication;
+import log.ProfiPrinter;
+
 import java.io.IOException;
 import java.net.*;
 
@@ -76,7 +78,7 @@ public class HearthBeatSocket extends MulticastSocket {
             this.setNetworkInterface(NetworkInterface.getByName(networkInterfaceName));
         }
         catch (Exception exception){
-            System.out.println("Exception occured at setting the network interface type");
+            ProfiPrinter.PrintException("Exception occured at setting the network interface type");
         }
     }
 

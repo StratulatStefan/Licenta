@@ -1,9 +1,7 @@
 import data.Pair;
 
-import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Queue;
 
 public class PendingList {
     private final List<Pair<String, String>> pendingList;

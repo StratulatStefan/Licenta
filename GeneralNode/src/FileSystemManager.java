@@ -3,6 +3,7 @@ import client_node.NewFileRequestFeedback;
 import communication.Address;
 import communication.Serializer;
 import config.AppConfig;
+import log.ProfiPrinter;
 import node_manager.*;
 import os.FileSystem;
 
@@ -92,7 +93,7 @@ public class FileSystemManager implements Runnable{
                     socket.close();
                 }
                 catch (IOException exception){
-                    System.out.println("Exceptie la sursa de replicare [sendReplication] : " + exception.getMessage());
+                    ProfiPrinter.PrintException("Exceptie la sursa de replicare [sendReplication] : " + exception.getMessage());
                 }
             }
         }).start();
@@ -199,10 +200,10 @@ public class FileSystemManager implements Runnable{
 
                 }
                 catch (IOException exception){
-                    System.out.println("Filesystem manager loop exception IO : " + exception.getMessage() + " " + exception.getStackTrace().toString());
+                    ProfiPrinter.PrintException("Filesystem manager loop exception IO : " + exception.getMessage() + " " + exception.getStackTrace().toString());
                 }
                 catch (ClassNotFoundException exception){
-                    System.out.println("Filesystem manager loop exception ClassNotFound : " + exception.getMessage());
+                    ProfiPrinter.PrintException("Filesystem manager loop exception ClassNotFound : " + exception.getMessage());
                 }
             }
         };
@@ -213,7 +214,7 @@ public class FileSystemManager implements Runnable{
             dataOutputStream.write(Serializer.serialize(feedbackResponse));
         }
         catch (IOException exception){
-            System.out.println("Exceptie IO la sendFeedbackToGeneraManage : " + exception.getMessage());
+            ProfiPrinter.PrintException("Exceptie IO la sendFeedbackToGeneraManage : " + exception.getMessage());
         }
     }
 
@@ -232,14 +233,14 @@ public class FileSystemManager implements Runnable{
             }
         }
         catch (IOException exception){
-            System.out.println("File System manager exception : " + exception.getMessage());
+            ProfiPrinter.PrintException("File System manager exception : " + exception.getMessage());
         }
         finally {
             try {
                 serverSocket.close();
             }
             catch (IOException exception1){
-                System.out.println("Exceptie la FileSystemManager : Nu putem inchide in siguranta ServerSocket-ul");
+                ProfiPrinter.PrintException("Exceptie la FileSystemManager : Nu putem inchide in siguranta ServerSocket-ul");
             }
         }
     }

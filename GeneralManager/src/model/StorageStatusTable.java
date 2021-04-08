@@ -2,6 +2,7 @@ package model;
 
 import communication.Address;
 import data.Pair;
+import log.ProfiPrinter;
 import node_manager.Beat.FileAttribute;
 import node_manager.Beat.NodeBeat;
 
@@ -211,7 +212,7 @@ public class StorageStatusTable {
                             data.addNode(nodeAddress.getIpAddress(), userFile.getCrc());
                         }
                         catch (Exception exception){
-                            System.out.println("Node already contains address!");
+                            ProfiPrinter.PrintException("Node already contains address!");
                         }
                         this.statusTable.get(user).add(data);
                     }
@@ -231,7 +232,7 @@ public class StorageStatusTable {
                                     this.statusTable.get(user).get(candidate).setCrc(nodeAddress.getIpAddress(), userFile.getCrc());
                             }
                             catch (NullPointerException exception){
-                                System.out.println("File " + this.statusTable.get(user).get(candidate).getFilename() + " of user " + nodeAddress.getIpAddress() + " skipped!" +
+                                ProfiPrinter.PrintException("File " + this.statusTable.get(user).get(candidate).getFilename() + " of user " + nodeAddress.getIpAddress() + " skipped!" +
                                         "Suprapunere de operatii..");
                             }
                         }
@@ -257,7 +258,7 @@ public class StorageStatusTable {
                             this.statusTable.get(user).remove(index);
                     }
                     catch (NullPointerException exception){
-                        System.out.println(exception.getMessage());
+                        ProfiPrinter.PrintException(exception.getMessage());
                     }
                 }
 

@@ -1,6 +1,7 @@
 import client_manager.data.NewFileRequest;
 import client_node.NewFileRequestFeedback;
 import communication.Serializer;
+import log.ProfiPrinter;
 
 import java.io.DataInputStream;
 import java.net.InetSocketAddress;
@@ -36,7 +37,7 @@ public class FeedbackManager implements Runnable{
                     frontendSocket.close();
                 }
                 catch (Exception exception){
-                    System.out.println("Exceptie la thread-ul de feedback : " + exception.getMessage());
+                    ProfiPrinter.PrintException("Exceptie la thread-ul de feedback : " + exception.getMessage());
                 }
             }
         };
@@ -70,7 +71,7 @@ public class FeedbackManager implements Runnable{
             }
         }
         catch (Exception exception){
-            System.out.println("Exceptie la managerul de feedback :  " + exception.getMessage());
+            ProfiPrinter.PrintException("Exceptie la managerul de feedback :  " + exception.getMessage());
         }
     }
 }

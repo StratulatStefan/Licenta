@@ -1,5 +1,7 @@
 package communication;
 
+import log.ProfiPrinter;
+
 /**
  * Clasa care incapsuleaza o adresa de retea, formata din adresa IP si port.
  * Se asigura si mecanisme de validare a celor doua atribute
@@ -107,11 +109,11 @@ public class Address {
             return new Address(elements[0], Integer.parseInt(elements[1]));
         }
         catch (NumberFormatException exception){
-            System.out.println("Invalid address format!");
+            ProfiPrinter.PrintException("Invalid address format!");
             return null;
         }
         catch (Exception exception){
-            System.out.println("Addres parseAddress : " + exception.getMessage());
+            ProfiPrinter.PrintException("Addres parseAddress : " + exception.getMessage());
             return null;
         }
     }
