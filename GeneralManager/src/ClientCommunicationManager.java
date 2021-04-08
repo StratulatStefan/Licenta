@@ -146,8 +146,13 @@ public class ClientCommunicationManager {
         else{
             System.out.println("Generam token-ul..");
             StringBuilder token = new StringBuilder();
+            List<String> candidates = GeneralManager.nodeStorageQuantityTable.getMostSuitableNodes(filesize);
+            if(candidates.size() == 0){
+                System.out.println("Niciun nod nu are suficienta memorie pentru a stoca noul fisier.");
+                return null;
+            }
             /* !!!!!! criteriu de selectare a nodurilor !!!!!! */
-            for(String address : connectionAddresses){
+            for(String address : candidates){
                 if(replication_factor == 0){
                     break;
                 }
@@ -155,6 +160,10 @@ public class ClientCommunicationManager {
                 replication_factor -= 1;
             }
             token = new StringBuilder(token.substring(0, token.length() - 1));
+            System.out.println("====================================");
+            System.out.println(token.toString());
+            System.out.println("====================================");
+
             return token.toString();
         }
         return null;

@@ -125,8 +125,6 @@ public class HearthBeatManager implements Runnable{
                     try{
                         message = (NodeBeat) socket.receiveMessage();
                         receivedAddress = Address.parseAddress(message.getNodeAddress());
-                        GeneralManager.statusTable.updateTable(message);
-                        registerNodeStorageQuantity(receivedAddress.getIpAddress(), message.getMemoryQuantity());
                         System.out.println("Am primit un hearthbeat de la " + receivedAddress + " ...");
                         if(!GeneralManager.connectionTable.containsAddress(receivedAddress)){
                             System.out.println(" >>> [Adresa noua] : " + receivedAddress);
@@ -135,6 +133,8 @@ public class HearthBeatManager implements Runnable{
                         else {
                             GeneralManager.connectionTable.confirmAvailability(receivedAddress);
                         }
+                        GeneralManager.statusTable.updateTable(message, GeneralManager.contentTable);
+                        registerNodeStorageQuantity(receivedAddress.getIpAddress(), message.getMemoryQuantity());
                     }
                     catch (Exception exception){
                         System.out.println("Hearthbeatmanager receiveloop : " + exception.getMessage());

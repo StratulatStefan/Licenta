@@ -1,6 +1,13 @@
 package storage_quantity;
 
 import config.AppConfig;
+import data.Pair;
+
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * Clasa care va contine detaliile referitoare la cantitatile de stocare disponibile pentru nodurile interne;
@@ -53,7 +60,18 @@ public class NodeStorageQuantityTable extends StorageQuantityTable {
         }
     }
 
-
+    public List<String> getMostSuitableNodes(long filesize){
+        synchronized (this.storageStatus) {
+            List<Pair<String, Long>> availableQuantities = new ArrayList<Pair<String, Long>>();
+            for (String node : new ArrayList<>(this.storageStatus.keySet())) {
+                StorageQuantity quantity = this.storageStatus.get(node);
+                availableQuantities.add(new Pair<String, Long>(node, quantity.getTotalStorage() - quantity.getUsedStorage() - filesize));
+            }
+            availableQuantities.sort(Comparator.comparing(Pair::getSecond));
+            Collections.reverse(availableQuantities);
+            return availableQuantities.stream().filter(node -> node.getSecond() > 0).map(Pair::getFirst).collect(Collectors.toList());
+        }
+    }
     /** -------- Functii de baza, supraincarcate -------- **/
     @Override
     public String toString() {

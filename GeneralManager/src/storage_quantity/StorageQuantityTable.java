@@ -15,7 +15,7 @@ public abstract class StorageQuantityTable {
     /**
      * Tabela de status a memoriei;
      */
-    private final HashMap<String, StorageQuantity> storageStatus;
+    protected final HashMap<String, StorageQuantity> storageStatus;
 
 
     /** -------- Constructor & Configurare -------- **/

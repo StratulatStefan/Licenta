@@ -191,7 +191,7 @@ public class StorageStatusTable {
      * @param storageEntry Heartbeat de la nodul intern; Va contine adresa nodului, impreuna
      *                     cu toti utilizatorii existenti si fisierele acestora
      */
-    public void updateTable(NodeBeat storageEntry) throws Exception {
+    public void updateTable(NodeBeat storageEntry, ContentTable contentTable) throws Exception {
         Address nodeAddress = Address.parseAddress(storageEntry.getNodeAddress());
         synchronized (this.statusTable){
             for(String user : storageEntry.getUsers()){
@@ -240,7 +240,8 @@ public class StorageStatusTable {
 
                 // verificam daca sunt useri stersi complet de la un nod; in acest caz;
                 // eliminam adresa nodului de la care a fost sters, sau intregul user
-                cleanUpOnDeletedUser(nodeAddress.getIpAddress(), storageEntry.getUsers());
+                /* TODO fix this sh*t */
+                //cleanUpOnDeletedUser(nodeAddress.getIpAddress(), storageEntry.getUsers());
 
                 // verificam daca sunt fisiere care au fost sterse, si le eliminam;
                 // eliminam adresa nodului de la care a fost sters, sau fisierul daca nu se afla pe niciun nod
@@ -248,11 +249,7 @@ public class StorageStatusTable {
                 for(FileAttribute fileAttribute : storageEntry.getUserFilesById(user)){
                     files.add(fileAttribute.getFilename());
                 }
-                List<String> deletedFiles = getDeletedFiles(user, nodeAddress.getIpAddress(), files);
-                if(deletedFiles.size() > 0){
-                    int x = 0;
-                }
-                for(String deletedFile : deletedFiles){
+                for(String deletedFile : getDeletedFiles(user, nodeAddress.getIpAddress(), files)){
                     int index = getUserFile(user, deletedFile);
                     try {
                         this.statusTable.get(user).get(index).removeNode(nodeAddress.getIpAddress());

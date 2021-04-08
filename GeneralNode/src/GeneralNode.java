@@ -98,20 +98,20 @@ public class GeneralNode{
             String[] userFiles = FileSystem.getDirContent(path + "\\" + userDir);
             List<FileAttribute> fileAttributes = new ArrayList<>();
             for(String file : userFiles){
-                FileAttribute f = new FileAttribute();
-                f.setFilename(file);
-                /* TODO sincronizare la replication : poate fi de aici */
                 if(!pendingList.containsRegister(userDir, file)) {
+                    FileAttribute f = new FileAttribute();
+                    f.setFilename(file);
                     long startTime = System.currentTimeMillis();
                     f.setCrc(FileSystem.calculateCRC(path + "\\" + userDir + "\\" + file));
                     long estimatedTime = System.currentTimeMillis() - startTime;
                     System.out.println("CRC for " + file + " : " + estimatedTime + " ms");
+                    fileAttributes.add(f);
+
                 }
                 else{
-                    System.out.println("File ignored in CRC calculation : " + file);
-                    f.setCrc(0);
+                    System.out.println("File ignored because it is in pending : " + file);
+                    //f.setCrc(0);
                 }
-                fileAttributes.add(f);
             }
             storageStatus.addUserFiles(userDir, fileAttributes);
         }
