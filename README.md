@@ -1,22 +1,15 @@
 # LAST DONE
-- Mecanismul de sincronizare (cu mentiunea ca s-a adaugat o coada in plus)
-    - <b>Intrebare : </b> trimitem inapoi la frontend ok la stocarea fisierului ?
-- La stergerea unui fisier, factorul de replicare devine 0 si starea fisierului devine DELETED; daca cumva invie vreo replica, este stearsa; 
-- Daca userul face cerere sa stocheze din nou fisierul, se inlocuieste inregistrarea (factorul de replicare devine noul factor si starea devine valid
-- CRC : validarea statusului unui fisier pe baza CRC-ului; daca am un fisier modificat (nu mai corespunde crc-ul), momentam il sterg.
-- A trebuit sa adaug la nodul intern o logica suplimentara de evitare a calcularii a crc-ului atunci cand fisierul este
-in pending , adica in procesul de salvare; evitam doar calcularea crc-ului deoarece pentru fisiere mari este o operatie foarte
-costisitoare; ne asiguram la nodul general ca nu bagam in seama acest crc cand timp fisierul este in pending
-    - <b>Intrebare</b> : Mare parte din sistem imi este dat peste cap de calcularea crc-ului.
-- Feedback de la nodul intern la frontend (daca de ex solicit o redenumire, nodul general asteapta feedback de la toate fisierele care trebuie
-sa faca redenumire; si daca cel putin unul a reusit, intoarcem raspuns valid catre frontend)
-- afisarea statusului stocarii nodurilor interne (se adauga la fiecare heartbeat si se afiseaza)
-    - <b>Intrebare : </b> Unde sa tin evidenta de cantitatea de memorie disponibila pentru un user ? (server useri sau contenttable ?)
 
 ___
 
 # TO DO
-
+- refactorizare cod; 
+    - adaugare parametri in fisierul de configurare
+    - adaugare comentarii
+- creare si integrare server in spring pentru gestiunea utilizatorilor; adaugarea cantitatii de stocare disponibile pentru fiecare user
+    - Calcularea si afisarea cantitatii de stocare disponibile pentru un user
+- thread separat la managerul general pe care se solicita de la nodurile interne, adaugarea crc-ului in hearthbeat, astfel incat sa se verifice daca este
+nevoie de replicare; astfel, evitam calcularea crc-ului la fiecare beat
 - ~~Fiecare nod sa trimita informatii despre statusul memoriei sale; informatiile vor fi mentionate in hearthbeat-uri~~
 - ~~Nodul general sa aiba un alt thread care verifica daca se pastreaza numarul de replici si sa dea comenzi de replicare la nevoie~~
 - ~~Trimitere status operatie inapoi catre frontend (la editare si redenumire)~~
@@ -31,7 +24,6 @@ ___
     dar, daca se face undo la operatie (se schimba la loc octetul), eliminam o replica, nu?
 - ~~Calcularea si afisarea cantitatii de stocare disponibile pentru un nod~~
 - ~~Mecanism de selectare a nodurilor la care sa se stocheze un fisier~~
-- Calcularea si afisarea cantitatii de stocare disponibile pentru un user
 - Mirror (anycast) pentru managerul general
     - <b>Intrebare : </b>Deci daca am mirror la GM, nu mai am nevoie de refacerea starii, nu?
 - Componenta de versionare
