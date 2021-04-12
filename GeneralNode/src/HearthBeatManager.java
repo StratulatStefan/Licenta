@@ -9,6 +9,7 @@ import config.AppConfig;
 import log.ProfiPrinter;
 import node_manager.Beat.NodeBeat;
 import data.Time;
+import node_manager.Beat.RequestCRC;
 
 /**
  * Clasa care se va ocupa de tot mecanismul de heartbeats.
@@ -64,7 +65,7 @@ public class HearthBeatManager implements Runnable{
      * @param socket Socket-ul nodului curent
      * @return Runnable pe baza caruia se va porni thread-ul de trimitere
      */
-    public Runnable sendingLoop(InetAddress group, HearthBeatSocket socket){
+    public Runnable sendingHeartBeatLoop(InetAddress group, HearthBeatSocket socket){
         return new Runnable(){
             @Override
             public void run(){
@@ -96,28 +97,31 @@ public class HearthBeatManager implements Runnable{
      * @param socket Socket-ul nodului curent
      * @return Runnable-ul pe baza caruia se va crea thread-ul de receptie a hearth-beat-urilor.
      */
-    public Runnable receivingLoop(HearthBeatSocket socket){
+    public Runnable receivingCRCRequestLoop(HearthBeatSocket socket){
         return new Runnable() {
             @Override
             public void run(){
-                String message;
+                RequestCRC message;
                 Address receivedAddress;
-                //while(true){
-                try{
-                    //message = socket.receiveMessage();
-                    //receivedAddress = Address.parseAddress(message);
-                    //if(!connectionTable.containsAddress(receivedAddress)){
-                    //  System.out.println(" >>> [New address] : " + receivedAddress);
-                    //connectionTable.addAddress(receivedAddress);
-                    // }
-                    //else {
-                    //    connectionTable.confirmAvailability(receivedAddress);
-                    // }
+                while(true){
+                    try{
+                        message = (RequestCRC)socket.receiveMessage();
+                        System.out.println("Am primit cerere de includere a crc-ului in pachet!");
+                        new Thread(new Runnable() {
+                            @Override
+                            public void run() {
+                                GeneralNode.calculateFileSystemCRC();
+                            }
+                        }).start();
+                    }
+                    catch (ClassCastException castException){
+                        // nu facem nimic; aici primit beat de la celelalte noduri interne;
+                        // nu avem ce face cu el; il ignoram!
+                    }
+                    catch (Exception exception){
+                        ProfiPrinter.PrintException(exception.getMessage());
+                    }
                 }
-                catch (Exception exception){
-                    ProfiPrinter.PrintException(exception.getMessage());
-                }
-                // }
             }
         };
     }
@@ -135,10 +139,10 @@ public class HearthBeatManager implements Runnable{
             HearthBeatSocket socket = new HearthBeatSocket(nodeAddress, multicastPort);
             socket.setNetworkInterface(HearthBeatSocket.NetworkInterfacesTypes.LOCALHOST);
             socket.joinGroup(group);
-            Thread sendingThread = new Thread(sendingLoop(group, socket));
-            // Thread receivingThread = new Thread(receivingLoop(socket));
+            Thread sendingThread = new Thread(sendingHeartBeatLoop(group, socket));
+            Thread receivingThread = new Thread(receivingCRCRequestLoop(socket));
             sendingThread.start();
-            //receivingThread.start();
+            receivingThread.start();
         }
         catch (IOException exception){
             ProfiPrinter.PrintException(exception.getMessage());

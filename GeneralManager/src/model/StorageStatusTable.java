@@ -228,7 +228,7 @@ public class StorageStatusTable {
                         else{
                             int candidate = this.getUserFile(user, userFile.getFilename());
                             try {
-                                if (this.statusTable.get(user).get(candidate).getCrc(nodeAddress.getIpAddress()) != userFile.getCrc())
+                                if (userFile.getCrc() != -1 && this.statusTable.get(user).get(candidate).getCrc(nodeAddress.getIpAddress()) != userFile.getCrc())
                                     this.statusTable.get(user).get(candidate).setCrc(nodeAddress.getIpAddress(), userFile.getCrc());
                             }
                             catch (NullPointerException exception){

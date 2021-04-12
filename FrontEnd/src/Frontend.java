@@ -111,7 +111,7 @@ public class Frontend {
 
         NewFileRequest newFileRequest = new NewFileRequest();
         newFileRequest.setUserId("1");
-        String filepath = "D:/Facultate/Licenta/test_files/Dangerous.mp3";
+        String filepath = "D:/Facultate/Licenta/test_files/lab06.py";
         //String filepath = "D:/Facultate/Licenta/test_files/curs.rar";
         newFileRequest.setFilename(filepath);
         newFileRequest.setFilesize(FileSystem.getFileSize(filepath));
@@ -126,7 +126,7 @@ public class Frontend {
         newFileRequest.setFilesize(FileSystem.getFileSize(filepath));
         newFileRequest.setCrc(FileSystem.calculateCRC(filepath));
         newFileRequest.setUserType("STANDARD");
-        //mainActivity(newFileRequest);
+        mainActivity(newFileRequest);
 
 
         newFileRequest = new NewFileRequest();
@@ -136,7 +136,7 @@ public class Frontend {
         newFileRequest.setFilesize(FileSystem.getFileSize(filepath));
         newFileRequest.setCrc(FileSystem.calculateCRC(filepath));
         newFileRequest.setUserType("STANDARD");
-        //mainActivity(newFileRequest);
+        mainActivity(newFileRequest);
 
 
 

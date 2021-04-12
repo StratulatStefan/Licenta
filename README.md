@@ -1,5 +1,6 @@
 # LAST DONE
-
+- thread separat la managerul general pe care se solicita de la nodurile interne, adaugarea crc-ului in hearthbeat, astfel incat sa se verifice daca este
+  nevoie de replicare; astfel, evitam calcularea crc-ului la fiecare beat.
 ___
 
 # TO DO
@@ -8,8 +9,8 @@ ___
     - adaugare comentarii
 - creare si integrare server in spring pentru gestiunea utilizatorilor; adaugarea cantitatii de stocare disponibile pentru fiecare user
     - Calcularea si afisarea cantitatii de stocare disponibile pentru un user
-- thread separat la managerul general pe care se solicita de la nodurile interne, adaugarea crc-ului in hearthbeat, astfel incat sa se verifice daca este
-nevoie de replicare; astfel, evitam calcularea crc-ului la fiecare beat
+- ~~thread separat la managerul general pe care se solicita de la nodurile interne, adaugarea crc-ului in hearthbeat, astfel incat sa se verifice daca este
+nevoie de replicare; astfel, evitam calcularea crc-ului la fiecare beat~~
 - ~~Fiecare nod sa trimita informatii despre statusul memoriei sale; informatiile vor fi mentionate in hearthbeat-uri~~
 - ~~Nodul general sa aiba un alt thread care verifica daca se pastreaza numarul de replici si sa dea comenzi de replicare la nevoie~~
 - ~~Trimitere status operatie inapoi catre frontend (la editare si redenumire)~~

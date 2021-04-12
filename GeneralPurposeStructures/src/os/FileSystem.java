@@ -107,33 +107,19 @@ public class FileSystem {
      * Functie care calculeaza CRC-ul unui fisier
      */
     public static long calculateCRC(String filename){
-        final long[] crcValue = new long[]{0};
-        Thread thread = new Thread(new Runnable() {
-            @Override
-            public void run(){
-                try {
-                    InputStream inputStream = new BufferedInputStream(new FileInputStream(filename));
-                    CRC32 crc = new CRC32();
-                    int count;
-                    byte[] buffer = new byte[1024 * 8];
-                    while ((count = inputStream.read(buffer)) != -1)
-                        crc.update(buffer, 0, count);
-                    inputStream.close();
-                    crcValue[0] = crc.getValue();
-                }
-                catch (IOException exception){
-                    ProfiPrinter.PrintException("IOException la calculateCRC : " + exception.getMessage());
-                }
-            }
-        });
-        thread.start();
         try {
-            if (thread.isAlive())
-                thread.join();
+            InputStream inputStream = new BufferedInputStream(new FileInputStream(filename));
+            CRC32 crc = new CRC32();
+            int count;
+            byte[] buffer = new byte[1024 * 8];
+            while ((count = inputStream.read(buffer)) != -1)
+                crc.update(buffer, 0, count);
+            inputStream.close();
+            return crc.getValue();
         }
-        catch (InterruptedException exception){
-            ProfiPrinter.PrintException("calculateCRC thread interrupt..");
+        catch (IOException exception){
+            ProfiPrinter.PrintException("IOException la calculateCRC : " + exception.getMessage());
         }
-        return crcValue[0];
+        return -1;
     }
 }

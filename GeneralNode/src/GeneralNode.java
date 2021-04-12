@@ -1,6 +1,8 @@
 import communication.Address;
 import config.AppConfig;
 import log.ProfiPrinter;
+import model.CRCTable;
+import model.NewFiles;
 import node_manager.Beat.FileAttribute;
 import node_manager.Beat.NodeBeat;
 import os.FileSystem;
@@ -30,6 +32,11 @@ public class GeneralNode{
      * Obiectul care va fi trimis la nodul general sub forma de heartbeat
      * **/
     private final static NodeBeat storageStatus = new NodeBeat();
+
+
+    private final static CRCTable crcTable = new CRCTable();
+
+    private final static NewFiles newFiles = new NewFiles();
 
 
     public final static PendingList pendingList = new PendingList();
@@ -70,6 +77,24 @@ public class GeneralNode{
 
 
     /** -------- Getter -------- **/
+
+    public static void calculateFileSystemCRC(){
+        String path = storagePath + ipAddress;
+
+        for (String userDir : FileSystem.getDirContent(path)) {
+            String[] userFiles = FileSystem.getDirContent(path + "\\" + userDir);
+            for(String file : userFiles){
+                new Thread(new Runnable() {
+                    @Override
+                    public void run() {
+                        long crc = FileSystem.calculateCRC(path + "\\" + userDir + "\\" + file);
+                        crcTable.updateRegister(userDir, file, crc);
+                        System.out.println("Am modificat crc-ul pentru [" +userDir + ":" + file +"]");
+                    }
+                }).start();
+            }
+        }
+    }
     /**
      * Functie care acceseaza filesystem-ul si determina statusul stocarii nodului curent;
      * Extrage toti utilizatorii si fisierele din stocarea nodului curent, si compune heartBeat-ul
@@ -102,16 +127,18 @@ public class GeneralNode{
                 if(!pendingList.containsRegister(userDir, file)) {
                     FileAttribute f = new FileAttribute();
                     f.setFilename(file);
-                    long startTime = System.currentTimeMillis();
-                    f.setCrc(FileSystem.calculateCRC(path + "\\" + userDir + "\\" + file));
-                    long estimatedTime = System.currentTimeMillis() - startTime;
-                    System.out.println("CRC for " + file + " : " + estimatedTime + " ms");
+                    if(!newFiles.containsRegister(userDir, file)){
+                        f.setCrc(FileSystem.calculateCRC(path + "\\" + userDir + "\\" + file));
+                        newFiles.addNewFile(userDir, file);
+                    }
+                    else{
+                        f.setCrc(crcTable.getCrcForFile(userDir, file));
+                        crcTable.resetRegister(userDir, file);
+                    }
                     fileAttributes.add(f);
-
                 }
                 else{
                     System.out.println("File ignored because it is in pending : " + file);
-                    //f.setCrc(0);
                 }
             }
             storageStatus.addUserFiles(userDir, fileAttributes);

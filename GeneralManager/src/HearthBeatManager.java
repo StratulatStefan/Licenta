@@ -1,5 +1,6 @@
 import communication.Address;
 import communication.HearthBeatSocket;
+import communication.Serializer;
 import config.AppConfig;
 import data.Pair;
 import log.ProfiPrinter;
@@ -8,6 +9,7 @@ import java.io.IOException;
 import java.net.InetAddress;
 import java.util.List;
 import data.Time;
+import node_manager.Beat.RequestCRC;
 
 /**
  * Clasa care se va ocupa de tot mecanismul de heartbeats.
@@ -137,9 +139,37 @@ public class HearthBeatManager implements Runnable{
                         GeneralManager.statusTable.updateTable(message, GeneralManager.contentTable);
                         registerNodeStorageQuantity(receivedAddress.getIpAddress(), message.getMemoryQuantity());
                     }
+                    catch (ClassCastException exception){
+                        // mesajul trimis de acest nod a ajuns tot la el, ceea ce nu ne dorim sa se intample
+                        // nu stim de ce se intampla, dar se intampla cateodata.
+                        // primim RequestCRC
+                    }
                     catch (Exception exception){
                         ProfiPrinter.PrintException("Hearthbeatmanager receiveloop : " + exception.getMessage());
                     }
+                }
+            }
+        };
+    }
+
+    public Runnable requestCRC(InetAddress group, HearthBeatSocket socket){
+        return new Runnable(){
+            @Override
+            public void run(){
+                RequestCRC requestCRC = new RequestCRC();
+                while(true) {
+                    try {
+                        Thread.sleep((int) (10 * 1e3));
+                        System.out.println(Time.getCurrentTimeWithFormat() + " Se trimite cerere pentru CRC ...");
+                        socket.sendBinaryMessage(group, Serializer.serialize(requestCRC));
+                    } catch (IOException exception) {
+                        socket.close();
+                        ProfiPrinter.PrintException("IOException occured at requestCRC. : " + exception.getMessage());
+                    } catch (InterruptedException exception) {
+                        socket.close();
+                        ProfiPrinter.PrintException("InterruptedException occured at requestCRC. : " + exception.getMessage());
+                    }
+                    System.out.println("\n");
                 }
             }
         };
@@ -187,10 +217,12 @@ public class HearthBeatManager implements Runnable{
             HearthBeatSocket socket = new HearthBeatSocket(nodeAddress, multicastPort);
             socket.setNetworkInterface(HearthBeatSocket.NetworkInterfacesTypes.LOCALHOST);
             socket.joinGroup(group);
-            Thread sendingThread = new Thread(cleanUp(group, socket));
+            Thread cleanUpThread = new Thread(cleanUp(group, socket));
             Thread receivingThread = new Thread(receivingLoop(socket));
-            sendingThread.start();
+            Thread requestCRCThread = new Thread(requestCRC(group, socket));
+            cleanUpThread.start();
             receivingThread.start();
+            requestCRCThread.start();
         }
         catch (IOException exception){
             ProfiPrinter.PrintException(exception.getMessage());

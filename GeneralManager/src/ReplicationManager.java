@@ -81,7 +81,7 @@ public class ReplicationManager implements Runnable{
 
             System.out.println("------------------------------------");
             System.out.println("Replication Status");
-            /* TODO rezolvare problema replicare .. */
+            /* TODO rezolvare problema replicare .. ??? */
             try {
                 for (String userId : GeneralManager.contentTable.getUsers()) {
                     HashMap<String, Integer> userFiles = GeneralManager.contentTable.getUserFiless(userId);
@@ -133,6 +133,9 @@ public class ReplicationManager implements Runnable{
     }
 
     private String checkForFileCorruption(long crc, List<Pair<String, Long>> availableNodesForFile){
+        if(crc == -1){
+            return null;
+        }
         for(Pair<String, Long> file : availableNodesForFile){
             if(file.getSecond() != crc){
                 System.out.println("Found corrupted file at address : " + file.getFirst());
