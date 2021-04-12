@@ -26,6 +26,10 @@ public class ClientCommunicationManager {
      * Adresa nodului curent
      */
     private Address nodeAddress;
+
+    private static int feedbackPort;
+
+    private static String frontendIpAddress;
     /**
      * Dimensiunea bufferului in care vor fi citite datele de la un nod adiacent
      */
@@ -48,6 +52,8 @@ public class ClientCommunicationManager {
         bufferSize = Integer.parseInt(AppConfig.getParam("buffersize"));
         dataTransmissionPort = Integer.parseInt(AppConfig.getParam("dataTransmissionPort"));
         storagePath = AppConfig.getParam("storagePath");
+        frontendIpAddress = AppConfig.getParam("frontendAddress");
+        feedbackPort = Integer.parseInt(AppConfig.getParam("feedbackPort"));
     }
 
     /**
@@ -248,7 +254,7 @@ public class ClientCommunicationManager {
                 DataOutputStream dataOutputStream = null;
 
                 try{
-                    frontendSocket = new Socket("127.0.0.100", 8010);
+                    frontendSocket = new Socket(frontendIpAddress, feedbackPort);
                     dataOutputStream = new DataOutputStream(frontendSocket.getOutputStream());
 
                     dataOutputStream.write(Serializer.serialize(feedback));

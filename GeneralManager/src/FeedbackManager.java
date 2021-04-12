@@ -1,6 +1,7 @@
 import client_manager.data.NewFileRequest;
 import client_node.NewFileRequestFeedback;
 import communication.Serializer;
+import config.AppConfig;
 import log.ProfiPrinter;
 
 import java.io.DataInputStream;
@@ -12,9 +13,19 @@ import java.util.List;
 
 public class FeedbackManager implements Runnable{
     private final List<NewFileRequestFeedback> feedbackList;
-    private final static int bufferSize = 1024;
+    private static int bufferSize;
+    private static String generalManagerIpAddress;
+    private static int feedbackPort;
+
     public FeedbackManager(){
         this.feedbackList = new ArrayList<NewFileRequestFeedback>();
+        readConfigParams();
+    }
+
+    public void readConfigParams(){
+        bufferSize = Integer.parseInt(AppConfig.getParam("buffersize"));
+        generalManagerIpAddress = AppConfig.getParam("generalManagerIpAddress");
+        feedbackPort = Integer.parseInt(AppConfig.getParam("feedbackPort"));
     }
 
     public Runnable feedbackThread(Socket frontendSocket){
@@ -61,7 +72,7 @@ public class FeedbackManager implements Runnable{
     public void run() {
         try {
             ServerSocket feedbackSocket = new ServerSocket();
-            feedbackSocket.bind(new InetSocketAddress("127.0.0.1", 8010));
+            feedbackSocket.bind(new InetSocketAddress(generalManagerIpAddress, feedbackPort));
             while(true) {
                 System.out.println("Feedback nou de la frontend!");
                 Socket socket = feedbackSocket.accept();

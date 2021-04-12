@@ -22,12 +22,15 @@ public class FileSystemManager {
      */
     private static int replicationPort;
 
+    private static int buffersize;
+
 
     /** -------- Constructor & Configurare -------- **/
     /**
      * Functie care citeste si initializeaza parametrii de configurare
      */
     public static void readConfigParams(){
+        buffersize = Integer.parseInt(AppConfig.getParam("buffersize"));
         replicationPort = Integer.parseInt(AppConfig.getParam("replicationPort"));
     }
 
@@ -57,8 +60,8 @@ public class FileSystemManager {
                 se cere feedback doar in cazul operatiilor la care am de trimis raspuns la client
                  */
                 DataInputStream dataInputStream = new DataInputStream(deleteSocket.getInputStream());
-                byte[] buffer = new byte[1024];
-                while(dataInputStream.read(buffer, 0, 1024) > 0){
+                byte[] buffer = new byte[buffersize];
+                while(dataInputStream.read(buffer, 0, buffersize) > 0){
                     feedbackResponse = (FeedbackResponse)Serializer.deserialize(buffer);
                     break;
                 }

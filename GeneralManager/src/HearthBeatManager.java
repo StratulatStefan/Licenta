@@ -39,6 +39,8 @@ public class HearthBeatManager implements Runnable{
      */
     private static int cleanupFrequency;
 
+    private static int checkStorageHealthFrequency;
+
 
     /** -------- Constructor & Configurare -------- **/
     /**
@@ -49,6 +51,7 @@ public class HearthBeatManager implements Runnable{
         multicastPort = Integer.parseInt(AppConfig.getParam("multicastPort"));
         frequency = Integer.parseInt(AppConfig.getParam("hearthBeatFrequency"));
         cleanupFrequency = Integer.parseInt(AppConfig.getParam("cleanupFrequency"));
+        checkStorageHealthFrequency = Integer.parseInt(AppConfig.getParam("checkStorageHealthFrequency"));
     }
 
     /**
@@ -159,7 +162,7 @@ public class HearthBeatManager implements Runnable{
                 RequestCRC requestCRC = new RequestCRC();
                 while(true) {
                     try {
-                        Thread.sleep((int) (10 * 1e3));
+                        Thread.sleep((int) (checkStorageHealthFrequency * 1e3));
                         System.out.println(Time.getCurrentTimeWithFormat() + " Se trimite cerere pentru CRC ...");
                         socket.sendBinaryMessage(group, Serializer.serialize(requestCRC));
                     } catch (IOException exception) {

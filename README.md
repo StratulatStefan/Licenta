@@ -4,8 +4,9 @@
 ___
 
 # TO DO
+- trimitere sms la administrator atunci cand un nod nu mai are capacitate de stocare sau avem prea multe erori la un harddisk
 - refactorizare cod; 
-    - adaugare parametri in fisierul de configurare
+    - ~~adaugare parametri in fisierul de configurare~~
     - adaugare comentarii
 - creare si integrare server in spring pentru gestiunea utilizatorilor; adaugarea cantitatii de stocare disponibile pentru fiecare user
     - Calcularea si afisarea cantitatii de stocare disponibile pentru un user
