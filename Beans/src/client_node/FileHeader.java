@@ -27,6 +27,8 @@ public class FileHeader implements Serializable {
      */
     private String userId;
 
+    private String description;
+
 
     /** -------- Constructori -------- **/
     /**
@@ -100,4 +102,11 @@ public class FileHeader implements Serializable {
         this.filesize = filesize;
     }
 
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
+    }
 }

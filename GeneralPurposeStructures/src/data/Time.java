@@ -22,12 +22,13 @@ public class Time {
     /**
      * Timpul curent, formatat.
      */
-    private static SimpleDateFormat formattedTime = new SimpleDateFormat("dd-MM-yyyy | hh:mm:ss");
+    private static SimpleDateFormat formattedTime = new SimpleDateFormat("dd-MM-yyyy|hh:mm:ss");
 
 
     /** -------- Gettere -------- **/
     /**
-     * Functie care returneaza timestamp-ul curent, raportat la timestampul de baza al clasei
+     * Functie care returneaza timestamp-ul curent, raportat la timestampul de baza al clasei.
+     * Timpul este exprimat in secunde
      */
     public static long getCurrentTimestamp(){
         currentTimestamp.setTime(System.currentTimeMillis());

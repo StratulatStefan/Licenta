@@ -82,9 +82,9 @@ public class ClientCommunicationManager {
      * @param user Id-ul utilizatorului.
      * @param filename Numele fisierului cautat.
      */
-    public ClientRequestStatus checkFileStatus(String user, String filename){
+    public ClientRequestStatus checkFileStatus(String user, String filename, long crc){
         try{
-            boolean fileStatus = GeneralManager.contentTable.checkForUserFile(user, filename);
+            boolean fileStatus = GeneralManager.contentTable.checkForUserFile(user, filename, crc);
             if(fileStatus){
                 String status = GeneralManager.contentTable.getFileStatusForUser(user, filename);
                 if(status.contains("DELETED"))
@@ -131,6 +131,17 @@ public class ClientCommunicationManager {
         return 0;
     }
 
+
+    public String generateChainForUpdate(String userId, String filename){
+        List<String> candidates = GeneralManager.statusTable.getAvailableNodesAddressesForFile(userId, filename);
+        StringBuilder token = new StringBuilder();
+        for(String address : candidates){
+            token.append(address).append("-");
+        }
+        token = new StringBuilder(token.substring(0, token.length() - 1));
+        return token.toString();
+    }
+
     /**
      * Functie care va genera lantul de noduri la care se va stoca un fisier nou aparut in sistem.
      * Totadata, inregistreaza consumul de memorie in tabela de stocare a nodurilor.
@@ -138,7 +149,7 @@ public class ClientCommunicationManager {
      * @param replication_factor Factorul de replicare al fisierului
      * @return Lantul de noduri la care se va stoca fisierului
      */
-    public String generateChain(long filesize, int replication_factor) throws Exception{
+    public String generateNewChain(long filesize, int replication_factor) throws Exception{
         System.out.println("User uploaded a new file with size : " + filesize + " and replication factor : " + replication_factor);
         List<String> connectionAddresses = GeneralManager.connectionTable.getConnectionTable();
         if(connectionAddresses.size() <  replication_factor){
@@ -152,7 +163,6 @@ public class ClientCommunicationManager {
                 System.out.println("Niciun nod nu are suficienta memorie pentru a stoca noul fisier.");
                 return null;
             }
-            /* !!!!!! criteriu de selectare a nodurilor !!!!!! */
             for(String address : candidates){
                 if(replication_factor == 0){
                     break;
@@ -170,6 +180,7 @@ public class ClientCommunicationManager {
         return null;
     }
 
+
     /**
      * TODO rework description
      * Functie apelata la adaugarea unui nou fisier;
@@ -186,7 +197,7 @@ public class ClientCommunicationManager {
             try {
                 int replication_factor = getReplicationFactor(userType);
                 String newFileStatus = "[PENDING]";
-                if(!GeneralManager.contentTable.checkForUserFile(user, filename)){
+                if(!GeneralManager.contentTable.checkForUserFile(user, filename, -1)){
                     // aici putem ajunge doar la adaugarea unui nou fisier
                     GeneralManager.contentTable.addRegister(user, filename, replication_factor, crc, newFileStatus);
                 }
@@ -194,6 +205,7 @@ public class ClientCommunicationManager {
                     // aici putem ajunge si rename si alte operatii asupra fisierului
                     GeneralManager.contentTable.updateFileStatus(user, filename, newFileStatus);
                     GeneralManager.contentTable.updateReplicationFactor(user, filename, replication_factor);
+                    GeneralManager.contentTable.updateFileCRC(user, filename, crc);
                 }
             }
             catch (Exception exception){
@@ -256,7 +268,7 @@ public class ClientCommunicationManager {
                     ManagerResponse response = new ManagerResponse();
                     DataInputStream dataInputStream = new DataInputStream(clientSocket.getInputStream());
                     DataOutputStream dataOutputStream = new DataOutputStream(clientSocket.getOutputStream());
-                    String chain;
+                    String chain = "";
                     byte[] buffer = new byte[bufferSize];
                     while(dataInputStream.read(buffer, 0, bufferSize) > 0){
                         ClientManagerRequest clientManagerRequest = (ClientManagerRequest) Serializer.deserialize(buffer);
@@ -264,21 +276,36 @@ public class ClientCommunicationManager {
 
                         String userId = clientManagerRequest.getUserId();
                         String filename = clientManagerRequest.getFilename();
-                        ClientRequestStatus fileStatus = checkFileStatus(userId, filename);
+                        ClientRequestStatus fileStatus = checkFileStatus(userId, filename, -1);
                         switch (clientRequest){
                             case NEW_FILE:{
                                 /* TODO trimitem inapoi la frontend ok la stocarea fisierului ? */
+                                boolean crcMatch = false;
                                 switch (fileStatus){
                                     case FILE_EXISTS: {
-                                        response.setException("FILE ALREADY EXISTS!");
-                                        break;
+                                        fileStatus = checkFileStatus(userId, filename, ((NewFileRequest)clientManagerRequest).getCrc());
+                                        switch (fileStatus){
+                                            case FILE_EXISTS: {
+                                                response.setException("FILE ALREADY EXISTS!");
+                                                break;
+                                            }
+                                            case FILE_NOT_FOUND:{
+                                                chain = generateChainForUpdate(userId, filename);
+                                                crcMatch = true;
+                                            }
+                                        }
+                                        if(!crcMatch){
+                                            break;
+                                        }
                                     }
                                     case FILE_NOT_FOUND: {
                                         long filesize = ((NewFileRequest)clientManagerRequest).getFilesize();
                                         long crc = ((NewFileRequest)clientManagerRequest).getCrc();
                                         String usertype = ((NewFileRequest) clientManagerRequest).getUserType();
                                         int replication_factor = getReplicationFactor(usertype);
-                                        chain = generateChain(filesize, replication_factor);
+                                        if(chain == ""){
+                                            chain = generateNewChain(filesize, replication_factor);
+                                        }
                                         if (chain != null) {
                                             response.setResponse(chain);
                                             System.out.println("Token-ul a fost trimis catre client : " + chain);
@@ -311,7 +338,7 @@ public class ClientCommunicationManager {
                                         GeneralManager.contentTable.updateFileStatus(userId, filename, "[PENDING]");
                                         String newName = ((RenameFileRequest)clientManagerRequest).getNewName();
                                         List<String> candidateNodes = GeneralManager.statusTable.getAvailableNodesAddressesForFile(userId, filename);
-                                        FeedbackResponse feedbackResponse = GeneralManager.fileSystemManager.renameFile(userId, filename, newName, candidateNodes);
+                                        FeedbackResponse feedbackResponse = GeneralManager.fileSystemManager.renameFile(userId, filename, newName, candidateNodes, clientManagerRequest.getDescription());
                                         GeneralManager.contentTable.updateFileName(userId, filename, newName);
                                         response.setResponse(feedbackResponse.getStatus());
                                         GeneralManager.contentTable.updateFileStatus(userId, newName, "[VALID]");

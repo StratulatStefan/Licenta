@@ -204,9 +204,11 @@ public class ClientCommunicationManager {
                     clientSocket.close();
                     GeneralNode.pendingList.removeFromList(fileHeader.getUserId(), fileHeader.getFilename());
                     long filecrc = FileSystem.calculateCRC(filepath);
+                    GeneralNode.versionControlManager.registerFileVersion(fileHeader.getUserId(), fileHeader.getFilename(), filecrc, fileHeader.getDescription());
+                    GeneralNode.crcTable.updateRegister(fileHeader.getUserId(), fileHeader.getFilename(), filecrc);
                     sendFeedbackToFrontend(fileHeader, filecrc);
-
                 }
+
                 catch (Exception exception){
                     ProfiPrinter.PrintException(exception.getMessage());
                     ProfiPrinter.PrintException(String.format("Could not properly close connection with my friend : [%s : %d]",

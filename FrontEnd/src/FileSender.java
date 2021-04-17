@@ -54,7 +54,7 @@ public class FileSender {
         return null;
     }
 
-    public static void sendFile(String userId, String token, String filename){
+    public static void sendFile(String userId, String token, String filename, String description){
         try {
             String destinationAddress = getDestinationIpAddress(token);
             Socket socket = new Socket(destinationAddress, generalManagerPort);
@@ -64,6 +64,7 @@ public class FileSender {
             fileHeader.setToken(token);
             fileHeader.setFilesize(file.length());
             fileHeader.setUserId(userId);
+            fileHeader.setDescription(description);
 
             DataOutputStream outputStream = new DataOutputStream(socket.getOutputStream());
             BufferedInputStream inputStream = new BufferedInputStream(new FileInputStream(file));

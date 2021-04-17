@@ -1,26 +1,35 @@
 package model;
 
 import data.Pair;
+import data.Time;
+import os.FileSystem;
 
 import java.util.ArrayDeque;
 import java.util.Queue;
 
+
 public class PendingQueue {
-    private final Queue<Pair<String, String>> pendingQueue;
+    //private final Queue<Pair<String, String>> pendingQueue;
+    private final Queue<PendingQueueRegister> pendingQueue;
 
     public PendingQueue(){
-        this.pendingQueue = new ArrayDeque<>();
+        this.pendingQueue = new ArrayDeque<PendingQueueRegister>();
     }
 
     public void addToQueue(String userId, String filename) throws Exception{
         synchronized (this.pendingQueue){
             if(this.containsRegister(userId, filename))
                 throw new Exception("Queue already contains file " + filename + " of user " + userId + "!");
-            this.pendingQueue.add(new Pair<>(userId, filename));
+            this.pendingQueue.add(new PendingQueueRegister(userId, filename));
+        }
+    }
+    public void addToQueue(PendingQueueRegister pendingQueueRegister) throws Exception{
+        synchronized (this.pendingQueue){
+            this.pendingQueue.add(pendingQueueRegister);
         }
     }
 
-    public Pair<String, String> popFromQueue(){
+    public PendingQueueRegister popFromQueue(){
         synchronized (this.pendingQueue){
             return this.pendingQueue.poll();
         }
@@ -28,8 +37,8 @@ public class PendingQueue {
 
     public boolean containsRegister(String userId, String filename){
         synchronized (this.pendingQueue){
-            for(Pair<String, String> request : this.pendingQueue){
-                if(request.getFirst().equals(userId) && request.getSecond().equals(filename)){
+            for(PendingQueueRegister request : this.pendingQueue){
+                if(request.getUserId().equals(userId) && request.getFilename().equals(filename)){
                     return true;
                 }
             }

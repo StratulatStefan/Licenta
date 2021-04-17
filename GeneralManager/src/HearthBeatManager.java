@@ -4,6 +4,8 @@ import communication.Serializer;
 import config.AppConfig;
 import data.Pair;
 import log.ProfiPrinter;
+import model.PendingQueue;
+import model.PendingQueueRegister;
 import node_manager.Beat.NodeBeat;
 import java.io.IOException;
 import java.net.InetAddress;
@@ -179,10 +181,21 @@ public class HearthBeatManager implements Runnable{
     }
 
     public void checkForFileStatusChange(){
+        long currentTimeStamp;
         for(int i = 0; i < 3; i++){
             try {
-                Pair<String, String> updateRequest = GeneralManager.pendingQueue.popFromQueue();
-                GeneralManager.contentTable.updateFileStatus(updateRequest.getFirst(), updateRequest.getSecond(), "[VALID]");
+                PendingQueueRegister updateRequest = GeneralManager.pendingQueue.popFromQueue();
+                currentTimeStamp = Time.getCurrentTimestamp();
+                ProfiPrinter.PrintException("Current : " + currentTimeStamp + " | Request : " + updateRequest.getTimestamp());
+                if(Math.abs(updateRequest.getTimestamp() - currentTimeStamp) < frequency){
+                    // asta apare mai ales atunci cand facem cerere de replicare;
+                    // la replicare, nu asteptam feedback de la user, ci adaugam instant in lista
+                    // ne asiguram ca modificarea statusului fisierului nu se inainte de a primi macar cu beat de la noduri
+                    // bagam inregistrarea inapoi in coada si mai asteptam inca o perioada de cleanup
+                    GeneralManager.pendingQueue.addToQueue(updateRequest);
+                    continue;
+                }
+                GeneralManager.contentTable.updateFileStatus(updateRequest.getUserId(), updateRequest.getFilename(), "[VALID]");
             }
             catch (NullPointerException exception) {
                 break;

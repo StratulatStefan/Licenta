@@ -28,6 +28,7 @@ class FileEntry{
         this.filename = filename;
     }
 }
+
 public class NewFiles {
     private final List<FileEntry> fileEntries = new ArrayList<>();
 
@@ -46,6 +47,12 @@ public class NewFiles {
                 }
             }
             return false;
+        }
+    }
+
+    public void clean(){
+        synchronized (this.fileEntries){
+            this.fileEntries.clear();
         }
     }
 }

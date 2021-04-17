@@ -85,7 +85,7 @@ public class Frontend {
                         System.out.println("New file request : " + requestData.getFilename() + " -> " + token);
                         requestData.setFilename(fullPath);
                         long start = System.currentTimeMillis();
-                        FileSender.sendFile(requestData.getUserId(), token, requestData.getFilename());
+                        FileSender.sendFile(requestData.getUserId(), token, requestData.getFilename(), requestData.getDescription());
                         long timeElapsed = System.currentTimeMillis() - start;
                         long fileCRC = FileSystem.calculateCRC(requestData.getFilename());
                         FileSender.waitForFeedback(requestData.getUserId(), token, requestData.getFilename(), timeElapsed, fileCRC);
@@ -117,6 +117,8 @@ public class Frontend {
         newFileRequest.setFilesize(FileSystem.getFileSize(filepath));
         newFileRequest.setCrc(FileSystem.calculateCRC(filepath));
         newFileRequest.setUserType("STANDARD");
+        //newFileRequest.setDescription("Adaugare fisier lab06.py de la ML; este complet");
+        newFileRequest.setDescription("refactorizare cod");
         mainActivity(newFileRequest);
 
         newFileRequest = new NewFileRequest();
@@ -126,7 +128,8 @@ public class Frontend {
         newFileRequest.setFilesize(FileSystem.getFileSize(filepath));
         newFileRequest.setCrc(FileSystem.calculateCRC(filepath));
         newFileRequest.setUserType("STANDARD");
-        mainActivity(newFileRequest);
+        newFileRequest.setDescription("Adaugare fisier sss.pdf");
+        //mainActivity(newFileRequest);
 
 
         newFileRequest = new NewFileRequest();
@@ -136,7 +139,8 @@ public class Frontend {
         newFileRequest.setFilesize(FileSystem.getFileSize(filepath));
         newFileRequest.setCrc(FileSystem.calculateCRC(filepath));
         newFileRequest.setUserType("STANDARD");
-        mainActivity(newFileRequest);
+        newFileRequest.setDescription("Adaugare arhiva curs; In arhiva se gaseste inregistrarea video");
+        //mainActivity(newFileRequest);
 
 
 
@@ -145,17 +149,18 @@ public class Frontend {
 
         DeleteFileRequest deleteFileRequest = new DeleteFileRequest();
         //deleteFileRequest.setFilename("D:/Facultate/Licenta/test_files/sss.pdf");
-        deleteFileRequest.setFilename("D:/Facultate/Licenta/test_files/lab06.py");
+        deleteFileRequest.setFilename("D:/Facultate/Licenta/test_files/lab06_Ok.py");
         deleteFileRequest.setUserId("1");
-        //mainActivity(deleteFileRequest);
+       // mainActivity(deleteFileRequest);
 
 
 
 
         RenameFileRequest renameFileRequest = new RenameFileRequest();
-        renameFileRequest.setFilename("curs1.rar");
+        renameFileRequest.setFilename("lab06_ML.py");
+        renameFileRequest.setNewName("lab06_Ok.py");
         renameFileRequest.setUserId("1");
-        renameFileRequest.setNewName("curs2.rar");
+        renameFileRequest.setDescription("Inca un test");
         //mainActivity(renameFileRequest);
 
 

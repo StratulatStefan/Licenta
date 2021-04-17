@@ -7,6 +7,9 @@ import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.nio.file.StandardOpenOption;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.zip.CRC32;
 
 /**
@@ -29,6 +32,20 @@ public class FileSystem {
      */
     public static void createDir(String path) throws IOException {
         Files.createDirectories(Paths.get(path ));
+    }
+
+    /**
+     * Functie care creeaza un director.
+     * @param path Calea noului director.
+     * @throws IOException Exceptie generata daca directorul exista deja.
+     */
+    public static void createFile(String path){
+        try {
+            Files.createFile(Paths.get(path));
+        }
+        catch (IOException exception){
+            ProfiPrinter.PrintException("Nu se poate crea fisierul de metadate " + path);
+        }
     }
 
     /**
@@ -121,5 +138,33 @@ public class FileSystem {
             ProfiPrinter.PrintException("IOException la calculateCRC : " + exception.getMessage());
         }
         return -1;
+    }
+
+    public static List<String> getFileLines(String filepath) throws IOException{
+        File file = new File(filepath);
+        BufferedReader reader = new BufferedReader(new FileReader(file));
+        List<String> fileLines = new ArrayList<>();
+        String line;
+        while((line = reader.readLine()) != null){
+            if(line.equals(""))
+                continue;
+            fileLines.add(line);
+        }
+        reader.close();
+        return fileLines;
+    }
+
+    public static void appendToFile(String filepath, String content){
+        try {
+            Path path = Paths.get(filepath);
+            Files.write(path, content.getBytes(), StandardOpenOption.APPEND);
+        }
+        catch (IOException exception){
+            ProfiPrinter.PrintException("Nu se poate modifica fisierul de metadate " + filepath);
+        }
+    }
+
+    public static String changeFileExtension(String filepath, String newExtension){
+        return filepath.substring(0, filepath.lastIndexOf(".")) + newExtension;
     }
 }

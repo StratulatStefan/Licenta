@@ -316,13 +316,13 @@ public class ContentTable {
      * @param userId Id-ul utilizatorului
      * @param filename Numele fisierului cautat.
      */
-    public boolean checkForUserFile(String userId, String filename){
+    public boolean checkForUserFile(String userId, String filename, long crc){
         try {
             List<FileAttributes> userFiles = getUserFiles(userId);
             if (userFiles == null)
                 return false;
             for (FileAttributes userFile : userFiles) {
-                if (userFile.getFilename().equals(filename)) {
+                if (userFile.getFilename().equals(filename) && (crc == -1 || userFile.getCrc() == crc)) {
                     //if(userFile.getReplication_factor() != 0)
                     return true;
                 }

@@ -127,8 +127,11 @@ public class FileSystemManager implements Runnable{
 
                             if(fileSystemRequest.getClass() == ReplicationRequest.class){
                                 System.out.println("Am primit comanda de replicare si trimit fisierul mai departe.");
+                                String metadataFilename = FileSystem.changeFileExtension(filename, ".metadata");
+
                                 for(String destionationAddress : ((ReplicationRequest)fileSystemRequest).getDestionationAddress()) {
                                     sendReplication(userId, filename, destionationAddress);
+                                    sendReplication(userId, metadataFilename, destionationAddress);
                                 }
                             }
                             else if(fileSystemRequest.getClass() == DeleteRequest.class){
@@ -145,6 +148,9 @@ public class FileSystemManager implements Runnable{
                                     case 1 : {
                                         feedbackResponse.setStatus("Fisierul a fost eliminat cu succes!");
                                         feedbackResponse.setSuccess(true);
+
+                                        String metadataPath = FileSystem.changeFileExtension(filepath, ".metadata");
+                                        FileSystem.deleteFile(metadataPath);
                                         break;
                                     }
                                 }
@@ -153,7 +159,8 @@ public class FileSystemManager implements Runnable{
                             else if(fileSystemRequest.getClass() == RenameRequest.class){
                                 System.out.println("Am primit comanda de redenumire. Dam drumu la treaba imediat");
                                 String originalPath = mainFilepath + address.getIpAddress() + "/" + userId + "/" + filename;
-                                String newPath = mainFilepath + address.getIpAddress() + "/" + userId + "/" + ((RenameRequest) fileSystemRequest).getNewName();
+                                String newFilename = ((RenameRequest) fileSystemRequest).getNewName();
+                                String newPath = mainFilepath + address.getIpAddress() + "/" + userId + "/" + newFilename;
                                 int operation_status = FileSystem.renameFile(originalPath, newPath);
                                 FeedbackResponse feedbackResponse = new FeedbackResponse();
                                 switch (operation_status){
@@ -165,6 +172,12 @@ public class FileSystemManager implements Runnable{
                                     case 1 : {
                                         feedbackResponse.setStatus("Fisierul a fost redenumit cu succes!");
                                         feedbackResponse.setSuccess(true);
+
+                                        String metadataPath = FileSystem.changeFileExtension(originalPath, ".metadata");
+                                        String newMetadataPath = FileSystem.changeFileExtension(newPath, ".metadata");
+                                        FileSystem.renameFile(metadataPath, newMetadataPath);
+
+                                        GeneralNode.versionControlManager.registerFileVersion(userId, newFilename, -1, fileSystemRequest.getDescription());
                                         break;
                                     }
                                     case 2 : {

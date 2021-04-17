@@ -18,6 +18,8 @@ public class ClientManagerRequest implements Serializable {
      */
     private String filename;
 
+    private String description;
+
 
     /** -------- Gettere & Settere -------- **/
     /**
@@ -44,5 +46,13 @@ public class ClientManagerRequest implements Serializable {
      */
     public String getUserId() {
         return userId;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
     }
 }

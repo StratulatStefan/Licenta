@@ -24,6 +24,7 @@ public class GeneralNode{
      * Adresa IP la care va fi mapat nodul intern
      */
     private static String ipAddress;
+
     /**
      * Calea de baza la care se vor stoca fisierele
      */
@@ -33,8 +34,9 @@ public class GeneralNode{
      * **/
     private final static NodeBeat storageStatus = new NodeBeat();
 
+    private static boolean initFlag = true;
 
-    private final static CRCTable crcTable = new CRCTable();
+    public final static CRCTable crcTable = new CRCTable();
 
     private final static NewFiles newFiles = new NewFiles();
 
@@ -57,6 +59,8 @@ public class GeneralNode{
      */
     private FileSystemManager fileSystemManager;
 
+    public static VersionControlManager versionControlManager;
+
 
     /** -------- Constructor & Configurare -------- **/
     /**
@@ -73,6 +77,7 @@ public class GeneralNode{
         this.hearthBeatManager = new HearthBeatManager(ipAddress);
         this.clientCommunicationManager = new ClientCommunicationManager(ipAddress);
         this.fileSystemManager = new FileSystemManager(ipAddress);
+        versionControlManager = new VersionControlManager(ipAddress);
     }
 
 
@@ -95,7 +100,9 @@ public class GeneralNode{
             }
         }
     }
+
     /**
+     * TODO rework description
      * Functie care acceseaza filesystem-ul si determina statusul stocarii nodului curent;
      * Extrage toti utilizatorii si fisierele din stocarea nodului curent, si compune heartBeat-ul
      * ce va fi trimis catre nodul general.
@@ -104,11 +111,23 @@ public class GeneralNode{
      * @return Heartbeat-ul (acelasi, dar cu alte valori)
      */
     public static NodeBeat getStorageStatus() throws IOException {
+        // la primul beat, se trimite neaparat tot statusul
+        if(initFlag){
+            try {
+                calculateFileSystemCRC();
+            }
+            catch (Exception exception){
+                // se genereaza daca nu gaseste niciun fisier
+            }
+            initFlag = false;
+        }
+
         storageStatus.cleanUp();
         String path = storagePath + ipAddress;
         if(!FileSystem.checkFileExistance(path)){
             FileSystem.createDir(path);
             System.out.println("No status defined yet!");
+            newFiles.clean();
             return null;
         }
 
@@ -124,6 +143,9 @@ public class GeneralNode{
             String[] userFiles = FileSystem.getDirContent(path + "\\" + userDir);
             List<FileAttribute> fileAttributes = new ArrayList<>();
             for(String file : userFiles){
+                if(file.contains("metadata")){
+                    continue;
+                }
                 if(!pendingList.containsRegister(userDir, file)) {
                     FileAttribute f = new FileAttribute();
                     f.setFilename(file);

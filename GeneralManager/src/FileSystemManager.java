@@ -143,7 +143,7 @@ public class FileSystemManager {
      * @param newname Noul nume al fisierului
      * @param candidates Adresele nodurilor de la care se va elimina fisierului.
      */
-    public FeedbackResponse renameFile(String userId, String filename, String newname, List<String> candidates){
+    public FeedbackResponse renameFile(String userId, String filename, String newname, List<String> candidates, String description){
         List<FeedbackResponse> feedbackResponses = new ArrayList<FeedbackResponse>();
         List<Thread> threadPool = new ArrayList<>();
         for(String destinationAddress : candidates) {
@@ -154,6 +154,7 @@ public class FileSystemManager {
                     renameRequest.setUserId(userId);
                     renameRequest.setFilename(filename);
                     renameRequest.setNewName(newname);
+                    renameRequest.setDescription(description);
                     System.out.println("Trimitem cerere de replicare catre " + destinationAddress);
 
                     feedbackResponses.add(makeRequestToFileSystem(destinationAddress, renameRequest));
