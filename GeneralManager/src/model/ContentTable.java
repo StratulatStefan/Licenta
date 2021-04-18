@@ -30,12 +30,15 @@ class FileAttributes{
      */
     private long crc;
 
+    private String versionNo;
+
     /** -------- Constructor -------- **/
-    public FileAttributes(String filename, int replication_factor, String status, long crc){
+    public FileAttributes(String filename, int replication_factor, String status, long crc, String versionNo){
         this.filename = filename;
         this.replication_factor = replication_factor;
         this.status = status;
         this.crc = crc;
+        this.versionNo = versionNo;
     }
 
     /** -------- Gettere & Settere -------- **/
@@ -91,6 +94,13 @@ class FileAttributes{
         this.crc = crc;
     }
 
+    public void setVersionNo(String versionNo) {
+        this.versionNo = versionNo;
+    }
+
+    public String getVersionNo() {
+        return versionNo;
+    }
 
     /** -------- Functii de baza, supraincarcate -------- **/
     @Override
@@ -98,7 +108,8 @@ class FileAttributes{
         StringBuilder stringBuilder = new StringBuilder();
         stringBuilder.append(filename).append(" ");
         stringBuilder.append("[repl. : ").append(replication_factor).append("] ");
-        stringBuilder.append("[CRC : ").append(Long.toHexString(crc)).append("] ");
+        stringBuilder.append("[CRC : ").append(Long.toHexString(crc)).append(" | ");
+        stringBuilder.append("VersionNo : ").append(versionNo).append("] ");
         stringBuilder.append("[Status : ").append(status).append("]\n");
         return stringBuilder.toString();
     }
@@ -144,9 +155,11 @@ public class ContentTable {
             for (String user : storageStatusTable.getUsers()) {
                 HashMap<String, Integer> userFilesNodesCount = storageStatusTable.getUserFilesNodesCount(user);
                 HashMap<String, List<Long>> userFilesCRC = storageStatusTable.getUserFilesCRC(user);
+                HashMap<String, List<String>> userFilesVersion = storageStatusTable.getUserFilesVersions(user);
                 for (String filename : new ArrayList<>(userFilesNodesCount.keySet())) {
                     try {
-                        this.addRegister(user, filename, userFilesNodesCount.get(filename), userFilesCRC.get(filename).get(0), "[VALID]");
+                        this.addRegister(user, filename, userFilesNodesCount.get(filename),
+                                userFilesCRC.get(filename).get(0), "[VALID]", userFilesVersion.get(filename).get(0));
                     }
                     catch (Exception exception){
                         // nu prea avem cum sa ajunge aici la init intrucat exceptia se genereaza doar daca inregistrarea exista deja
@@ -166,9 +179,9 @@ public class ContentTable {
      * @param filename Numele fisierului;
      * @param replication_factor Factorul de replicare;
      */
-    public void addRegister(String userId, String filename, int replication_factor, long crc, String filestatus) throws Exception{
+    public void addRegister(String userId, String filename, int replication_factor, long crc, String filestatus, String versionNo) throws Exception{
         synchronized (this.contentTable){
-            FileAttributes fileAttribute = new FileAttributes(filename, replication_factor, filestatus, crc);
+            FileAttributes fileAttribute = new FileAttributes(filename, replication_factor, filestatus, crc, versionNo);
             if(this.containsUser(userId)){
                 this.contentTable.get(userId).add(fileAttribute);
             }
@@ -292,10 +305,32 @@ public class ContentTable {
         }
     }
 
+    public void updateFileVersionNo(String userId, String filename) throws Exception {
+        synchronized (this.contentTable) {
+            if (!this.containsUser(userId)) {
+                throw new Exception("Register not found!");
+            }
+            for (FileAttributes fileAttributes : this.contentTable.get(userId)) {
+                if (fileAttributes.getFilename().equals(filename)) {
+                    try {
+                        int versionNumber = Integer.parseInt(fileAttributes.getVersionNo().substring(1));
+                        fileAttributes.setVersionNo("v" + (versionNumber + 1));
+                        return;
+                    }
+                    catch (NumberFormatException exception){
+                        ProfiPrinter.PrintException("Exceptie de parsare la updateFileVersionNo");
+                    }
+
+                }
+            }
+            throw new Exception("Register not found!");
+        }
+    }
 
 
 
-    /** -------- Functii de validare -------- **/
+
+            /** -------- Functii de validare -------- **/
     /**
      * Functie care verifica daca un utilizator exista.
      * @param userId Id-ul utilizatorului cautat;
@@ -397,6 +432,20 @@ public class ContentTable {
             ProfiPrinter.PrintException("User not found!");
         }
         return -1;
+    }
+
+    public String getVersionForUser(String userId, String filename){
+        try {
+            for(FileAttributes file : this.getUserFiles(userId)){
+                if(file.getFilename().equals(filename)){
+                    return file.getVersionNo();
+                }
+            }
+        }
+        catch (Exception exception){
+            ProfiPrinter.PrintException("User not found!");
+        }
+        return null;
     }
 
 

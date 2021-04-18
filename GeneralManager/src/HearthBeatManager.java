@@ -82,6 +82,7 @@ public class HearthBeatManager implements Runnable{
                 int cleanUpIndex = 1;
                 while(true) {
                     System.out.println(Time.getCurrentTimeWithFormat() + " ");
+                    ProfiPrinter.PrintException("Hearbeat Manager cleanup");
                     try {
                         if(cleanUpIndex == cleanupFrequency){
                             checkForFileStatusChange();
@@ -186,7 +187,6 @@ public class HearthBeatManager implements Runnable{
             try {
                 PendingQueueRegister updateRequest = GeneralManager.pendingQueue.popFromQueue();
                 currentTimeStamp = Time.getCurrentTimestamp();
-                ProfiPrinter.PrintException("Current : " + currentTimeStamp + " | Request : " + updateRequest.getTimestamp());
                 if(Math.abs(updateRequest.getTimestamp() - currentTimeStamp) < frequency){
                     // asta apare mai ales atunci cand facem cerere de replicare;
                     // la replicare, nu asteptam feedback de la user, ci adaugam instant in lista

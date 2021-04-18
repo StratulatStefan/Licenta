@@ -63,4 +63,10 @@ public class VersionControlManager {
         }
     }
 
+    public VersionData getLastVersionOfFile(String userId, String filename){
+        String filepath = baseFilepath + userId + "\\" + filename;
+        String metadataFilePath = filepath.substring(0, filepath.lastIndexOf(".")) + extension;
+        return getLastVersionOfFile(metadataFilePath);
+    }
+
 }

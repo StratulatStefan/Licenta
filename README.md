@@ -6,6 +6,9 @@
 ___
 
 # TO DO
+- rezolvare problema redenumire; cand un nod moare si, intre timp, unul dintre fisierele existente la acel nod este redenumit; daca nodul invie, va declara fosta
+versiune a fisierului, insa in content table nu va mai exista.. deci tre <b>cumva</b> sters..
+    - la bucla de replicare tre avut grija.. 
 - ~~cand invie o replica, sa trimita filestoragestatus complet (cu tot cu crc) la primul beat~~
 - trimitere sms la administrator atunci cand un nod nu mai are capacitate de stocare sau avem prea multe erori la un harddisk
 - refactorizare
@@ -54,7 +57,9 @@ ___
     - ~~la stergerea unui fisier, se elimina si fisierul de metadate~~
     - ~~la redenumirea unui fisier, crc-ul se pastreaza, deci se schimba tot inafara de crc; se redenumeste si fisierul de metadate~~
     - ~~cand se face replicarea, se copie si fisierul de metadate~~
-- La cererea de incarcare a unui nou fisier care exista deja, verificarea existentei sa se faca pe baza numelui <b>si a crc-ului</b>
-        - daca avem un fisier cu acelasi nume si crc, sa nu putem sa il incarcam..
-        - daca are acelasi nume dar crc diferit sa se poata incarca; 
-        - daca avem nume diferit,il incarcam fara probleme
+- ~~La cererea de incarcare a unui nou fisier care exista deja, verificarea existentei sa se faca pe baza numelui <b>si a crc-ului</b>~~
+        - ~~daca avem un fisier cu acelasi nume si crc, sa nu putem sa il incarcam..~~
+        - ~~daca are acelasi nume dar crc diferit sa se poata incarca;~~
+        - ~~daca avem nume diferit,il incarcam fara probleme~~
+- ~~sa se trimita numarul versiunii in beat~~
+- ~~sa se adauge versiunea in storagestatus si in contenttable~~

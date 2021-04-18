@@ -15,6 +15,10 @@ public class FileAttribute implements Serializable {
      * CRC
      */
     private long crc;
+    /**
+     * Numarul versiunii fisierului.
+     */
+    private String versionNo;
 
     /** -------- Gettere & Settere -------- **/
     /**
@@ -41,5 +45,18 @@ public class FileAttribute implements Serializable {
      */
     public void setCrc(long crc) {
         this.crc = crc;
+    }
+
+    /**
+     * Getter pentru numarul versiunii
+     */
+    public String getVersionNo() {
+        return versionNo;
+    }
+    /**
+     * Setter pentru numarul versiunii
+     */
+    public void setVersionNo(String versionNo) {
+        this.versionNo = versionNo;
     }
 }

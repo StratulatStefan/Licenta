@@ -1,6 +1,7 @@
 import config.AppConfig;
 import data.Pair;
 import log.ProfiPrinter;
+import model.FileVersionData;
 
 import javax.swing.*;
 import java.util.ArrayList;
@@ -86,7 +87,7 @@ public class ReplicationManager implements Runnable{
                     HashMap<String, Integer> userFiles = GeneralManager.contentTable.getUserFiless(userId);
                     for (String userFile : new ArrayList<>(userFiles.keySet())) {
                         int replication_factor = userFiles.get(userFile);
-                        List<Pair<String, Long>> availableNodesForFile = GeneralManager.statusTable.getAvailableNodesForFile(userId, userFile);
+                        List<Pair<String, FileVersionData>> availableNodesForFile = GeneralManager.statusTable.getAvailableNodesForFile(userId, userFile);
                         List<String> availableNodesAddressesForFile = GeneralManager.statusTable.getAvailableNodesAddressesForFile(userId, userFile);
                         if(availableNodesForFile ==  null){
                             // eroare de sincronizare; se va rezolva la iteratia urmatoare a for-ului prin useri
@@ -121,6 +122,17 @@ public class ReplicationManager implements Runnable{
                             System.out.println("[UNKNOWN]\n");
                         }
                     }
+                    // verificam daca sunt fisiere care sunt in storage status table, dar nu sunt in tabela de content (situatie intalnita atunci cand un nod moare si, intre timp,
+                    // un fisier a fost redenumit); nodul care invie va declara fisierul, dar contenttable nu va sti de el
+                    // TODO aici.. cu redenumirea..
+                    /*List<String> statusTableUserFiles = GeneralManager.statusTable.getUserFiles(userId);
+                    for(String statusTableUserFile : GeneralManager.statusTable.getUserFiles(userId)){
+                        if(!GeneralManager.contentTable.checkForUserFile(userId, statusTableUserFile, -1)){
+                            if(!GeneralManager.contentTable.getFileStatusForUser(userId, statusTableUserFile).contains("PENDING"))
+                            this.deletion(-1, userId,statusTableUserFile, GeneralManager.statusTable.getAvailableNodesAddressesForFile(userId, statusTableUserFile));
+                        }
+                    }*/
+
                 }
                 System.out.println("------------------------------------\n");
                 Thread.sleep((int) (replicationFrequency * 1e3));
@@ -131,12 +143,12 @@ public class ReplicationManager implements Runnable{
         }
     }
 
-    private String checkForFileCorruption(long crc, List<Pair<String, Long>> availableNodesForFile){
+    private String checkForFileCorruption(long crc, List<Pair<String, FileVersionData>> availableNodesForFile){
         if(crc == -1){
             return null;
         }
-        for(Pair<String, Long> file : availableNodesForFile){
-            if(file.getSecond() != crc && file.getSecond() != -1){
+        for(Pair<String, FileVersionData> file : availableNodesForFile){
+            if(file.getSecond().getCrc() != crc && file.getSecond().getCrc() != -1){
                 ProfiPrinter.PrintException("Found corrupted file at address : " + file.getFirst());
                 return file.getFirst();
             }
@@ -172,7 +184,7 @@ public class ReplicationManager implements Runnable{
     }
 
     public void deletion(int replication_factor, String userId, String userFile, List<String> candidates) throws Exception {
-        System.out.println("[NEED DELETION OF FILE FROM ONE NODE]");
+        System.out.println(String.format("[NEED DELETION OF FILE %s]", userFile));
         System.out.print("\t\tFound nodes to delete file : ");
         for (String candidate : candidates) {
             System.out.print("[" + candidate + "] ");

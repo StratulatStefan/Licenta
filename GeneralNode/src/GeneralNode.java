@@ -157,6 +157,8 @@ public class GeneralNode{
                         f.setCrc(crcTable.getCrcForFile(userDir, file));
                         crcTable.resetRegister(userDir, file);
                     }
+                    String versionName = versionControlManager.getLastVersionOfFile(userDir, file).getVersionName();
+                    f.setVersionNo(versionName);
                     fileAttributes.add(f);
                 }
                 else{

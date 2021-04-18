@@ -199,13 +199,14 @@ public class ClientCommunicationManager {
                 String newFileStatus = "[PENDING]";
                 if(!GeneralManager.contentTable.checkForUserFile(user, filename, -1)){
                     // aici putem ajunge doar la adaugarea unui nou fisier
-                    GeneralManager.contentTable.addRegister(user, filename, replication_factor, crc, newFileStatus);
+                    GeneralManager.contentTable.addRegister(user, filename, replication_factor, crc, newFileStatus, "v1");
                 }
                 else{
                     // aici putem ajunge si rename si alte operatii asupra fisierului
                     GeneralManager.contentTable.updateFileStatus(user, filename, newFileStatus);
                     GeneralManager.contentTable.updateReplicationFactor(user, filename, replication_factor);
                     GeneralManager.contentTable.updateFileCRC(user, filename, crc);
+                    GeneralManager.contentTable.updateFileVersionNo(user, filename);
                 }
             }
             catch (Exception exception){
@@ -306,6 +307,9 @@ public class ClientCommunicationManager {
                                         if(chain == ""){
                                             chain = generateNewChain(filesize, replication_factor);
                                         }
+                                        else{
+
+                                        }
                                         if (chain != null) {
                                             response.setResponse(chain);
                                             System.out.println("Token-ul a fost trimis catre client : " + chain);
@@ -341,7 +345,9 @@ public class ClientCommunicationManager {
                                         FeedbackResponse feedbackResponse = GeneralManager.fileSystemManager.renameFile(userId, filename, newName, candidateNodes, clientManagerRequest.getDescription());
                                         GeneralManager.contentTable.updateFileName(userId, filename, newName);
                                         response.setResponse(feedbackResponse.getStatus());
+                                        //confirmUserRequest(userId, newName);
                                         GeneralManager.contentTable.updateFileStatus(userId, newName, "[VALID]");
+                                        GeneralManager.contentTable.updateFileVersionNo(userId, newName);
                                         break;
                                     }
                                 }
