@@ -37,7 +37,6 @@ public class FileSystem {
     /**
      * Functie care creeaza un director.
      * @param path Calea noului director.
-     * @throws IOException Exceptie generata daca directorul exista deja.
      */
     public static void createFile(String path){
         try {
@@ -103,6 +102,13 @@ public class FileSystem {
         throw new IOException("File not found!");
     }
 
+    /**
+     * Functie care determina dimensiunea in kilobytes a unei entitati a sistemului de fisiere
+     * Ne referim la fisiere sau chiar foldere intregi
+     * In cazul directoarelor, parcurgerea se face recursiv astfel incat sa analizam tot content-ul
+     * @param directory Numele fisierului/directorului a carui dimensiune dorim sa o determinam.
+     * @return Dimensiunea in kilobytes.
+     */
     public static long entitySize(File directory) {
         if(directory.isFile()){
             return directory.length();
@@ -140,6 +146,13 @@ public class FileSystem {
         return -1;
     }
 
+    /**
+     * Functie care returneaza tot continutul unui fisier text; continutul este organizat sub forma de linii.
+     * Se ignora liniile goale. ("")
+     * @param filepath Calea catre fisierul care se doreste a fi citit.
+     * @return Lista de linii cu continutul fisierului.
+     * @throws IOException Exceptie generata daca nu putem deschide/inchide fisierul sau reader-ul
+     */
     public static List<String> getFileLines(String filepath) throws IOException{
         File file = new File(filepath);
         BufferedReader reader = new BufferedReader(new FileReader(file));
@@ -154,6 +167,12 @@ public class FileSystem {
         return fileLines;
     }
 
+    /**
+     * Functie care adayga continut text la un anumit fisier.
+     * La final se adauga o noua linie (CRLF)
+     * @param filepath Calea care fisierul care va fi moddificat
+     * @param content Continutul care va fi adaugat
+     */
     public static void appendToFile(String filepath, String content){
         try {
             Path path = Paths.get(filepath);
@@ -164,6 +183,15 @@ public class FileSystem {
         }
     }
 
+    /**
+     * Functie care returneaza numele unui fisier cu extensia schimbata extensia.
+     * Se poate furniza atat numele fisierului cat si calea absolut catre acel fisier.
+     * Se foloseste cand dorim sa obtinem calea catre fisierul de metadate
+     * exemplu: lab.py -> lab.metadata
+     * @param filepath Numele fisierului sau calea absoluta catre fisier
+     * @param newExtension noua extensia a fisierului
+     * @return Numele fisierului cu extensia schimbata
+     */
     public static String changeFileExtension(String filepath, String newExtension){
         return filepath.substring(0, filepath.lastIndexOf(".")) + newExtension;
     }

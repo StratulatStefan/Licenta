@@ -17,7 +17,9 @@ public class ClientManagerRequest implements Serializable {
      * Fisierul care se va prelucra.
      */
     private String filename;
-
+    /**
+     * Descrierea request-ului; Se foloseste la versionare
+     */
     private String description;
 
 
@@ -48,10 +50,15 @@ public class ClientManagerRequest implements Serializable {
         return userId;
     }
 
+    /**
+     * Getter pentru descrierea request-ului
+     */
     public String getDescription() {
         return description;
     }
-
+    /**
+     * Setter pentru descrierea request-ului
+     */
     public void setDescription(String description) {
         this.description = description;
     }

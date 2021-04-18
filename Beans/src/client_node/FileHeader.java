@@ -26,7 +26,9 @@ public class FileHeader implements Serializable {
      * ID-ul userului care va detine fisierul
      */
     private String userId;
-
+    /**
+     * Descrierea versiunii noului fisier;
+     */
     private String description;
 
 
@@ -102,10 +104,15 @@ public class FileHeader implements Serializable {
         this.filesize = filesize;
     }
 
+    /**
+     * Getter pentru descrierea versiunii
+     */
     public String getDescription() {
         return description;
     }
-
+    /**
+     * Setter pentru descrierea versiunii
+     */
     public void setDescription(String description) {
         this.description = description;
     }

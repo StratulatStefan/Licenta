@@ -33,7 +33,7 @@ public class AppConfig {
     public static void readConfig(){
         BufferedReader reader;
         try{
-            reader = new BufferedReader(new FileReader("D:\\Facultate\\Licenta\\Dropbox\\dropbox.config"));
+            reader = new BufferedReader(new FileReader("D:\\Facultate\\Licenta\\Licenta\\dropbox.config"));
             String line;
             while((line = reader.readLine()) != null){
                 if(!line.equals("")){

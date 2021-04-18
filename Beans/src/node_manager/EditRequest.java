@@ -16,7 +16,9 @@ public class EditRequest implements Serializable {
      * Fisierul care se va prelucra.
      */
     private String filename;
-
+    /**
+     * Descrierea cererii de editare; Folosita la versionare
+     */
     private String description;
 
 
@@ -47,10 +49,15 @@ public class EditRequest implements Serializable {
         return userId;
     }
 
+    /**
+     * Getter pentru descrierea cererii
+     */
     public String getDescription() {
         return description;
     }
-
+    /**
+     * Setter pentru descrierea cererii
+     */
     public void setDescription(String description) {
         this.description = description;
     }

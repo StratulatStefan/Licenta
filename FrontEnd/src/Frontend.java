@@ -119,7 +119,7 @@ public class Frontend {
         newFileRequest.setUserType("STANDARD");
         //newFileRequest.setDescription("Adaugare fisier lab06.py de la ML; este complet");
         newFileRequest.setDescription("refactorizare cod");
-        //mainActivity(newFileRequest);
+        mainActivity(newFileRequest);
 
         newFileRequest = new NewFileRequest();
         newFileRequest.setUserId("3");
@@ -161,7 +161,7 @@ public class Frontend {
         renameFileRequest.setNewName("lab06_Okish.py");
         renameFileRequest.setUserId("1");
         renameFileRequest.setDescription("Inca un test");
-        mainActivity(renameFileRequest);
+        //mainActivity(renameFileRequest);
 
 
 
