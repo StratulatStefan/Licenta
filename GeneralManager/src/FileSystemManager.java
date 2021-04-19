@@ -92,13 +92,9 @@ public class FileSystemManager {
             @Override
             public void run() {
                 System.out.println("Trimit fisierul " + filename + " al userului " + user + " catre " + sourceAddress);
-
-                ReplicationRequest replicationRequest = new ReplicationRequest();
-                replicationRequest.setUserId(user);
-                replicationRequest.setFilename(filename);
-                replicationRequest.setDestionationAddress(destinationAddresses);
-
+                ReplicationRequest replicationRequest = new ReplicationRequest(user, filename, destinationAddresses);
                 makeRequestToFileSystem(sourceAddress, replicationRequest);
+
                 try{
                     GeneralManager.pendingQueue.addToQueue(user, filename);
                 }
@@ -123,11 +119,7 @@ public class FileSystemManager {
                 @Override
                 public void run() {
                     System.out.println("Trimit cerere de eliminare pentru fisierul " + filename + " al userului " + user + " de la nodul " + destinationAddress);
-
-                    DeleteRequest deleteRequest = new DeleteRequest();
-                    deleteRequest.setUserId(user);
-                    deleteRequest.setFilename(filename);
-
+                    DeleteRequest deleteRequest = new DeleteRequest(user, filename);
                     makeRequestToFileSystem(destinationAddress, deleteRequest);
                 }
             }).start();
@@ -143,18 +135,14 @@ public class FileSystemManager {
      * @param newname Noul nume al fisierului
      * @param candidates Adresele nodurilor de la care se va elimina fisierului.
      */
-    public FeedbackResponse renameFile(String userId, String filename, String newname, List<String> candidates, String description){
+    public String renameFile(String userId, String filename, String newname, List<String> candidates, String description){
         List<FeedbackResponse> feedbackResponses = new ArrayList<FeedbackResponse>();
         List<Thread> threadPool = new ArrayList<>();
         for(String destinationAddress : candidates) {
             Thread thread = new Thread(new Runnable() {
                 @Override
                 public void run() {
-                    RenameRequest renameRequest = new RenameRequest();
-                    renameRequest.setUserId(userId);
-                    renameRequest.setFilename(filename);
-                    renameRequest.setNewName(newname);
-                    renameRequest.setDescription(description);
+                    RenameRequest renameRequest = new RenameRequest(userId, filename, newname, description);
                     System.out.println("Trimitem cerere de replicare catre " + destinationAddress);
 
                     feedbackResponses.add(makeRequestToFileSystem(destinationAddress, renameRequest));
@@ -175,8 +163,7 @@ public class FileSystemManager {
                 }
             }
         }
-        return getOverallFeedback(feedbackResponses);
-
+        return getOverallFeedback(feedbackResponses).getStatus();
     }
 
     public FeedbackResponse getOverallFeedback(List<FeedbackResponse> feedbackResponses){

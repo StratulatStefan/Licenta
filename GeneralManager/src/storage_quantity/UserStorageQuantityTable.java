@@ -1,7 +1,6 @@
 package storage_quantity;
 
 import config.AppConfig;
-import model.StorageStatusTable;
 
 /**
  * Clasa care va contine detaliile referitoare la cantitatile de stocare disponibile pentru utilizatori;

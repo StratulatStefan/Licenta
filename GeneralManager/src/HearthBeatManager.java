@@ -2,9 +2,7 @@ import communication.Address;
 import communication.HearthBeatSocket;
 import communication.Serializer;
 import config.AppConfig;
-import data.Pair;
 import log.ProfiPrinter;
-import model.PendingQueue;
 import model.PendingQueueRegister;
 import node_manager.Beat.NodeBeat;
 import java.io.IOException;
@@ -82,8 +80,8 @@ public class HearthBeatManager implements Runnable{
                 int cleanUpIndex = 1;
                 while(true) {
                     System.out.println(Time.getCurrentTimeWithFormat() + " ");
-                    ProfiPrinter.PrintException("Hearbeat Manager cleanup");
                     try {
+                        ProfiPrinter.PrintException("Heartbeat Manager cleanup");
                         if(cleanUpIndex == cleanupFrequency){
                             checkForFileStatusChange();
                             disconnected = GeneralManager.connectionTable.checkDisconnection(frequency);
@@ -187,14 +185,14 @@ public class HearthBeatManager implements Runnable{
             try {
                 PendingQueueRegister updateRequest = GeneralManager.pendingQueue.popFromQueue();
                 currentTimeStamp = Time.getCurrentTimestamp();
-                if(Math.abs(updateRequest.getTimestamp() - currentTimeStamp) < frequency){
+                //if(Math.abs(updateRequest.getTimestamp() - currentTimeStamp) < frequency){
                     // asta apare mai ales atunci cand facem cerere de replicare;
                     // la replicare, nu asteptam feedback de la user, ci adaugam instant in lista
                     // ne asiguram ca modificarea statusului fisierului nu se inainte de a primi macar cu beat de la noduri
                     // bagam inregistrarea inapoi in coada si mai asteptam inca o perioada de cleanup
-                    GeneralManager.pendingQueue.addToQueue(updateRequest);
-                    continue;
-                }
+                    //GeneralManager.pendingQueue.addToQueue(updateRequest);
+                    //continue;
+                //}
                 GeneralManager.contentTable.updateFileStatus(updateRequest.getUserId(), updateRequest.getFilename(), "[VALID]");
             }
             catch (NullPointerException exception) {

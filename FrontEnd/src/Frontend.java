@@ -121,44 +121,41 @@ public class Frontend {
         newFileRequest.setDescription("refactorizare cod");
         mainActivity(newFileRequest);
 
-        newFileRequest = new NewFileRequest();
-        newFileRequest.setUserId("3");
-        filepath = "D:/Facultate/Licenta/test_files/sss.pdf";
-        newFileRequest.setFilename(filepath);
-        newFileRequest.setFilesize(FileSystem.getFileSize(filepath));
-        newFileRequest.setCrc(FileSystem.calculateCRC(filepath));
-        newFileRequest.setUserType("STANDARD");
-        newFileRequest.setDescription("Adaugare fisier sss.pdf");
-        //mainActivity(newFileRequest);
+        {
+            newFileRequest = new NewFileRequest();
+            newFileRequest.setUserId("3");
+            filepath = "D:/Facultate/Licenta/test_files/sss.pdf";
+            newFileRequest.setFilename(filepath);
+            newFileRequest.setFilesize(FileSystem.getFileSize(filepath));
+            newFileRequest.setCrc(FileSystem.calculateCRC(filepath));
+            newFileRequest.setUserType("STANDARD");
+            newFileRequest.setDescription("Adaugare fisier sss.pdf");
+            //mainActivity(newFileRequest);
+        }
 
+        {
+            newFileRequest = new NewFileRequest();
+            newFileRequest.setUserId("2");
+            filepath = "D:/Facultate/Licenta/test_files/curs.rar";
+            newFileRequest.setFilename(filepath);
+            newFileRequest.setFilesize(FileSystem.getFileSize(filepath));
+            newFileRequest.setCrc(FileSystem.calculateCRC(filepath));
+            newFileRequest.setUserType("STANDARD");
+            newFileRequest.setDescription("Adaugare arhiva curs; In arhiva se gaseste inregistrarea video");
+            //mainActivity(newFileRequest);
+        }
 
-        newFileRequest = new NewFileRequest();
-        newFileRequest.setUserId("2");
-        filepath = "D:/Facultate/Licenta/test_files/curs.rar";
-        newFileRequest.setFilename(filepath);
-        newFileRequest.setFilesize(FileSystem.getFileSize(filepath));
-        newFileRequest.setCrc(FileSystem.calculateCRC(filepath));
-        newFileRequest.setUserType("STANDARD");
-        newFileRequest.setDescription("Adaugare arhiva curs; In arhiva se gaseste inregistrarea video");
-        //mainActivity(newFileRequest);
-
-
-
-
-
-
-        DeleteFileRequest deleteFileRequest = new DeleteFileRequest();
-        //deleteFileRequest.setFilename("D:/Facultate/Licenta/test_files/sss.pdf");
-        deleteFileRequest.setFilename("D:/Facultate/Licenta/test_files/lab06_Ok.py");
-        deleteFileRequest.setUserId("1");
-       // mainActivity(deleteFileRequest);
-
-
-
+        {
+            DeleteFileRequest deleteFileRequest = new DeleteFileRequest();
+            //deleteFileRequest.setFilename("D:/Facultate/Licenta/test_files/sss.pdf");
+            deleteFileRequest.setFilename("D:/Facultate/Licenta/test_files/lab06.py");
+            deleteFileRequest.setUserId("1");
+            //mainActivity(deleteFileRequest);
+        }
 
         RenameFileRequest renameFileRequest = new RenameFileRequest();
         renameFileRequest.setFilename("lab06.py");
-        renameFileRequest.setNewName("lab06_Okish.py");
+        renameFileRequest.setNewName("lab07.py");
         renameFileRequest.setUserId("1");
         renameFileRequest.setDescription("Inca un test");
         //mainActivity(renameFileRequest);

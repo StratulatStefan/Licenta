@@ -14,6 +14,11 @@ public class ReplicationRequest extends EditRequest {
      * Tipul ArrayList este serializabil.
      */
     private ArrayList<String> destionationAddress;
+    
+    public ReplicationRequest(String user, String filename, List<String> destinationAddress){
+        super(user, filename);
+        this.destionationAddress = new ArrayList<>(destinationAddress);
+    }
 
 
     /** -------- Gettere & Settere -------- **/

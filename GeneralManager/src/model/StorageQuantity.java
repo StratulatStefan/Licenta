@@ -1,4 +1,4 @@
-package storage_quantity;
+package model;
 
 import data.Pair;
 
@@ -6,7 +6,7 @@ import data.Pair;
  * Clasa care descrie cantitatea stocarii unei entitati;
  * Entitate : user/nod intern
  */
-class StorageQuantity{
+public class StorageQuantity{
     /** -------- Atribute -------- **/
     /**
      * Cantitatea totala de memorie disponibila pentru o entitate

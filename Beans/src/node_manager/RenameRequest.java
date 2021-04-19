@@ -12,6 +12,12 @@ public class RenameRequest extends EditRequest {
      */
     private String newName;
 
+    public RenameRequest(String user, String filename, String newName, String description){
+        super(user, filename);
+        this.newName = newName;
+        this.setDescription(description);
+
+    }
 
     /** -------- Gettere & Settere -------- **/
     /**

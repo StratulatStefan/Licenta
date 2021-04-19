@@ -1,6 +1,6 @@
 package storage_quantity;
-import config.AppConfig;
 import data.Pair;
+import model.StorageQuantity;
 
 import java.util.ArrayList;
 import java.util.HashMap;

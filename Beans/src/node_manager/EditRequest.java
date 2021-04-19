@@ -21,6 +21,11 @@ public class EditRequest implements Serializable {
      */
     private String description;
 
+    public EditRequest(String user, String filename) {
+        this.userId = user;
+        this.filename = filename;
+    }
+
 
     /** -------- Gettere & Settere -------- **/
     /**

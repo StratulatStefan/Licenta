@@ -1,7 +1,7 @@
-import communication.Address;
 import config.AppConfig;
+import generalstructures.PendingList;
 import log.ProfiPrinter;
-import model.CRCTable;
+import tables.CRCTable;
 import model.NewFiles;
 import node_manager.Beat.FileAttribute;
 import node_manager.Beat.NodeBeat;

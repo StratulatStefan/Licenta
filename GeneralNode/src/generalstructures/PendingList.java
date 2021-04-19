@@ -1,3 +1,5 @@
+package generalstructures;
+
 import data.Pair;
 
 import java.util.ArrayList;

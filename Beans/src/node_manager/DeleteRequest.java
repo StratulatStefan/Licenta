@@ -7,4 +7,7 @@ package node_manager;
  * deja se afla in clasa parinte; Asadar, aceasta clasa nu va avea niciun membru.
  * **/
 public class DeleteRequest extends EditRequest {
+    public DeleteRequest(String user, String filename){
+        super(user, filename);
+    }
 }

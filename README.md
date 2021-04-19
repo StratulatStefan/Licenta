@@ -6,15 +6,15 @@
 ___
 
 # TO DO
-- rezolvare problema redenumire; cand un nod moare si, intre timp, unul dintre fisierele existente la acel nod este redenumit; daca nodul invie, va declara fosta
-versiune a fisierului, insa in content table nu va mai exista.. deci tre <b>cumva</b> sters..
-    - la bucla de replicare tre avut grija.. 
+- ~~rezolvare problema redenumire; cand un nod moare si, intre timp, unul dintre fisierele existente la acel nod este redenumit; daca nodul invie, va declara fosta
+versiune a fisierului, insa in content table nu va mai exista.. deci tre <b>cumva</b> sters..~~
+    - ~~la bucla de replicare tre avut grija..~~
 - ~~cand invie o replica, sa trimita filestoragestatus complet (cu tot cu crc) la primul beat~~
 - trimitere sms la administrator atunci cand un nod nu mai are capacitate de stocare sau avem prea multe erori la un harddisk
 - refactorizare
     - ~~adaugare parametri in fisierul de configurare~~
     - adaugare comentarii
-    - restructurare pachete si clase
+    - ~~restructurare pachete si clase~~
     - restructurare cod
 - creare si integrare server in spring pentru gestiunea utilizatorilor; adaugarea cantitatii de stocare disponibile pentru fiecare user
     - Calcularea si afisarea cantitatii de stocare disponibile pentru un user
@@ -63,3 +63,4 @@ ___
         - ~~daca avem nume diferit,il incarcam fara probleme~~
 - ~~sa se trimita numarul versiunii in beat~~
 - ~~sa se adauge versiunea in storagestatus si in contenttable~~
+- sa se tina cont, atat de crc, cat si de versiune

@@ -14,6 +14,10 @@ public class ProfiPrinter {
      * la culoarea implicita folosita la consola.
      */
     private final static String ANSI_RESET = "\u001B[0m";
+    /**
+     * Codul pentru culoarea albastru
+     */
+    private final static String ANSI_BLUE = "\u001B[34m";
 
 
     /** -------- Metode -------- **/
@@ -24,5 +28,9 @@ public class ProfiPrinter {
      */
     public static void PrintException(String message){
         System.out.println(ANSI_RED + message + ANSI_RESET);
+    }
+
+    public static void PrintExtraInfo(String message){
+        System.out.println(ANSI_BLUE + message + ANSI_RESET);
     }
 }

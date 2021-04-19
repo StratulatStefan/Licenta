@@ -1,7 +1,8 @@
-package model;
+package generalstructures;
 
 import data.Pair;
 import data.Time;
+import model.PendingQueueRegister;
 import os.FileSystem;
 
 import java.util.ArrayDeque;
@@ -9,7 +10,6 @@ import java.util.Queue;
 
 
 public class PendingQueue {
-    //private final Queue<Pair<String, String>> pendingQueue;
     private final Queue<PendingQueueRegister> pendingQueue;
 
     public PendingQueue(){

@@ -99,7 +99,9 @@ public class ReplicationManager implements Runnable{
                                 System.out.println("[UNKNOWN]\n");
                                 continue;
                             }
-                            String corruptedFileAddress = this.checkForFileCorruption(GeneralManager.contentTable.getCRCForUser(userId, userFile), availableNodesForFile);
+                            long crc = GeneralManager.contentTable.getCRCForUser(userId, userFile);
+                            String versionNo = GeneralManager.contentTable.getVersionForUser(userId, userFile);
+                            String corruptedFileAddress = this.checkForFileCorruption(crc, versionNo, availableNodesForFile);
                             if(corruptedFileAddress == null) {
                                 System.out.println("[OK].");
                             }
@@ -125,13 +127,6 @@ public class ReplicationManager implements Runnable{
                     // verificam daca sunt fisiere care sunt in storage status table, dar nu sunt in tabela de content (situatie intalnita atunci cand un nod moare si, intre timp,
                     // un fisier a fost redenumit); nodul care invie va declara fisierul, dar contenttable nu va sti de el
                     // TODO aici.. cu redenumirea..
-                    /*List<String> statusTableUserFiles = GeneralManager.statusTable.getUserFiles(userId);
-                    for(String statusTableUserFile : GeneralManager.statusTable.getUserFiles(userId)){
-                        if(!GeneralManager.contentTable.checkForUserFile(userId, statusTableUserFile, -1)){
-                            if(!GeneralManager.contentTable.getFileStatusForUser(userId, statusTableUserFile).contains("PENDING"))
-                            this.deletion(-1, userId,statusTableUserFile, GeneralManager.statusTable.getAvailableNodesAddressesForFile(userId, statusTableUserFile));
-                        }
-                    }*/
 
                 }
                 System.out.println("------------------------------------\n");
@@ -143,12 +138,12 @@ public class ReplicationManager implements Runnable{
         }
     }
 
-    private String checkForFileCorruption(long crc, List<Pair<String, FileVersionData>> availableNodesForFile){
+    private String checkForFileCorruption(long crc, String versionNo,  List<Pair<String, FileVersionData>> availableNodesForFile){
         if(crc == -1){
             return null;
         }
         for(Pair<String, FileVersionData> file : availableNodesForFile){
-            if(file.getSecond().getCrc() != crc && file.getSecond().getCrc() != -1){
+            if(file.getSecond().getCrc() != -1 && file.getSecond().getCrc() != crc && file.getSecond().getVersionNo() != versionNo){
                 ProfiPrinter.PrintException("Found corrupted file at address : " + file.getFirst());
                 return file.getFirst();
             }

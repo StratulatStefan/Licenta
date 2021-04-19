@@ -4,6 +4,8 @@ public class FileVersionData{
     private long crc;
     private String versionNo;
 
+    public FileVersionData(){}
+
     public FileVersionData(long crc, String versionNo){
         this.crc = crc;
         this.versionNo = versionNo;
