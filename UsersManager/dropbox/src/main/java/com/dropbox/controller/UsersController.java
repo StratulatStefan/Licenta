@@ -2,7 +2,6 @@ package com.dropbox.controller;
 
 import com.dropbox.interfaces.UserDao;
 import com.dropbox.model.User;
-import com.dropbox.model.UserType;
 import com.dropbox.services.ResponseHandlerService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -11,7 +10,6 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 @RestController

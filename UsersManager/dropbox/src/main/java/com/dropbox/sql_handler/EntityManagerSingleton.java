@@ -9,7 +9,7 @@ public class EntityManagerSingleton {
     public static EntityManager getEntityManager(){
         if(entityManager == null){
             System.out.println("Initializing the entity manager for SQL");
-            entityManager = Persistence.createEntityManagerFactory("com.dropbox.user").createEntityManager();
+            entityManager = Persistence.createEntityManagerFactory("com.dropbox.sql").createEntityManager();
         }
         else{
             System.out.println("Using the existent entity manager for SQL");

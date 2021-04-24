@@ -29,12 +29,8 @@ public class UserDaoService implements UserDao {
             throw new Exception(String.format("User with address %s already exists!", user.getEmail()));
         UserType userTypeData = userTypeDao.getUserTypeData(user.getType());
         user.setStorage_quantity(userTypeData.getAvailable_storage());
-        int status_code = mySQLManager.insert(user);
-        if(status_code == 1){
-            throw new Exception("User type already exists!");
-        }
-        candidate = getUserByUsername(user.getEmail());
-        return candidate.getId();
+        mySQLManager.insert(user);
+        return user.getId();
     }
 
 

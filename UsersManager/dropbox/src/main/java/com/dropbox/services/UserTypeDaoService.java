@@ -1,16 +1,10 @@
 package com.dropbox.services;
 
-import com.dropbox.interfaces.UserDao;
 import com.dropbox.interfaces.UserTypeDao;
 import com.dropbox.model.UserType;
-import com.dropbox.sql_handler.EntityManagerSingleton;
 import com.dropbox.sql_handler.MySQLManager;
 import org.springframework.stereotype.Service;
 
-import javax.persistence.EntityExistsException;
-import javax.persistence.EntityManager;
-import javax.persistence.Persistence;
-import javax.persistence.RollbackException;
 import java.util.List;
 
 @Service
@@ -22,10 +16,7 @@ public class UserTypeDaoService implements UserTypeDao {
      */
     @Override
     public void insertUserType(UserType userType) throws Exception{
-        int status_code = mySQLManager.insert(userType);
-        if(status_code == 1){
-            throw new Exception("User type already exists!");
-        }
+        mySQLManager.insert(userType);
     }
 
 

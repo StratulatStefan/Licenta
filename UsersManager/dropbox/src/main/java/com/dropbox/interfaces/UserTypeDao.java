@@ -1,6 +1,5 @@
 package com.dropbox.interfaces;
 
-import com.dropbox.model.User;
 import com.dropbox.model.UserType;
 
 import java.util.List;

@@ -1,11 +1,13 @@
 package com.dropbox.sql_handler;
 
+import com.dropbox.model.Log;
+
 import javax.persistence.EntityExistsException;
 import javax.persistence.EntityManager;
 import javax.persistence.Query;
 import javax.persistence.RollbackException;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
+import java.util.stream.Collectors;
 
 public class MySQLManager<T> {
     EntityManager entityManager;
@@ -14,8 +16,7 @@ public class MySQLManager<T> {
         this.entityManager = EntityManagerSingleton.getEntityManager();
     }
 
-    public int insert(T object){
-        int status_code = 0;
+    public void insert(T object) throws Exception{
         try{
             entityManager.getTransaction().begin();
             entityManager.persist(object);
@@ -23,9 +24,8 @@ public class MySQLManager<T> {
         }
         catch (Exception exception){
             entityManager.getTransaction().rollback();
-            status_code = 1;
+            throw new Exception(exception.getLocalizedMessage());
         }
-        return status_code;
     }
 
     public T findByPrimaryKey(Class<T> tableType, Object primaryKey){
@@ -71,21 +71,37 @@ public class MySQLManager<T> {
         return status_code;
     }
 
-    public List<Object> findByCriteria(Class<T> entityClass, Map<String, Object> conditions) {
+    public List<Object> findByCriteria(Class<T> entityClass, Map<String, Object> conditions){
         StringBuilder sqlQueryString = new StringBuilder();
-        sqlQueryString.append(String.format("Select b FROM %s b WHERE ", entityClass.getSimpleName()));
-        int index = 0;
+        sqlQueryString.append(String.format("Select b FROM %s b WHERE", entityClass.getSimpleName()));
         for(Map.Entry<String, Object> condition : conditions.entrySet()){
-            sqlQueryString.append("b." + condition.getKey() + "=:" + condition.getKey());
-            if (index < conditions.size() - 1 ){
-                sqlQueryString.append(" and ");
+            try {
+                entityClass.getDeclaredField(condition.getKey());
             }
-            index = index + 1;
+            catch (NoSuchFieldException exception){
+                continue;
+            }
+            sqlQueryString.append(" b." + condition.getKey() + "=:" + condition.getKey()).append(" and");
         }
-        Query query = entityManager.createQuery(sqlQueryString.toString(), entityClass);
+
+        String lastWord = sqlQueryString.substring(sqlQueryString.lastIndexOf(" ")+1);
+        String queryStr;
+        if(lastWord.equals("and"))
+            queryStr = sqlQueryString.substring(0, sqlQueryString.lastIndexOf(" "));
+        else
+            queryStr = sqlQueryString.toString();
+
+        Query query = entityManager.createQuery(queryStr, entityClass);
         for(Map.Entry<String, Object> condition : conditions.entrySet()){
+            try {
+                entityClass.getDeclaredField(condition.getKey());
+            }
+            catch (NoSuchFieldException exception){
+                continue;
+            }
             query.setParameter(condition.getKey(), condition.getValue());
         }
         return query.getResultList();
     }
+
 }

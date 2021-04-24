@@ -11,13 +11,8 @@ versiune a fisierului, insa in content table nu va mai exista.. deci tre <b>cumv
     - ~~la bucla de replicare tre avut grija..~~
 - ~~cand invie o replica, sa trimita filestoragestatus complet (cu tot cu crc) la primul beat~~
 - trimitere sms la administrator atunci cand un nod nu mai are capacitate de stocare sau avem prea multe erori la un harddisk
-- refactorizare
-    - ~~adaugare parametri in fisierul de configurare~~
-    - adaugare comentarii
-    - ~~restructurare pachete si clase~~
-    - restructurare cod
-- creare si integrare server in spring pentru gestiunea utilizatorilor; adaugarea cantitatii de stocare disponibile pentru fiecare user
-    - Calcularea si afisarea cantitatii de stocare disponibile pentru un user
+- ~~creare si integrare server in spring pentru gestiunea utilizatorilor; adaugarea cantitatii de stocare disponibile pentru fiecare user~~
+    - ~~Calcularea si afisarea cantitatii de stocare disponibile pentru un user~~
 - ~~thread separat la managerul general pe care se solicita de la nodurile interne, adaugarea crc-ului in hearthbeat, astfel incat sa se verifice daca este
 nevoie de replicare; astfel, evitam calcularea crc-ului la fiecare beat~~
 - ~~Fiecare nod sa trimita informatii despre statusul memoriei sale; informatiile vor fi mentionate in hearthbeat-uri~~
@@ -29,19 +24,25 @@ nevoie de replicare; astfel, evitam calcularea crc-ului la fiecare beat~~
 - ~~Replicarea unui fisier daca nu mai corespunde CRC-u~~
 - ~~Feedback status operatie de la client la frontend~~
 - ~~reparare probleme socket-uri~~
-- la operatia de redenumire, daca am un nod inchis care contine fisierul, la deschidere sa ne dam seama pe baza crc-ului ca este acelasi fisier
-    - <b>Intrebare : </b> Daca am un fisier in care a fost schimbat un octet.. Mecanismul de replicare va vedea ca nu mai corespunde CRC-ul, si va solicita replicare; 
-    dar, daca se face undo la operatie (se schimba la loc octetul), eliminam o replica, nu?
 - ~~Calcularea si afisarea cantitatii de stocare disponibile pentru un nod~~
 - ~~Mecanism de selectare a nodurilor la care sa se stocheze un fisier~~
 - Mirror (anycast) pentru managerul general
     - <b>Intrebare : </b>Deci daca am mirror la GM, nu mai am nevoie de refacerea starii, nu?
-- Componenta de versionare
-- Tratare eficienta exceptii
+- ~~Componenta de versionare~~
 - Informatii in heartbeat care sa ma ajute sa evidentiez progresul trimiterii fisierului (progress bar in interfata)
 - ~~Culoare diferentiatoare mesaj exceptii~~
 
 ___
+
+# La final
+- Tratare eficienta exceptii
+- Refactorizare
+    - Adaugare/completare comentarii
+    - Adaugare parametrii in fisierul de configurare
+    - Restructurare cod
+    - Restructurare pachete si clase
+___
+
 # Controlul versiunilor
 
 - ~~adaugare descriere in versiune~~
@@ -63,4 +64,15 @@ ___
         - ~~daca avem nume diferit,il incarcam fara probleme~~
 - ~~sa se trimita numarul versiunii in beat~~
 - ~~sa se adauge versiunea in storagestatus si in contenttable~~
-- sa se tina cont, atat de crc, cat si de versiune
+- ~~sa se tina cont, atat de crc, cat si de versiune~~
+
+___
+
+# Frontend / Backend
+- aplicatia are 2 tipuri de utilizatori
+    - utilizator obisnuit al aplicatiei
+    - admin : exista un cont predefinit al adminului, creat manual; 
+        - in meniul de create account, nu se poate crea un admin; in schimb, un admin are posibilitatea de a adauga alt admin in sistem
+- daca se inregistreaza coruperi ale sistemului de stocare la un anumit nod (un fisier devine corupt din senin), nodul general ca inregistra aceasta corupere intr-o tabela;
+mai departe, in interfata, admin-ul va avea disponibila o fereastra unde va putea vedea aceste fail-uri ale nodurilor.
+- cand testezi pe target, sa tii minte sa implementezi (sa termini) cautarea in log dupa date
