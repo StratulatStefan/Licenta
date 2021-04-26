@@ -3,6 +3,7 @@ import communication.HearthBeatSocket;
 import communication.Serializer;
 import config.AppConfig;
 import log.ProfiPrinter;
+import logger.LoggerService;
 import model.PendingQueueRegister;
 import node_manager.Beat.NodeBeat;
 import java.io.IOException;
@@ -87,7 +88,8 @@ public class HearthBeatManager implements Runnable{
                             disconnected = GeneralManager.connectionTable.checkDisconnection(frequency);
                             if(disconnected.size() != 0){
                                 for (Address disconnectedAddres : disconnected) {
-                                    System.out.println(" >>> Address " + disconnectedAddres + " disconnected");
+                                    LoggerService.registerWarning(GeneralManager.generalManagerIpAddress,
+                                            " >>> Address " + disconnectedAddres + " disconnected");
                                     GeneralManager.connectionTable.removeAddress(disconnectedAddres);
                                     GeneralManager.statusTable.cleanUpAtNodeDisconnection(disconnectedAddres.getIpAddress());
                                 }
@@ -95,7 +97,8 @@ public class HearthBeatManager implements Runnable{
                             cleanUpIndex = 0;
                         }
                         if(GeneralManager.connectionTable.size() == 0){
-                            System.out.println(" >>> Niciun nod conectat!");
+                            LoggerService.registerWarning(GeneralManager.generalManagerIpAddress,
+                                    " >>> Niciun nod conectat!");
                         }
                         else {
                             System.out.println(GeneralManager.connectionTable);
@@ -108,7 +111,8 @@ public class HearthBeatManager implements Runnable{
                         }
                     } catch (InterruptedException exception) {
                         socket.close();
-                        ProfiPrinter.PrintException("InterruptedException occured. : " + exception.getMessage());
+                        LoggerService.registerError(GeneralManager.generalManagerIpAddress,
+                                "InterruptedException occured. : " + exception.getMessage());
                     }
                     System.out.println("\n");
                 }
@@ -134,7 +138,8 @@ public class HearthBeatManager implements Runnable{
                         receivedAddress = Address.parseAddress(message.getNodeAddress());
                         System.out.println("Am primit un hearthbeat de la " + receivedAddress + " ...");
                         if(!GeneralManager.connectionTable.containsAddress(receivedAddress)){
-                            System.out.println(" >>> [Adresa noua] : " + receivedAddress);
+                            LoggerService.registerSuccess(GeneralManager.generalManagerIpAddress,
+                                    " >>> [Adresa noua] : " + receivedAddress);
                             GeneralManager.connectionTable.addAddress(receivedAddress);
                         }
                         else {
@@ -149,7 +154,7 @@ public class HearthBeatManager implements Runnable{
                         // primim RequestCRC
                     }
                     catch (Exception exception){
-                        ProfiPrinter.PrintException("Hearthbeatmanager receiveloop : " + exception.getMessage());
+                        LoggerService.registerError(GeneralManager.generalManagerIpAddress,"Hearthbeatmanager receiveloop : " + exception.getMessage());
                     }
                 }
             }
@@ -164,14 +169,17 @@ public class HearthBeatManager implements Runnable{
                 while(true) {
                     try {
                         Thread.sleep((int) (checkStorageHealthFrequency * 1e3));
-                        System.out.println(Time.getCurrentTimeWithFormat() + " Se trimite cerere pentru CRC ...");
+                        LoggerService.registerSuccess(GeneralManager.generalManagerIpAddress,
+                                Time.getCurrentTimeWithFormat() + " Se trimite cerere pentru CRC ...");
                         socket.sendBinaryMessage(group, Serializer.serialize(requestCRC));
                     } catch (IOException exception) {
                         socket.close();
-                        ProfiPrinter.PrintException("IOException occured at requestCRC. : " + exception.getMessage());
+                        LoggerService.registerError(GeneralManager.generalManagerIpAddress,
+                                "IOException occured at requestCRC. : " + exception.getMessage());
                     } catch (InterruptedException exception) {
                         socket.close();
-                        ProfiPrinter.PrintException("InterruptedException occured at requestCRC. : " + exception.getMessage());
+                        LoggerService.registerError(GeneralManager.generalManagerIpAddress,
+                                "InterruptedException occured at requestCRC. : " + exception.getMessage());
                     }
                     System.out.println("\n");
                 }
@@ -199,7 +207,7 @@ public class HearthBeatManager implements Runnable{
                 break;
             }
             catch (Exception exception){
-                ProfiPrinter.PrintException("checkForFileStatusChange exception : " + exception.getMessage());
+                LoggerService.registerError(GeneralManager.generalManagerIpAddress,"checkForFileStatusChange exception : " + exception.getMessage());
             }
         }
     }
@@ -211,7 +219,7 @@ public class HearthBeatManager implements Runnable{
                 try {
                     GeneralManager.nodeStorageQuantityTable.updateRegister(nodeAddress, quantity);
                 } catch (Exception exception) {
-                    ProfiPrinter.PrintException("registerNodeStorageQuantity exception : " + exception.getMessage());
+                    LoggerService.registerError(GeneralManager.generalManagerIpAddress,"registerNodeStorageQuantity exception : " + exception.getMessage());
                 }
             }
         }).start();

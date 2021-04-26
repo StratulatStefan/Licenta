@@ -5,6 +5,7 @@
       <element id="module-output" name="GeneralNode" />
       <element id="module-output" name="Beans" />
       <element id="module-output" name="GeneralPurposeStructures" />
+      <element id="module-output" name="HTTPHandler" />
     </root>
   </artifact>
 </component>

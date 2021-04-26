@@ -1,6 +1,7 @@
 import config.AppConfig;
 import data.Pair;
 import log.ProfiPrinter;
+import logger.LoggerService;
 import model.FileVersionData;
 
 import javax.swing.*;
@@ -144,7 +145,7 @@ public class ReplicationManager implements Runnable{
         }
         for(Pair<String, FileVersionData> file : availableNodesForFile){
             if(file.getSecond().getCrc() != -1 && file.getSecond().getCrc() != crc && file.getSecond().getVersionNo() != versionNo){
-                ProfiPrinter.PrintException("Found corrupted file at address : " + file.getFirst());
+                LoggerService.registerWarning(GeneralManager.generalManagerIpAddress, "Found corrupted file at address : " + file.getFirst());
                 return file.getFirst();
             }
         }
@@ -152,10 +153,10 @@ public class ReplicationManager implements Runnable{
     }
 
     private void replication(int replication_factor, String userId, String userFile, List<String> availableNodesAddressesForFile){
-        System.out.println("[NEED REPLICATION].");
+        LoggerService.registerWarning(GeneralManager.generalManagerIpAddress,"[NEED REPLICATION]. " + userFile + " of user " +  userId);
         List<String> candidates = searchCandidatesForReplication(replication_factor, availableNodesAddressesForFile);
         if(replication_factor == 1 || candidates == null){
-            System.out.println("Nu se poate realiza replicarea pentru fisierul curent. " +
+            LoggerService.registerWarning(GeneralManager.generalManagerIpAddress,"Nu se poate realiza replicarea pentru fisierul curent. " +
                     "Nu exista suficiente noduri pe care sa se faca replicarea.");
         }
         else {
@@ -179,7 +180,7 @@ public class ReplicationManager implements Runnable{
     }
 
     public void deletion(int replication_factor, String userId, String userFile, List<String> candidates) throws Exception {
-        System.out.println(String.format("[NEED DELETION OF FILE %s]", userFile));
+        LoggerService.registerWarning(GeneralManager.generalManagerIpAddress,String.format("[NEED DELETION OF FILE %s]", userFile));
         System.out.print("\t\tFound nodes to delete file : ");
         for (String candidate : candidates) {
             System.out.print("[" + candidate + "] ");

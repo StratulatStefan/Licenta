@@ -1,6 +1,7 @@
 import config.AppConfig;
 import generalstructures.PendingQueue;
 import log.ProfiPrinter;
+import logger.LoggerService;
 import storage_quantity.NodeStorageQuantityTable;
 import storage_quantity.UserStorageQuantityTable;
 import tables.ConnectionTable;
@@ -21,7 +22,7 @@ public class GeneralManager{
     /**
      * Adresa IP la care va fi mapat managerul general
      */
-    private static String generalManagerIpAddress;
+    public static String generalManagerIpAddress;
     /**
      * Calea de baza la care se vor stoca fisierele
      */
@@ -99,14 +100,23 @@ public class GeneralManager{
      * Constructorul clasei
      */
     public GeneralManager() throws Exception {
-        this.feedbackManager = new FeedbackManager();
+        feedbackManager = new FeedbackManager();
         this.hearthBeatManager = new HearthBeatManager(generalManagerIpAddress);
         this.clientCommunicationManager = new ClientCommunicationManager();
         this.replicationManager = new ReplicationManager();
+
         GeneralManager.fileSystemManager.readConfigParams();
+
     }
 
+    public static void attachRuntimeExitHook(){
+        Runtime.getRuntime().addShutdownHook(new Thread() {
+            public void run() {
+                LoggerService.registerError(generalManagerIpAddress, "General manager closed.");
+            }
+        });
 
+    }
     /** -------- Main -------- **/
     /**
      * Functia care porneste toate activitatile managerilor;
@@ -128,10 +138,12 @@ public class GeneralManager{
      * @param args Argumentele furnizate la linia de comanda
      */
     public static void main(String[] args){
+        attachRuntimeExitHook();
         AppConfig.readConfig();
         readConfigParams();
 
         try {
+            LoggerService.registerSuccess(generalManagerIpAddress, "General manager successfully started");
             nodeStorageQuantityTable = new NodeStorageQuantityTable();
             userStorageQuantityTable = new UserStorageQuantityTable();
             userDataTable = new UserDataTable();
@@ -140,7 +152,7 @@ public class GeneralManager{
             generalManager.startActivity();
         }
         catch (Exception exception){
-            ProfiPrinter.PrintException("Exceptie la GeneralManagerMain : " + exception.getMessage());
+            LoggerService.registerError(generalManagerIpAddress, "GeneralManagerMain exception : " + exception.getMessage());
         }
     }
 }

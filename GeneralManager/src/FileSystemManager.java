@@ -2,6 +2,7 @@
 import communication.Serializer;
 import config.AppConfig;
 import log.ProfiPrinter;
+import logger.LoggerService;
 import node_manager.*;
 
 import java.awt.datatransfer.FlavorEvent;
@@ -72,7 +73,8 @@ public class FileSystemManager {
             return feedbackResponse;
         }
         catch (Exception exception){
-            ProfiPrinter.PrintException("MakeRequestToFileSystem  exception : " + request.getClass() + " : " + exception.getMessage());
+            LoggerService.registerError(GeneralManager.generalManagerIpAddress,
+                    "MakeRequestToFileSystem  exception : " + request.getClass() + " : " + exception.getMessage());
         }
         return null;
     }
@@ -91,7 +93,8 @@ public class FileSystemManager {
         new Thread(new Runnable() {
             @Override
             public void run() {
-                System.out.println("Trimit fisierul " + filename + " al userului " + user + " catre " + sourceAddress);
+                LoggerService.registerSuccess(GeneralManager.generalManagerIpAddress,
+                        "Trimit fisierul " + filename + " al userului " + user + " catre " + sourceAddress);
                 ReplicationRequest replicationRequest = new ReplicationRequest(user, filename, destinationAddresses);
                 makeRequestToFileSystem(sourceAddress, replicationRequest);
 
@@ -99,7 +102,8 @@ public class FileSystemManager {
                     GeneralManager.pendingQueue.addToQueue(user, filename);
                 }
                 catch (Exception exception){
-                    ProfiPrinter.PrintException("Replication : updatefilestatus1 : " + exception.getMessage());
+                    LoggerService.registerError(GeneralManager.generalManagerIpAddress,
+                        "Replication : updatefilestatus1 : " + exception.getMessage());
                 }
             }
         }).start();
@@ -118,7 +122,8 @@ public class FileSystemManager {
             new Thread(new Runnable() {
                 @Override
                 public void run() {
-                    System.out.println("Trimit cerere de eliminare pentru fisierul " + filename + " al userului " + user + " de la nodul " + destinationAddress);
+                    LoggerService.registerSuccess(GeneralManager.generalManagerIpAddress,
+                        "Trimit cerere de eliminare pentru fisierul " + filename + " al userului " + user + " de la nodul " + destinationAddress);
                     DeleteRequest deleteRequest = new DeleteRequest(user, filename);
                     makeRequestToFileSystem(destinationAddress, deleteRequest);
                 }
@@ -143,7 +148,8 @@ public class FileSystemManager {
                 @Override
                 public void run() {
                     RenameRequest renameRequest = new RenameRequest(userId, filename, newname, description);
-                    System.out.println("Trimitem cerere de replicare catre " + destinationAddress);
+                    LoggerService.registerSuccess(GeneralManager.generalManagerIpAddress,
+                            "Trimitem cerere de replicare catre " + destinationAddress);
 
                     feedbackResponses.add(makeRequestToFileSystem(destinationAddress, renameRequest));
                     System.out.println("Am primis feedback de la " + destinationAddress);
@@ -174,7 +180,8 @@ public class FileSystemManager {
             if(feedbackResponse.isSuccess())
                 break;
         }
-        System.out.println("Status overall : " + feedbackResponse.getStatus());
+        LoggerService.registerSuccess(GeneralManager.generalManagerIpAddress,
+            "Status overall : " + feedbackResponse.getStatus());
         return feedbackResponse;
     }
 }

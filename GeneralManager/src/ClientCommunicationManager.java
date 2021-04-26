@@ -9,6 +9,7 @@ import communication.Serializer;
 import config.AppConfig;
 import data.Pair;
 import log.ProfiPrinter;
+import logger.LoggerService;
 import node_manager.FeedbackResponse;
 import os.FileSystem;
 
@@ -144,16 +145,16 @@ public class ClientCommunicationManager {
      * @return Lantul de noduri la care se va stoca fisierului
      */
     public String generateNewChain(long filesize, int replication_factor) throws Exception{
-        System.out.println("User uploaded a new file with size : " + filesize + " and replication factor : " + replication_factor);
+        LoggerService.registerSuccess(GeneralManager.generalManagerIpAddress, "User uploaded a new file with size : " + filesize + " and replication factor : " + replication_factor);
         List<String> connectionAddresses = GeneralManager.connectionTable.getConnectionTable();
         if(connectionAddresses.size() <  replication_factor){
-            System.out.println("Nu sunt suficiente noduri disponibile");
+            LoggerService.registerWarning(GeneralManager.generalManagerIpAddress, "Nu sunt suficiente noduri disponibile");
             return null;
         }
         System.out.println("Generam token-ul..");
         List<String> candidates = GeneralManager.nodeStorageQuantityTable.getMostSuitableNodes(filesize);
         if(candidates.size() == 0){
-            System.out.println("Niciun nod nu are suficienta memorie pentru a stoca noul fisier.");
+            LoggerService.registerWarning(GeneralManager.generalManagerIpAddress, "Niciun nod nu are suficienta memorie pentru a stoca noul fisier.");
             return null;
         }
         String token = String.join("-", candidates.subList(0, replication_factor));
@@ -194,7 +195,7 @@ public class ClientCommunicationManager {
                 }
             }
             catch (Exception exception){
-                ProfiPrinter.PrintException("registerUserNewFileRequest exception : " + exception.getMessage());
+                LoggerService.registerError(GeneralManager.generalManagerIpAddress, "registerUserNewFileRequest exception : " + exception.getMessage());
             }
         }
     }
@@ -212,7 +213,7 @@ public class ClientCommunicationManager {
                 GeneralManager.pendingQueue.addToQueue(user, filename);
             }
             catch (Exception exception){
-                ProfiPrinter.PrintException("confirmNewFileStorage exception : " + exception.getMessage());
+                LoggerService.registerError(GeneralManager.generalManagerIpAddress,"confirmNewFileStorage exception : " + exception.getMessage());
             }
         }
     }
@@ -229,13 +230,15 @@ public class ClientCommunicationManager {
             serverSocket.bind(new InetSocketAddress(address.getIpAddress(), address.getPort()));
             while(true){
                 Socket clientSocket = serverSocket.accept();
-                System.out.println(String.format("Client nou conectat : [%s : %d]\n", clientSocket.getLocalAddress(), clientSocket.getLocalPort()));
+                LoggerService.registerSuccess(GeneralManager.generalManagerIpAddress,
+                        String.format("Client nou conectat : [%s : %d]\n", clientSocket.getLocalAddress(), clientSocket.getLocalPort()));
                 new Thread(clientCommunicationThread(clientSocket)).start();
             }
         }
         catch (Exception exception){
             serverSocket.close();
-            ProfiPrinter.PrintException("Client communication loop exception : " + exception.getMessage());
+            LoggerService.registerError(GeneralManager.generalManagerIpAddress,
+                    "Client communication loop exception : " + exception.getMessage());
         }
     }
 
@@ -292,7 +295,7 @@ public class ClientCommunicationManager {
                                                 chain = generateNewChain(filesize, replication_factor);
                                             }
                                             response.setResponse(chain);
-                                            System.out.println("Token-ul a fost trimis catre client : " + chain);
+                                            LoggerService.registerSuccess(GeneralManager.generalManagerIpAddress, "Token-ul a fost trimis catre client : " + chain);
                                             System.out.println("Inregistram noul fisier.");
                                             String status = GeneralManager.contentTable.getFileStatusForUser(userId, filename);
                                             registerFileRequest(userId, filename, crc, filesize, usertype, status);
@@ -365,9 +368,9 @@ public class ClientCommunicationManager {
                 }
                 catch (Exception exception){
                     ProfiPrinter.PrintException(exception.getMessage());
-                    ProfiPrinter.PrintException(String.format("Could not properly close connection with my friend : [%s : %d]",
-                            clientSocket.getLocalAddress(),
-                            clientSocket.getLocalPort()));
+                    LoggerService.registerError(GeneralManager.generalManagerIpAddress,
+                        String.format("Could not properly close connection with my friend : [%s : %d]", clientSocket.getLocalAddress(), clientSocket.getLocalPort())
+                    );
                 }
             }
         };
@@ -384,12 +387,13 @@ public class ClientCommunicationManager {
                 String fileName = feedback.getFilename();
                 String userID = feedback.getUserId();
                 if(status.equals("OK") && fileName.equals(filename) && userID.equals(userId)) {
-                    System.out.println("Feedback valid de la frontend!");
-                    System.out.println("Confirmam stocarea noului fisier.");
+                    LoggerService.registerSuccess(GeneralManager.generalManagerIpAddress,
+                            "Feedback valid de la frontend! Confirmam stocarea noului fisier.");
                     confirmUserRequest(userId, filename);
                 }
                 else{
-                    System.out.println("Nu putem inregistra fisierul!");
+                    LoggerService.registerError(GeneralManager.generalManagerIpAddress,
+                            "Nu putem inregistra fisierul " + fileName + "!");
                 }
             }
         }).start();

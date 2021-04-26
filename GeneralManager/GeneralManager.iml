@@ -10,5 +10,6 @@
     <orderEntry type="library" exported="" name="src" level="project" />
     <orderEntry type="module" module-name="Beans" exported="" />
     <orderEntry type="module" module-name="GeneralPurposeStructures" exported="" />
+    <orderEntry type="module" module-name="HTTPHandler" exported="" />
   </component>
 </module>

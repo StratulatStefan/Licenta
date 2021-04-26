@@ -3,6 +3,7 @@ import client_node.NewFileRequestFeedback;
 import communication.Serializer;
 import config.AppConfig;
 import log.ProfiPrinter;
+import logger.LoggerService;
 
 import java.io.DataInputStream;
 import java.net.InetSocketAddress;
@@ -46,7 +47,7 @@ public class FeedbackManager implements Runnable{
                     frontendSocket.close();
                 }
                 catch (Exception exception){
-                    ProfiPrinter.PrintException("Exceptie la thread-ul de feedback : " + exception.getMessage());
+                    LoggerService.registerError(GeneralManager.generalManagerIpAddress, "Exceptie la thread-ul de feedback : " + exception.getMessage());
                 }
             }
         };
@@ -80,7 +81,8 @@ public class FeedbackManager implements Runnable{
             }
         }
         catch (Exception exception){
-            ProfiPrinter.PrintException("Exceptie la managerul de feedback :  " + exception.getMessage());
+            LoggerService.registerError(GeneralManager.generalManagerIpAddress,
+                    "Exceptie la managerul de feedback :  " + exception.getMessage());
         }
     }
 }
