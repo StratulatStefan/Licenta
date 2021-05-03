@@ -3,7 +3,9 @@ package node_manager.Beat;
 import java.io.Serializable;
 
 /**
- * Clasa care inglobeaza atributele unui fisier
+ * Clasa care inglobeaza atributele unui fisier.
+ * Obiectul ce inglobeaza atributele fisierului va fi trimis prin retea, deci
+ * va trebui sa fie serializabil.
  */
 public class FileAttribute implements Serializable {
     /** -------- Atribute -------- **/

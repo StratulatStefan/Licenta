@@ -14,7 +14,14 @@ public class ReplicationRequest extends EditRequest {
      * Tipul ArrayList este serializabil.
      */
     private ArrayList<String> destionationAddress;
-    
+
+    /**
+     * Constructorul clasei; Apeleaza constructorul clasei parinte, furnizand cele doua argumente
+     * generice fiecarei cereri; Mai mult decat atat, instantiaza lista de adrese;
+     * @param user Id-ul utilizatoului
+     * @param filename Numele fisierului utilizatorului
+     * @param destinationAddress Lista de adrese destinatie, pe care se va replica fisierul
+     */
     public ReplicationRequest(String user, String filename, List<String> destinationAddress){
         super(user, filename);
         this.destionationAddress = new ArrayList<>(destinationAddress);

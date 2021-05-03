@@ -12,6 +12,13 @@ public class RenameRequest extends EditRequest {
      */
     private String newName;
 
+    /**
+     * Constructorul clasei; Apeleaza constructorul clasei parinte, furnizand cele doua argumente
+     * generice fiecarei cereri; Mai mult decat atat, adauga descrierea cererii, necesara la versionare
+     * @param user Id-ul utilizatoului
+     * @param filename Numele fisierului utilizatorului
+     * @param description Descierea cererii de redenumire (motiv redenumire, etc)
+     */
     public RenameRequest(String user, String filename, String newName, String description){
         super(user, filename);
         this.newName = newName;

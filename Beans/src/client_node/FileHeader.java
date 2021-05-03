@@ -19,7 +19,7 @@ public class FileHeader implements Serializable {
      */
     private String filename;
     /**
-     * Dimensiunea fisierului. Aparent, nu avem nevoie de ea.
+     * Dimensiunea fisierului.
      */
     private long filesize;
     /**
@@ -74,7 +74,7 @@ public class FileHeader implements Serializable {
     }
     /**
      * Setter pentru numele fisierului.
-     * Nu pastreaza calea absoluta, ci doar numele efectiv al fisierului.
+     * Nu se pastreaza calea absoluta, ci doar numele efectiv al fisierului.
      * @param filename numele fisierului (poate contine si calea)
      */
     public void setFilename(String filename){
@@ -94,7 +94,12 @@ public class FileHeader implements Serializable {
      * deci se poate genera o exceptie;
      */
     public void setFilesize(String filesize) throws Exception{
-        this.filesize = Long.parseLong(filesize);
+        try {
+            this.filesize = Long.parseLong(filesize);
+        }
+        catch (NumberFormatException exception){
+            throw new Exception("Eroare de parsare a dimensiunii de la string la long.");
+        }
     }
     /**
      * Setter pentru dimensiunea fisierului, ce primeste direct dimensiunea in formatul necesar

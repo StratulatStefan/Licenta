@@ -21,6 +21,11 @@ public class EditRequest implements Serializable {
      */
     private String description;
 
+    /**
+     * Constructorul clasei; Instantiaza valorile pentru id-ul utilizatorului si pentru numele fisierului
+     * @param user Id-ul utilizatoului
+     * @param filename Numele fisierului utilizatorului
+     */
     public EditRequest(String user, String filename) {
         this.userId = user;
         this.filename = filename;

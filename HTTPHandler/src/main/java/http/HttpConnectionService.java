@@ -12,9 +12,29 @@ import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.util.Map;
 
+/**
+ * Clasa care inglobeaza toate functionalitatile necesare efectuarii de operatii caracteristice HTTP (mai exact REST API)
+ * cum ar fi trimiterea unei cereri de PUT/POST si citirea raspunsului cererii;
+ * In cadrul aplicatiei, se foloseste in contextul logging-ului, care se va efectua pe un server separat,
+ * cu o baza de date proprie; Prin intermediul acestei clase, se vor trimite mesajele ce dorim a fi stocate.
+ */
 public class HttpConnectionService {
+    /**
+     * ObjectMapper-ul are rolul de a face conversia json <-> hashmap;
+     * Avem nevoie de aceasta conversie, avand in vedere (conform REST API) ca corpul cererilor HTTP
+     * este in format JSON
+     */
     private final ObjectMapper jackson = new ObjectMapper();
 
+    /**
+     * Functie care genereaza o conexiune HTTP cu serverul aflat la distanta;
+     * In general, o astfel de conexiune este folosita in contextul unei singure sesiuni (singura cerere).
+     * Conexiunea pregateste cererea ce se va trimite, setand tipul cererii
+     * @param urlink URL-ul
+     * @param method
+     * @return
+     * @throws IOException
+     */
     private HttpURLConnection generateConnection(String urlink, HTTPMethod method) throws IOException {
         URL url = new URL(urlink);
         HttpURLConnection connection = (HttpURLConnection)url.openConnection();

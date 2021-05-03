@@ -1,0 +1,116 @@
+.App #description {
+    padding-top: 50px;
+    font-size: 28px;
+    margin-bottom: 100px;
+    position: relative;
+}
+
+.App .redirector{
+    margin: 0 auto;
+    display: block;
+    font-size: 28px;
+    margin-top: 50px;
+}
+
+.App .login_div{
+    margin-top: 125px;
+    color: white;
+    font-size: 30px;
+    font-weight: bold;
+}
+
+.App .login_div .credential{
+    margin-top: 30px;
+}
+
+.App .login_div .help{
+    margin-top: 40px;
+    font-size: 20px;
+}
+
+.App .login_div .credential input, select{
+    margin-left: 20px;
+    height: 40px;
+    font-size: 20px;
+    text-align: center;
+}
+
+.App .login_div .credential select{
+    width: 300px;
+}
+
+.App .ViewBooks{
+    margin: 0 auto;
+    padding-top: 50px;
+}
+
+.App .ViewBooks h3{
+    font-size: 30px;
+}
+
+.App .ViewBooks #books_div{
+    margin-top: 105px;
+    margin: 0 auto;
+    border: 10px solid black;
+    width: 60%;
+    height: 500px;
+    overflow-y: scroll;
+}
+
+.App .ViewBooks #book_div{
+    margin: 0 auto;
+    border: 5px solid black;
+    width: 65%;
+    height: 450px;
+    margin-bottom: 50px;
+    overflow-y: scroll;
+}
+
+.App .ViewBooks label{
+    margin-left: 50px;
+    font-size: 30px;
+    font-weight: bold;
+}
+
+.App .ViewBooks #searchbar{
+    padding-bottom: 50px;
+}
+
+.App .ViewBooks #searchbox{
+    margin-left: 30px;
+    width: 400px;
+    font-size: 25px;
+    font-weight: bold;
+    text-align: center;
+}
+
+.App .ViewBooks #searchtype{
+    font-size: 30px;
+    font-weight: bold;
+    height: 50px;
+    margin-bottom: 50px;
+}
+
+.App .ViewBooks button{
+    font-size: 30px;
+    font-weight: bold;
+    height: 50px;
+    margin-top: 10px;
+}
+
+.App .AddBook label{
+    margin-left: 50px;
+    margin-right: 50px;
+    font-size: 30px;
+    font-weight: bold;
+}
+
+.App .AddBook input, textarea{
+    margin-left: 20px;
+    height: 40px;
+    font-size: 20px;
+    text-align: center;
+    font-weight: bold;
+    margin-bottom: 30px;
+    border-radius: 10px;
+}

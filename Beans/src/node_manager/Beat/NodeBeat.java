@@ -102,7 +102,8 @@ public class NodeBeat implements Serializable {
     }
 
     /**
-     * Functie apelata cand se doreste citirea noului status al stocarii; Lista de fisiere disponibile trebuie sa fie curatata (goala)
+     * Functie apelata cand se doreste citirea noului status al stocarii;
+     * Lista de fisiere disponibile trebuie sa fie curatata (goala)
      */
     public void cleanUp(){
         this.userFiles.clear();
