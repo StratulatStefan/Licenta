@@ -46,7 +46,13 @@ body {
   text-decoration: none;
 }
 
+.header .menu-option:hover{
+  font-size: 45px;
+  color:#2978b5;
+}
+
 .header #page-name{
+
   font-size: 40px;
   
   padding-top: 50px;
@@ -57,10 +63,21 @@ body {
 
 #root{
   text-align: center;
-  background-color : #2978b5;
+  background-color : #8ab6d6;
   height: 100%;
   overflow : auto;
   overflow-x: hidden;
   margin-left: 20%;
 
+}
+
+.log_data{
+  margin-top: 35%;
+  font-size: 25px;
+}
+
+.log_data #log_data_profile{
+  max-width: 100px;
+  max-height: 100px;
+  visibility: hidden;
 }

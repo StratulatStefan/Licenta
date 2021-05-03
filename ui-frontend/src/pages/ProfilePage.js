@@ -3,10 +3,10 @@ import useStateWithCallback from 'use-state-with-callback';
 
 import '../styles/pages-style.css';
 
-class StartPage extends Component {
+class ProfilePage extends Component {
     constructor(props){
         super(props)
-        document.getElementById("page-name").innerHTML = "Home Page";
+        document.getElementById("page-name").innerHTML = "Profile Page";
         this.userData = localStorage.getItem('user_data')
         this.state = {
             isUserConnected : false,
@@ -57,4 +57,4 @@ class StartPage extends Component {
     }
   }
   
-  export default StartPage;
+  export default ProfilePage;

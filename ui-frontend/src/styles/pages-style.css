@@ -1,3 +1,16 @@
+.App{
+    color: #02475e;
+}
+
+.App #title {
+    padding-top: 50px;
+    font-size: 60px;
+    margin-bottom: 100px;
+    font-weight: bold;
+    position: relative;
+    
+}
+
 .App #description {
     padding-top: 50px;
     font-size: 28px;
