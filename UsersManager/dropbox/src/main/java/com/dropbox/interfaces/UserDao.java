@@ -12,6 +12,7 @@ public interface UserDao {
     /**
      * ============== RETRIEVE ==============
      */
+    String login(String username, String password) throws Exception;
     User getUserById(int id_user) throws NullPointerException;
     User getUserByUsername(String email) throws Exception;
     String getUserCountry(int id_user) throws Exception;

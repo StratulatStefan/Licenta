@@ -2,6 +2,7 @@ package com.dropbox.services;
 
 import com.dropbox.interfaces.UserDao;
 import com.dropbox.interfaces.UserTypeDao;
+import com.dropbox.jwt.JWT;
 import com.dropbox.model.User;
 import com.dropbox.model.UserType;
 import com.dropbox.sql_handler.MySQLManager;
@@ -72,6 +73,16 @@ public class UserDaoService implements UserDao {
     @Override
     public int getReplicationFactor(int id_user) throws Exception {
         return userTypeDao.getReplicationFactor(getUserById(id_user).getType());
+    }
+
+    public String login(String username, String password) throws Exception{
+        User candidateUser = getUserByUsername(username);
+        if(candidateUser == null)
+            throw new Exception("User with email " + username + " not found!");
+        if(!candidateUser.getPassword().equals(password))
+            throw new Exception("Wrong password!");
+        JWT jwt = new JWT(candidateUser.getId(), username, candidateUser.getType());
+        return jwt.getJWT();
     }
 
 

@@ -88,6 +88,19 @@ public class UsersController {
         }
     }
 
+    @RequestMapping(value = "/login", method = RequestMethod.POST)
+    ResponseEntity<Map<String, Object>> login(@RequestBody HashMap<String, String> loginCredentials){
+        try {
+            String jwt = userDao.login(loginCredentials.get("username"), loginCredentials.get("password"));
+            Map<String, Object> response = ResponseHandlerService.buildCustomResponse("jwt", jwt);
+            return new ResponseEntity(response, HttpStatus.OK);
+        }
+        catch (Exception exception){
+            Map<String, String> errorResponse = ResponseHandlerService.buildErrorStatus(exception.getMessage());
+            return new ResponseEntity(errorResponse, HttpStatus.BAD_REQUEST);
+        }
+    }
+
 
     /**
      * ============== UPDATE ==============
