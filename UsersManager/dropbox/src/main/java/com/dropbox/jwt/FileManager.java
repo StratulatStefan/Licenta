@@ -7,6 +7,9 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Random;
 
+/**
+ * Nu este folosit !
+ */
 public class FileManager {
     public static String generateRandomFileName(){
         StringBuilder sBuilder = new StringBuilder();

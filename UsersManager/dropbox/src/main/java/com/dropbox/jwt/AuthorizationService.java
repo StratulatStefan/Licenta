@@ -58,5 +58,4 @@ public class AuthorizationService {
         }
         throw new Exception("Role exception! Your user type is not allowed to take this action!");
     }
-
 }
