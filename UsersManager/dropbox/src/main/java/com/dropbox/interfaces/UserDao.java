@@ -18,6 +18,7 @@ public interface UserDao {
     User getUserById(int id_user) throws NullPointerException;
     User getUserByUsername(String email) throws Exception;
     String getUserCountry(int id_user) throws Exception;
+    String getUserType(int id_user) throws Exception;
     long getUserStorageQuantity(int id_user) throws Exception;
     int getReplicationFactor(int id_user) throws Exception;
 

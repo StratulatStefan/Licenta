@@ -67,6 +67,11 @@ public class UserDaoService implements UserDao {
     }
 
     @Override
+    public String getUserType(int id_user) throws Exception {
+        return getUserById(id_user).getType();
+    }
+
+    @Override
     public long getUserStorageQuantity(int id_user) throws Exception {
         return getUserById(id_user).getStorage_quantity();
     }

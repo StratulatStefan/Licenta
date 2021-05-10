@@ -43,8 +43,9 @@ public class UsersController {
     /**
      * ============== RETRIEVE ==============
      */
-    @RequestMapping(value = "/{id}", method = RequestMethod.GET)
-    ResponseEntity<User> getUserDataById(@PathVariable int id) {
+    @RequestMapping(value = "/search/{id}", method = RequestMethod.GET)
+    ResponseEntity<User> getUserDataById(@PathVariable int id,
+                                         @RequestHeader("Authorization") String authorizationValue) {
         try {
             User user = userDao.getUserById(id);
             return new ResponseEntity<User>(user, HttpStatus.OK);
@@ -54,7 +55,7 @@ public class UsersController {
         }
     }
 
-    @RequestMapping(value = "", method = RequestMethod.GET)
+    @RequestMapping(value = "/seach", method = RequestMethod.GET)
     ResponseEntity<User> getUserDataByUsername(@RequestParam(name="email", required = true, defaultValue = "") String email) {
         try {
             User user = userDao.getUserByUsername(email);
@@ -67,8 +68,19 @@ public class UsersController {
         }
     }
 
-    @RequestMapping(value = "/{id}/{field}", method = RequestMethod.GET)
-    ResponseEntity<User> getUserFieldById(@PathVariable int id, @PathVariable String field) {
+    @RequestMapping(value = "/{field}", method = RequestMethod.GET)
+    ResponseEntity<User> getUserFieldById(@PathVariable String field,
+                                          @RequestHeader("Authorization") String authorizationValue) {
+        int id = -1;
+        try {
+            AuthorizationService.UserTypes allowedUserTypes[] = new AuthorizationService.UserTypes[]{AuthorizationService.UserTypes.ALL};
+            Map<String, Object> userData = authorizationService.userAuthorization(authorizationValue, allowedUserTypes);
+            id = Integer.parseInt((String)userData.get("sub"));
+        }
+        catch (Exception exception){
+            Map<String, String> errorResponse = ResponseHandlerService.buildErrorStatus(exception.getMessage());
+            return new ResponseEntity(errorResponse, HttpStatus.UNAUTHORIZED);
+        }
         try {
             if(field.equals("country")){
                 String country = userDao.getUserCountry(id);
@@ -83,6 +95,11 @@ public class UsersController {
             if(field.equals("storage_quantity")){
                 long storageQuantity = userDao.getUserStorageQuantity(id);
                 Map<String, Object> statusResponse = ResponseHandlerService.buildCustomResponse("storage_quantity", storageQuantity);
+                return new ResponseEntity(statusResponse, HttpStatus.OK);
+            }
+            if(field.equals("role")){
+                String userType = userDao.getUserType(id);
+                Map<String, Object> statusResponse = ResponseHandlerService.buildCustomResponse("role", userType);
                 return new ResponseEntity(statusResponse, HttpStatus.OK);
             }
             throw new Exception("Invalid field value!");
