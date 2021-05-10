@@ -74,10 +74,41 @@ class StartPage extends Component {
     render() {
       return (
         <div className="App">
-          <p id="title">Home</p>
-          {this.state.isUserConnected === false ?
-          <button className="redirector" onClick={this.login}>Autentificare</button>:
-          <button className="redirector" onClick={this.logout}>Logout</button>}
+            <p id="title">Home</p>
+            {this.state.isUserConnected === false ?
+                <div id="homediv">
+                    <div id="homediv_left">
+                        <div id="homediv_imgdiv">
+                            <img id="homediv_img" src="/images/mainpage_img.png"/>
+                        </div>
+                        <div id="homediv_descdiv">
+                            <p>
+                                File storage and versioning
+                                <br/>
+                                <br/>
+                                The ultimate app for storing and versioning your files in the safest way
+                                <br/>
+                                Inca ceva text aici, de umplutura, ca sa stim ce avem, eventual o lista!
+                            </p>
+                        </div>
+                    </div>
+                    <div id="homediv_right">
+                        <p id="login_header">Log into your account</p>
+
+                    <p>Email</p>
+                    <input 
+                        onChange={(event) => {}} 
+                        type="email" />
+                    <p>Password</p>
+                    <input 
+                        onChange={(event) => {}} 
+                        type="email" />
+                    <p><button className="redirector" onClick={this.login}>Autentificare</button></p>
+                    <p>Nu ai un cont? <a href="">Creaza un cont</a></p>
+                    </div>
+                </div> :
+                <button className="redirector" onClick={this.logout}>Logout</button>
+            }
         </div>
       );
     }
