@@ -1,5 +1,4 @@
 import React, { Component } from 'react';
-import useStateWithCallback from 'use-state-with-callback';
 
 import '../styles/pages-style.css';
 

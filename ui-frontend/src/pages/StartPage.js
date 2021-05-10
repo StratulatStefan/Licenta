@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import useStateWithCallback from 'use-state-with-callback';
+import {UsersHandlerService} from '../services/UsersHandlerService';
 
 import '../styles/pages-style.css';
 
@@ -18,6 +18,7 @@ class StartPage extends Component {
     componentDidMount = () => {
         this.checkForConnectedUser()
     }
+
     checkForConnectedUser = () => {
         this.userData = localStorage.getItem('user_data')
         var status = (this.userData !== null && this.userData !== '')
@@ -25,7 +26,7 @@ class StartPage extends Component {
             isUserConnected : status,
         });
         if(status === true){
-            document.getElementById("log_data_uname").innerHTML = this.userData;
+            document.getElementById("log_data_uname").innerHTML = JSON.parse(this.userData)["name"];
             document.getElementById("log_data_profile").style.visibility = "visible";
         }
         else{
@@ -35,8 +36,18 @@ class StartPage extends Component {
     }
 
     login = () => {
-        localStorage.setItem("user_data", "Stratulat Stefan")
-        this.checkForConnectedUser()
+        let username = "stefanc.stratulat@gmail.com"
+        let password = "parola.dropbox123"
+        UsersHandlerService.login(username, password).then(response => {
+            if(response.code === 1){
+                localStorage.setItem("user_data", JSON.stringify(response.content))
+                this.checkForConnectedUser()
+            }
+            else{
+                console.log(response.content)
+            }
+        })
+        
         
     }
 

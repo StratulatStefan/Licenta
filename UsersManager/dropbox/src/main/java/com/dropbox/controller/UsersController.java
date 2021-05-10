@@ -95,9 +95,9 @@ public class UsersController {
     @RequestMapping(value = "/login", method = RequestMethod.POST)
     ResponseEntity<Map<String, Object>> login(@RequestBody HashMap<String, String> loginCredentials){
         try {
-            String jwt = userDao.login(loginCredentials.get("username"), loginCredentials.get("password"));
-
-            Map<String, Object> response = ResponseHandlerService.buildCustomResponse("jwt", jwt);
+            Map<String, String> userIdentity = userDao.login(loginCredentials.get("username"), loginCredentials.get("password"));
+            Map<String, Object> response = ResponseHandlerService.buildCustomResponse("jwt", userIdentity.get("jwt"));
+            response.put("name", userIdentity.get("name"));
             return new ResponseEntity(response, HttpStatus.OK);
         }
         catch (Exception exception){
@@ -145,9 +145,16 @@ public class UsersController {
     @RequestMapping(value = "/{id}", method = RequestMethod.DELETE)
     ResponseEntity<Map<String, String>> deleteUser(@PathVariable int id,
                                                    @RequestHeader("Authorization") String authorizationValue) throws Exception {
-        AuthorizationService.UserTypes allowedUserTypes[] = new AuthorizationService.UserTypes[]{AuthorizationService.UserTypes.ALL};
-        try{
+        try {
+            AuthorizationService.UserTypes allowedUserTypes[] = new AuthorizationService.UserTypes[]{AuthorizationService.UserTypes.ALL};
             Map<String, Object> userData = authorizationService.userAuthorization(authorizationValue, allowedUserTypes);
+        }
+        catch (Exception exception){
+            Map<String, String> errorResponse = ResponseHandlerService.buildErrorStatus(exception.getMessage());
+            return new ResponseEntity(errorResponse, HttpStatus.UNAUTHORIZED);
+        }
+
+        try{
             userDao.deleteUserById(id);
             Map<String, String> statusResponse = ResponseHandlerService.buildSuccessStatus("User successfully deleted!");
             return new ResponseEntity(statusResponse, HttpStatus.OK);

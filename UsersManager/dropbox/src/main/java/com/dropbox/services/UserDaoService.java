@@ -10,6 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import java.util.List;
 import java.util.HashMap;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @Service
@@ -76,13 +77,16 @@ public class UserDaoService implements UserDao {
     }
 
     @Override
-    public String login(String username, String password) throws Exception{
+    public Map<String, String> login(String username, String password) throws Exception{
         User candidateUser = getUserByUsername(username);
         if(candidateUser == null)
             throw new Exception("User with email " + username + " not found!");
         if(!candidateUser.getPassword().equals(password))
             throw new Exception("Wrong password!");
-        return AuthorizationService.generateUserIdentity(candidateUser.getId(), username, candidateUser.getType());
+        return new HashMap<String, String>(){{
+            put("jwt", AuthorizationService.generateUserIdentity(candidateUser.getId(), username, candidateUser.getType()));
+            put("name", candidateUser.getName());
+        }};
     }
 
 

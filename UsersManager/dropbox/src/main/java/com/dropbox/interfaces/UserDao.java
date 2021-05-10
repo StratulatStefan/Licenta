@@ -2,6 +2,8 @@ package com.dropbox.interfaces;
 
 import com.dropbox.model.User;
 
+import java.util.Map;
+
 public interface UserDao {
     /**
      * ============== CREATE ==============
@@ -12,7 +14,7 @@ public interface UserDao {
     /**
      * ============== RETRIEVE ==============
      */
-    String login(String username, String password) throws Exception;
+    Map<String, String> login(String username, String password) throws Exception;
     User getUserById(int id_user) throws NullPointerException;
     User getUserByUsername(String email) throws Exception;
     String getUserCountry(int id_user) throws Exception;
