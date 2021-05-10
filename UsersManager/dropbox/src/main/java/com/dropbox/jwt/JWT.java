@@ -13,7 +13,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class JWT {
-    private final static long expirationTime = 10;//3600 * 1000;
+   // private final static long expirationTime = 3600 * 1000;
     private static final String SECRET_KEY = "DropboxSecretKey";
     private static final SignatureAlgorithm signatureAlgorithm = SignatureAlgorithm.HS512;
 
@@ -27,7 +27,7 @@ public class JWT {
         this.jwt = jwt;
     }
 
-    public JWT(int id, String username, String userRole){
+    public JWT(int id, String username, String userRole, long sessionTime){
         byte[] apiSecretKey = DatatypeConverter.parseBase64Binary(SECRET_KEY);
         Key signingKey = new SecretKeySpec(apiSecretKey, signatureAlgorithm.getJcaName());
         Map<String, Object> additionalClaims = new HashMap<>(){{
@@ -36,7 +36,7 @@ public class JWT {
         }};
         JwtBuilder jwtBuilder = Jwts.builder()
                 .setSubject(String.format("%d", id))
-                .setExpiration(new Date(System.currentTimeMillis() + expirationTime))
+                .setExpiration(new Date(System.currentTimeMillis() + sessionTime))
                 .signWith(signatureAlgorithm, signingKey);
         jwtBuilder.addClaims(additionalClaims);
         this.jwt = jwtBuilder.compact();

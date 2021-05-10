@@ -1,6 +1,7 @@
 package com.dropbox.controller;
 
 import com.dropbox.interfaces.UserDao;
+import com.dropbox.jwt.AuthorizationService;
 import com.dropbox.model.User;
 import com.dropbox.services.ResponseHandlerService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,6 +18,8 @@ import java.util.Map;
 public class UsersController {
     @Autowired
     private UserDao userDao;
+
+    AuthorizationService authorizationService = new AuthorizationService();
 
     /**
      * ============== CREATE ==============
@@ -92,6 +95,7 @@ public class UsersController {
     ResponseEntity<Map<String, Object>> login(@RequestBody HashMap<String, String> loginCredentials){
         try {
             String jwt = userDao.login(loginCredentials.get("username"), loginCredentials.get("password"));
+
             Map<String, Object> response = ResponseHandlerService.buildCustomResponse("jwt", jwt);
             return new ResponseEntity(response, HttpStatus.OK);
         }
@@ -138,8 +142,11 @@ public class UsersController {
      * ============== DELETE ==============
      */
     @RequestMapping(value = "/{id}", method = RequestMethod.DELETE)
-    ResponseEntity<Map<String, String>> deleteUser(@PathVariable int id){
+    ResponseEntity<Map<String, String>> deleteUser(@PathVariable int id,
+                                                   @RequestHeader("Authorization") String authorizationValue) throws Exception {
+        AuthorizationService.UserTypes allowedUserTypes[] = new AuthorizationService.UserTypes[]{AuthorizationService.UserTypes.ALL};
         try{
+            Map<String, Object> userData = authorizationService.userAuthorization(authorizationValue, allowedUserTypes);
             userDao.deleteUserById(id);
             Map<String, String> statusResponse = ResponseHandlerService.buildSuccessStatus("User successfully deleted!");
             return new ResponseEntity(statusResponse, HttpStatus.OK);
