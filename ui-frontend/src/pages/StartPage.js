@@ -17,7 +17,6 @@ class StartPage extends Component {
             accountAvailable : true,
             accountSuccessfullyCreated : false
         }
-        
     }
 
     componentDidMount = () => {
@@ -32,6 +31,10 @@ class StartPage extends Component {
             this.setState({
                 accountSuccessfullyCreated : false
             })
+        }
+
+        if(this.state.isUserConnected === true && this.state.userType !== ""){
+            this.redirect("/home")
         }
     }
 
@@ -79,7 +82,7 @@ class StartPage extends Component {
     }
 
     login = () => {
-        // {"email" : stefanc.stratulat@gmail.com", "password" : "parola.dropbox123"}
+        this.accountCredentials = {"email" : "stefanc.stratulat@gmail.com", "password" : "parola.dropbox123"}
         UsersHandlerService.login(this.accountCredentials).then(response => {
             if(response.code === 1){
                 localStorage.setItem("user_data", JSON.stringify(response.content))
@@ -114,6 +117,21 @@ class StartPage extends Component {
         this.accountCredentials[type] = event.target.value
     }
     
+    redirect = (destination) => {
+        if(destination !== ""){
+            // refactor cand apare si alte destinations
+            this.props.history.push({
+                "pathname" : destination,
+                "state" : {"detail" : {
+                    "user_type" : this.state.userType
+                }}
+            })
+        }
+        else{
+            this.props.history.push("/")
+        }
+    }
+
     render() {
         let userypesoptions = []
         if(StartPage.availableUserTypes !== null){
@@ -148,7 +166,7 @@ class StartPage extends Component {
                     <div id="homediv_right">
                         {this.state.accountAvailable === true ? 
                         <div>
-                            <p id="login_header">Log into your account</p>
+                            <p className="login_header">Log into your account</p>
 
                             <p>Email</p>
                             <input 
@@ -161,13 +179,13 @@ class StartPage extends Component {
                                 type="password" />
                             
                             <p><button className="redirector" onClick={this.login}>Autentificare</button></p>
-                            <p>Nu ai un cont? <a href="#" onClick={() => {
+                            <p>Nu ai un cont? <button className="a_redirector" onClick={() => {
                                 this.setState({accountAvailable : false})
                                 this.accountCredentials = {name : "", email : "", password : "", type: `${StartPage.availableUserTypes[0]["user_type"]}`, country : ""}
-                                }}>Creaza un cont</a></p>
+                                }}>Creaza un cont</button></p>
                         </div> : 
                         <div>
-                            <p id="login_header">Create account</p>
+                            <p className="login_header">Create account</p>
 
                             <p>Name</p>
                             <input 
@@ -199,10 +217,10 @@ class StartPage extends Component {
                         }
                         <p id="status_message"></p>
                         {this.state.accountSuccessfullyCreated === true ? 
-                            <p><a href="#" onClick={() => {
+                            <p><button className="a_redirector" onClick={() => {
                                 this.setState({accountAvailable : true})
                                 this.accountCredentials = {email : "", password : ""}
-                                }}>Go to login.</a>
+                                }}>Go to login.</button>
                             </p> : <p></p>
                         }
                     </div>

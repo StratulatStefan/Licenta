@@ -1,0 +1,44 @@
+.Home{
+    position: relative;
+    margin-top: 4%;
+    margin-left: 3%;
+    font-size: 20px;
+    /*border: 5px solid black;*/
+    width: 95%;
+    height: 1000px;
+}
+
+.Home hr{
+    border : 3px solid #126e82;
+    border-radius: 30px;
+}
+
+.Home .home_header{
+    text-align: left;
+}
+
+.Home p{
+    display: inline-block;
+}
+
+.Home .search-container{
+    font-size: 240px;
+}
+
+.Home .home_header .home_searchbar{
+    padding-top: 1%;
+    float: right;
+    height: 40px;
+}
+
+.Home .home_header .home_searchbar input{
+    display: inline-block;
+    text-align: center;
+    font-size: 27px;
+    margin-right: 20px;
+}
+
+.Home .home_header .home_searchbar button{
+    font-size: 27px;
+    background-color: transparent;
+}

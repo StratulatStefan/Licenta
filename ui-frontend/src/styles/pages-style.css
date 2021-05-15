@@ -107,7 +107,7 @@
     font-weight: bold;
 }
 
-#login_header{
+.App .login_header{
     margin-top: 15%;
     margin-bottom: 10%;
 }
@@ -172,4 +172,17 @@ li a:hover{
 .App .accountData .upgradeplan{
     border: 5px solid #325288;
     border-radius: 20px;
+}
+
+.App .a_redirector{
+    background-color: transparent;
+    border : none;
+    font-size: 28px;
+    color : #344fa1;
+    font-weight: bold;
+}
+
+.App .a_redirector:hover{
+    font-size: 30px;
+    color : #3d84b8;
 }

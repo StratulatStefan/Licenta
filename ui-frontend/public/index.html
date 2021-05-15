@@ -16,13 +16,8 @@
         </a>
       </h2>
       <h3 id="page-name"></h3>
-      <a class="menu-option" href="/">Home</a>
-      <a class="menu-option" href="/login">Login</a>
-      <a class="menu-option" href="gallery">Gallery</a>
-      <a class="menu-option" href="characters">Characters</a>
-      <a class="menu-option" href="cumparaturi">Shopping</a>
-      <a class="menu-option" href="creare_cont">Register</a>
-      <a class="menu-option" href="contact_us">Contact Us</a>
+      <a class="menu-option" href="/home">Home</a>
+      <a class="menu-option" href="about">About</a>
       <div class="log_data">
         <a href="/profile">
           <img id="log_data_profile" src="images/user_logo.png" />
@@ -38,6 +33,8 @@
     try{
       userData = JSON.parse(userData)
       document.getElementById("logoutButton").style.visibility = "visible"
+      document.getElementById("log_data_uname").innerHTML = userData["name"];
+      document.getElementById("log_data_profile").style.visibility = "visible";
     }
     catch(e){
       console.log("No user logged in!")

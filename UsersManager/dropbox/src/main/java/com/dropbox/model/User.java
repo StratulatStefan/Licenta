@@ -92,4 +92,14 @@ public class User {
     public void setType(String usertype) {
         this.type = usertype;
     }
+
+    public static User usercopy(User user){
+        User ucopy = new User();
+        ucopy.setName(user.getName());
+        ucopy.setEmail(user.getEmail());
+        ucopy.setType(user.getType());
+        ucopy.setCountry(user.getCountry());
+        ucopy.setStorage_quantity(user.getStorage_quantity());
+        return ucopy;
+    }
 }

@@ -80,8 +80,7 @@ public class UsersController {
             }
             if(user == null)
                 throw new Exception(String.format("User not found!", email));
-            user.setPassword("");
-            return new ResponseEntity<User>(user, HttpStatus.OK);
+            return new ResponseEntity<User>(User.usercopy(user), HttpStatus.OK);
         } catch (Exception nullPointerException) {
             Map<String, String> errorResponse = ResponseHandlerService.buildErrorStatus(nullPointerException.getMessage());
             return new ResponseEntity(errorResponse, HttpStatus.NOT_FOUND);

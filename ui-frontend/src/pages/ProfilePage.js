@@ -195,6 +195,9 @@ class ProfilePage extends Component {
                         </div>
                     break
                 }
+                default : {
+                    break
+                }
             }
         }
         else{
@@ -205,20 +208,20 @@ class ProfilePage extends Component {
             <div className="App">
                 {this.state.isUserConnected === true ?
                     <div>
-                        <img id="log_data_profile" src="images/user_logo.png" />
+                        <img id="log_data_profile" src="images/user_logo.png" alt=""/>
                         <p id="username">{this.userData.name}</p>
                         <ul>
-                            <li><a id="selector_general_info" href="#" onClick={() => {
+                            <li><button className="a_redirector" id="selector_general_info" href="#" onClick={() => {
                                 this.setState({userDetailsCategory: ProfilePage.userDetailsCategories[0]})
-                            }}>General Info</a>
+                            }}>General Info</button>
                             </li>
-                            <li><a id="selector_storage_status"href="#" onClick={() => {
+                            <li><button className="a_redirector" id="selector_storage_status"href="#" onClick={() => {
                                 this.setState({userDetailsCategory: ProfilePage.userDetailsCategories[1]})
-                                }}>Storage Status</a>
+                                }}>Storage Status</button>
                             </li>
-                            <li><a id="selector_plan" href="#" onClick={() => {
+                            <li><button className="a_redirector" id="selector_plan" href="#" onClick={() => {
                                 this.setState({userDetailsCategory: ProfilePage.userDetailsCategories[2]})
-                                }}>Plan</a>
+                                }}>Plan</button>
                             </li>
                         </ul>
                         {userDetails}
@@ -227,6 +230,6 @@ class ProfilePage extends Component {
             </div>
       );
     }
-  }
+}
   
   export default ProfilePage;
