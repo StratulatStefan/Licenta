@@ -35,7 +35,6 @@
   </body>
   <script>
     let userData = localStorage.getItem('user_data')
-    console.log(`User fucking data : ${userData}`)
     try{
       userData = JSON.parse(userData)
       document.getElementById("logoutButton").style.visibility = "visible"

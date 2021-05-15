@@ -113,8 +113,63 @@
 }
 
 .App .redirector{
-    font-size: 28px;
+    font-size: 25px;
     margin-top: 5%;
-    background-color: blue;
+    background-color: #2978b5;
     color: white;
+    padding: 15px;
+    border-radius: 15px;
+}
+
+.App #log_data_profile{
+    max-width: 150px;
+    max-height: 150px;
+    padding-top: 150px;
+}
+
+#username{
+    font-size: 300%;
+}
+
+ul {
+    list-style-type: none;
+    margin: 0;
+    padding-bottom: 5%;
+}
+  
+
+li {
+    display: inline;
+    padding-right: 3%;
+    font-size: 180%;
+    font-weight: bold;
+}
+
+li a{
+    text-decoration: none;
+    color: #344fa1;
+    padding-bottom: 1%;
+}
+
+li a:hover{
+    color:#3d84b8;
+}
+
+.App .accountData{
+    display: inline-block;
+    margin-top: 5%;
+    width: 50%;
+}
+
+.App .accountData .accountDataField{
+    text-align: left;
+}
+
+.App .accountData .accountDataValue{
+    float:right;
+}
+
+.App .accountData .upgradeplan{
+    border: 5px solid #325288;
+    border-radius: 20px;
 }

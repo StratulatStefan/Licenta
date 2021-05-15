@@ -18,12 +18,16 @@ public class UserType {
     @Column(name="available_storage")
     long available_storage;
 
+    @Column(name="price_dollars")
+    float price_dollars;
+
     public UserType(){}
 
-    public UserType(String user_type, int replication_factor, long available_storage){
+    public UserType(String user_type, int replication_factor, long available_storage, float price_dollars){
         this.user_type = user_type;
         this.replication_factor = replication_factor;
         this.available_storage = available_storage;
+        this.price_dollars = price_dollars;
     }
 
     public String getUser_type() {
@@ -48,5 +52,13 @@ public class UserType {
 
     public void setAvailable_storage(long available_storage) {
         this.available_storage = available_storage;
+    }
+
+    public float getPrice_dollars() {
+        return price_dollars;
+    }
+
+    public void setPrice_dollars(float price_dollars) {
+        this.price_dollars = price_dollars;
     }
 }

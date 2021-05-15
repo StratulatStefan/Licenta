@@ -39,7 +39,37 @@ export class UsersHandlerService{
         return status
     }
 
+
     /* ================= RETRIEVE ================= */
+    static getAdditionalUserData = (jwt) => {
+        return new Promise((resolve) => {
+            fetch(`${Environment.rest_api}/user/search`, {
+                method : 'GET',
+                mode : "cors",
+                headers : {
+                    'Authorization' : `Bearer ${jwt}`,
+                },
+            }).then(response => {
+                if(response.ok){
+                    response.json().then(response => {
+                        resolve({
+                            "code" : 1,
+                            "content" : response
+                        })
+                    });
+                }
+                else{
+                    HTTPResponseHandler.handleErrorStatus(response).then(status => {
+                        resolve({
+                            "code" : status.code,
+                            "content" : status.message
+                        })
+                    });
+                }
+            })
+        })
+    }
+
     static getUserRole = (jwt) => {
         return new Promise((resolve) => {
             fetch(`${Environment.rest_api}/user/role`, {
@@ -95,6 +125,7 @@ export class UsersHandlerService{
             })
         })
     }
+
 
     /* ================= CREATE ================= */
     static login = (credentials) => {
@@ -178,4 +209,38 @@ export class UsersHandlerService{
             }
         })
     }
+
+
+    /* ================= UPDATE ================= */
+    static updatePlan = (jwt, newplan) => {
+        return new Promise((resolve) => {
+            fetch(`${Environment.rest_api}/user`, {
+                method : 'PUT',
+                mode : 'cors',
+                headers : {
+                    'Content-Type' : 'application/json',
+                    'Authorization' : `Bearer ${jwt}`
+                },
+                body : JSON.stringify({"type" : newplan})
+            }).then(response => {
+                if(response.ok){
+                    response.json().then(response => {
+                        resolve({
+                            "code" : 1,
+                            "content" : response
+                        })
+                    });
+                }
+                else{
+                    HTTPResponseHandler.handleErrorStatus(response).then(status => {
+                        resolve({
+                            "code" : status.code,
+                            "content" : status.message
+                        })
+                    });
+                }
+            })
+        })
+    }
+
 }

@@ -27,7 +27,7 @@ class StartPage extends Component {
     }
 
     componentDidUpdate = () => {
-        if(this.state.accountAvailable === true && this.state.accountSuccessfullyCreated == true){
+        if(this.state.accountAvailable === true && this.state.accountSuccessfullyCreated === true){
             document.getElementById("status_message").innerHTML = ""
             this.setState({
                 accountSuccessfullyCreated : false
@@ -72,8 +72,7 @@ class StartPage extends Component {
                     this.setState({userType : response["content"]})
                 }
                 else if(response.code === 401){
-                    this.logout()
-
+                    localStorage.setItem("user_data", '')
                 }
             })
         }
@@ -92,11 +91,6 @@ class StartPage extends Component {
                 document.getElementById("status_message").innerHTML = response.content
             }
         })
-    }
-
-    logout = () => {
-        localStorage.setItem("user_data", '')
-        this.checkForConnectedUser()
     }
 
     createAccount = () => {
@@ -138,7 +132,7 @@ class StartPage extends Component {
                 <div id="homediv">
                     <div id="homediv_left">
                         <div id="homediv_imgdiv">
-                            <img id="homediv_img" src="/images/mainpage_img.png"/>
+                            <img id="homediv_img" src="/images/mainpage_img.png" alt=""/>
                         </div>
                         <div id="homediv_descdiv">
                             <p>
@@ -204,7 +198,7 @@ class StartPage extends Component {
                         </div>
                         }
                         <p id="status_message"></p>
-                        {this.state.accountSuccessfullyCreated == true ? 
+                        {this.state.accountSuccessfullyCreated === true ? 
                             <p><a href="#" onClick={() => {
                                 this.setState({accountAvailable : true})
                                 this.accountCredentials = {email : "", password : ""}

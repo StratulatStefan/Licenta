@@ -123,6 +123,20 @@ public class UserDaoService implements UserDao {
         mySQLManager.update(user);
     }
 
+    @Override
+    public void updateType(int id_user, String type) throws Exception{
+        User user = getUserById(id_user);
+        String currentType = user.getType();
+        user.setType(type);
+        long availableStorage = this.getUserStorageQuantity(id_user);
+
+        long previousTotal = userTypeDao.getAvailableStorage(currentType);
+        long newTotal = userTypeDao.getAvailableStorage(type);
+
+        user.setStorage_quantity(availableStorage + newTotal - previousTotal);
+        mySQLManager.update(user);
+    }
+
 
     /**
      * ============== DELETE ==============

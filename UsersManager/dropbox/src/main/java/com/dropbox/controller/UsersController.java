@@ -55,12 +55,32 @@ public class UsersController {
         }
     }
 
-    @RequestMapping(value = "/seach", method = RequestMethod.GET)
-    ResponseEntity<User> getUserDataByUsername(@RequestParam(name="email", required = true, defaultValue = "") String email) {
+    @RequestMapping(value = "/search", method = RequestMethod.GET)
+    ResponseEntity<User> getUserData(@RequestParam(name="email", required = false, defaultValue = "") String email,
+                                     @RequestHeader("Authorization") String authorizationValue) {
+        int userId = -1;
         try {
-            User user = userDao.getUserByUsername(email);
+            AuthorizationService.UserTypes allowedUserTypes[] = new AuthorizationService.UserTypes[]{AuthorizationService.UserTypes.ALL};
+            Map<String, Object> userData = authorizationService.userAuthorization(authorizationValue, allowedUserTypes);
+            int x = 0;
+            userId = Integer.parseInt((String)userData.get("sub"));
+        }
+        catch (Exception exception){
+            Map<String, String> errorResponse = ResponseHandlerService.buildErrorStatus(exception.getMessage());
+            return new ResponseEntity(errorResponse, HttpStatus.UNAUTHORIZED);
+        }
+
+        try {
+            User user = null;
+            if(!email.equals("")) {
+                user = userDao.getUserByUsername(email);
+            }
+            else{
+                user = userDao.getUserById(userId);
+            }
             if(user == null)
-                throw new Exception(String.format("User with address %s not found!", email));
+                throw new Exception(String.format("User not found!", email));
+            user.setPassword("");
             return new ResponseEntity<User>(user, HttpStatus.OK);
         } catch (Exception nullPointerException) {
             Map<String, String> errorResponse = ResponseHandlerService.buildErrorStatus(nullPointerException.getMessage());
@@ -127,8 +147,19 @@ public class UsersController {
     /**
      * ============== UPDATE ==============
      */
-    @RequestMapping(value = "/{id}", method = RequestMethod.PUT)
-    ResponseEntity<Map<String, String>> updateUser(@PathVariable int id, @RequestBody HashMap<String, Object> updateValue){
+    @RequestMapping(value = "s", method = RequestMethod.PUT)
+    ResponseEntity<Map<String, String>> updateUser(@RequestBody HashMap<String, Object> updateValue,
+                                                   @RequestHeader("Authorization") String authorizationValue){
+        int id = -1;
+        try {
+            AuthorizationService.UserTypes allowedUserTypes[] = new AuthorizationService.UserTypes[]{AuthorizationService.UserTypes.ALL};
+            Map<String, Object> userData = authorizationService.userAuthorization(authorizationValue, allowedUserTypes);
+            id = Integer.parseInt((String)userData.get("sub"));
+        }
+        catch (Exception exception){
+            Map<String, String> errorResponse = ResponseHandlerService.buildErrorStatus(exception.getMessage());
+            return new ResponseEntity(errorResponse, HttpStatus.UNAUTHORIZED);
+        }
         try{
             for(String key : new ArrayList<>(updateValue.keySet())){
                 if(key.equals("country")){
@@ -142,6 +173,9 @@ public class UsersController {
                 }
                 else if(key.equals("storage_quantity_consumption")){
                     userDao.updateStorageQuantity(id, -(int) updateValue.get(key));
+                }
+                else if(key.equals("type")){
+                    userDao.updateType(id, (String)updateValue.get(key));
                 }
                 else{
                     throw new NullPointerException("Invalid update field : " + key + "!");
