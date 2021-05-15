@@ -1,10 +1,9 @@
 import {Environment} from '../environment';
+import {HTTPResponseHandler} from '../services/HTTPResponseHandler';
 
 export class UsersHandlerService{
-    // TODO : functia de credentialsCheck mai smart putin; register
+    /* ================= ADDITIONAL VALIDATION FUNCTIONS ================= */
     static basicCredentialsCheck = (credentials) => {
-        console.log("-----------")
-        console.log(credentials)
         let status = [true, null]
         const forbiddens = ["\"", " ", "/", ";", ":"]
         const Exception = {}
@@ -40,28 +39,64 @@ export class UsersHandlerService{
         return status
     }
 
-    static handleErrorStatus = (response) => {
+    /* ================= RETRIEVE ================= */
+    static getUserRole = (jwt) => {
         return new Promise((resolve) => {
-            let response_status = response.status
-            let status_code = 0
-            response.json().then(response => {
-                if(response_status === 401){
-                    status_code = 401
-                    if(response["error status"].includes("expired")){
-                        alert("Sesiunea a expirat! Incercati sa va reautentificati!")
-                    }
-                    else{
-                        alert("Nu aveti permisiunea sa executati aceasta actiune!")
-                    }
+            fetch(`${Environment.rest_api}/user/role`, {
+                method : 'GET',
+                mode : "cors",
+                headers : {
+                    'Authorization' : `Bearer ${jwt}`,
+                },
+            }).then(response => {
+                if(response.ok){
+                    response.json().then(response => {
+                        resolve({
+                            "code" : 1,
+                            "content" : response["role"]
+                        })
+                    });
                 }
-                resolve({
-                    "code" : status_code,
-                    "message": response['error status']
-                })
+                else{
+                    HTTPResponseHandler.handleErrorStatus(response).then(status => {
+                        resolve({
+                            "code" : status.code,
+                            "content" : status.message
+                        })
+                    });
+                }
             })
         })
     }
 
+    static getAvailableUserTypes = () => {
+        return new Promise((resolve) => {
+            fetch(`${Environment.rest_api}/usertype/all`, {
+                method : 'GET',
+                mode : "cors",
+            }).then(response => {
+                if(response.ok){
+                    response.json().then(response => {
+                        console.log(response)
+                        resolve({
+                            "code" : 1,
+                            "content" : response
+                        })
+                    });
+                }
+                else{
+                    HTTPResponseHandler.handleErrorStatus(response).then(status => {
+                        resolve({
+                            "code" : status.code,
+                            "content" : status.message
+                        })
+                    });
+                }
+            })
+        })
+    }
+
+    /* ================= CREATE ================= */
     static login = (credentials) => {
         return new Promise((resolve) => {
             let credentialsCheckStatus = this.basicCredentialsCheck(credentials)
@@ -87,7 +122,7 @@ export class UsersHandlerService{
                         });
                     }
                     else{
-                        this.handleErrorStatus(response).then(status => {
+                        HTTPResponseHandler.handleErrorStatus(response).then(status => {
                             resolve({
                                 "code" : status.code,
                                 "content" : status.message
@@ -126,7 +161,7 @@ export class UsersHandlerService{
                         });
                     }
                     else{
-                        this.handleErrorStatus(response).then(status => {
+                        HTTPResponseHandler.handleErrorStatus(response).then(status => {
                             resolve({
                                 "code" : status.code,
                                 "content" : status.message
@@ -141,62 +176,6 @@ export class UsersHandlerService{
                     "content" : credentialsCheckStatus[1]
                 })
             }
-        })
-    }
-
-    static getUserRole = (jwt) => {
-        return new Promise((resolve) => {
-            fetch(`${Environment.rest_api}/user/role`, {
-                method : 'GET',
-                mode : "cors",
-                headers : {
-                    'Authorization' : `Bearer ${jwt}`,
-                },
-            }).then(response => {
-                if(response.ok){
-                    response.json().then(response => {
-                        resolve({
-                            "code" : 1,
-                            "content" : response["role"]
-                        })
-                    });
-                }
-                else{
-                    this.handleErrorStatus(response).then(status => {
-                        resolve({
-                            "code" : status.code,
-                            "content" : status.message
-                        })
-                    });
-                }
-            })
-        })
-    }
-
-    static getAvailableUserTypes = () => {
-        return new Promise((resolve) => {
-            fetch(`${Environment.rest_api}/usertype/all`, {
-                method : 'GET',
-                mode : "cors",
-            }).then(response => {
-                if(response.ok){
-                    response.json().then(response => {
-                        console.log(response)
-                        resolve({
-                            "code" : 1,
-                            "content" : response
-                        })
-                    });
-                }
-                else{
-                    this.handleErrorStatus(response).then(status => {
-                        resolve({
-                            "code" : status.code,
-                            "content" : status.message
-                        })
-                    });
-                }
-            })
         })
     }
 }
