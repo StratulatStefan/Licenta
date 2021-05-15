@@ -1,22 +1,43 @@
 import {Environment} from '../environment';
 
 export class UsersHandlerService{
-    static basicCredentialsCheck = (username, password) => {
-        if(username === "" || password === ""){
-            return false;
+    // TODO : functia de credentialsCheck mai smart putin; register
+    static basicCredentialsCheck = (credentials) => {
+        console.log("-----------")
+        console.log(credentials)
+        let status = [true, null]
+        const forbiddens = ["\"", " ", "/", ";", ":"]
+        const Exception = {}
+        // verificam sa nu avem campuri goale sau caractere interzise
+        try{
+            Object.keys(credentials).forEach(credential_key => {
+                if(credentials[credential_key] === ""){
+                    status = [false, `Nu ati introdus ${credential_key}`]
+                    throw Exception
+                }
+                
+                forbiddens.forEach(character => {
+                    if(character === " " && credential_key === "name"){
+                        return;
+                    }
+                    if(credentials[credential_key].includes(character)){
+                        status = [false, `${credential_key} contine caractere interzise! (${character})`]
+                        throw Exception
+                    }
+                })
+
+            })
         }
-        if(!username.includes("@") || !username.includes(".")){
-            return false;
+        catch(e){
+            return status
         }
-        
-        let forbiddens = ["\"", " ", "/", ";", ":"]
-        let contains = false
-        forbiddens.forEach(character => {
-            if((username + password).includes(character)){
-                contains = true
-            }
-        })
-        return !contains
+
+        // verificam ca email-ul sa aiba formatul necesar
+        if(!credentials["email"].includes("@") || !credentials["email"].includes(".")){
+            return [false, "Username-ul nu respecta formatul unui email."];
+        }
+
+        return status
     }
 
     static handleErrorStatus = (response) => {
@@ -41,13 +62,13 @@ export class UsersHandlerService{
         })
     }
 
-    static login = (username, password) => {
+    static login = (credentials) => {
         return new Promise((resolve) => {
-            let credentialsCheckStatus = this.basicCredentialsCheck(username, password)
-            if(credentialsCheckStatus === true){
+            let credentialsCheckStatus = this.basicCredentialsCheck(credentials)
+            if(credentialsCheckStatus[0] === true){
                 let userdata = {
-                    "username" : username,
-                    "password" : password
+                    "username" : credentials["email"],
+                    "password" : credentials["password"]
                 }
                 fetch(`${Environment.rest_api}/user/login`, {
                     method : 'POST',
@@ -78,7 +99,46 @@ export class UsersHandlerService{
             else{
                 resolve({
                     "code" : 0,
-                    "content" : credentialsCheckStatus
+                    "content" : credentialsCheckStatus[1]
+                })
+            }
+        })
+    }
+
+    static register = (credentials) => {
+        return new Promise((resolve) => {
+            let credentialsCheckStatus = this.basicCredentialsCheck(credentials)
+            if(credentialsCheckStatus[0] === true){
+                fetch(`${Environment.rest_api}/user`, {
+                    method : 'POST',
+                    mode : 'cors',
+                    headers : {
+                        'Content-Type' : 'application/json'
+                    },
+                    body : JSON.stringify(credentials)
+                }).then(response => {
+                    if(response.ok){
+                        response.json().then(response => {
+                            resolve({
+                                "code" : 1,
+                                "content" : response
+                            })
+                        });
+                    }
+                    else{
+                        this.handleErrorStatus(response).then(status => {
+                            resolve({
+                                "code" : status.code,
+                                "content" : status.message
+                            })
+                        });
+                    }
+                })
+            }
+            else{
+                resolve({
+                    "code" : 0,
+                    "content" : credentialsCheckStatus[1]
                 })
             }
         })
@@ -98,6 +158,33 @@ export class UsersHandlerService{
                         resolve({
                             "code" : 1,
                             "content" : response["role"]
+                        })
+                    });
+                }
+                else{
+                    this.handleErrorStatus(response).then(status => {
+                        resolve({
+                            "code" : status.code,
+                            "content" : status.message
+                        })
+                    });
+                }
+            })
+        })
+    }
+
+    static getAvailableUserTypes = () => {
+        return new Promise((resolve) => {
+            fetch(`${Environment.rest_api}/usertype/all`, {
+                method : 'GET',
+                mode : "cors",
+            }).then(response => {
+                if(response.ok){
+                    response.json().then(response => {
+                        console.log(response)
+                        resolve({
+                            "code" : 1,
+                            "content" : response
                         })
                     });
                 }

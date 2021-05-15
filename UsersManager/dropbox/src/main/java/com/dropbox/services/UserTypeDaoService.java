@@ -6,6 +6,7 @@ import com.dropbox.sql_handler.MySQLManager;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 public class UserTypeDaoService implements UserTypeDao {
@@ -26,6 +27,7 @@ public class UserTypeDaoService implements UserTypeDao {
     @Override
     public List<UserType> getAllUserTypes() throws NullPointerException{
         List<UserType> userTypes = mySQLManager.findlAll(UserType.class);
+        userTypes = userTypes.stream().filter(userType -> !userType.getUser_type().contains("ADMIN")).collect(Collectors.toList());
         if(userTypes.size() == 0){
             throw new NullPointerException("No usertype found!");
         }

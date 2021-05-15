@@ -4,19 +4,35 @@ import {UsersHandlerService} from '../services/UsersHandlerService';
 import '../styles/pages-style.css';
 
 class StartPage extends Component {
+    static availableUserTypes = null
+
     constructor(props){
         super(props)
         document.getElementById("page-name").innerHTML = "Home Page";
         this.userData = localStorage.getItem('user_data')
+        this.accountCredentials = {email : "", password : ""}
         this.state = {
             isUserConnected : false,
             userType : "",
+            accountAvailable : true,
+            accountSuccessfullyCreated : false
         }
+        
     }
 
     componentDidMount = () => {
+        this.fetchAvailableUserTypes()
         this.checkForConnectedUser()
         this.fetchUserType()
+    }
+
+    componentDidUpdate = () => {
+        if(this.state.accountAvailable === true && this.state.accountSuccessfullyCreated == true){
+            document.getElementById("status_message").innerHTML = ""
+            this.setState({
+                accountSuccessfullyCreated : false
+            })
+        }
     }
 
     checkForConnectedUser = () => {
@@ -36,6 +52,18 @@ class StartPage extends Component {
         }
     }
 
+    fetchAvailableUserTypes = () => {
+        UsersHandlerService.getAvailableUserTypes().then(response => {
+            if(response.code === 1){
+                StartPage.availableUserTypes = response.content
+                console.log(response.content)
+            }
+            else{
+                console.log(response.content)
+            }
+        })
+    }
+
     fetchUserType = () => {
         if(this.userData !== null && this.userData !== ''){
             UsersHandlerService.getUserRole(this.userData["jwt"]).then(response => {
@@ -52,16 +80,16 @@ class StartPage extends Component {
     }
 
     login = () => {
-        let username = "stefanc.stratulat@gmail.com"
-        let password = "parola.dropbox123"
-        UsersHandlerService.login(username, password).then(response => {
+        // {"email" : stefanc.stratulat@gmail.com", "password" : "parola.dropbox123"}
+        UsersHandlerService.login(this.accountCredentials).then(response => {
             if(response.code === 1){
                 localStorage.setItem("user_data", JSON.stringify(response.content))
                 this.checkForConnectedUser()
                 this.fetchUserType()
+                document.getElementById("logoutButton").style.visibility = "visible"
             }
             else{
-                console.log(response.content)
+                document.getElementById("status_message").innerHTML = response.content
             }
         })
     }
@@ -70,8 +98,39 @@ class StartPage extends Component {
         localStorage.setItem("user_data", '')
         this.checkForConnectedUser()
     }
-  
+
+    createAccount = () => {
+        console.log(this.accountCredentials)
+        UsersHandlerService.register(this.accountCredentials).then(response => {
+            console.log(response)
+            if(response.code === 1){
+                document.getElementById("status_message").innerHTML = response.content["success status"]
+                this.setState({
+                    accountSuccessfullyCreated : true
+                })
+            }
+            else{
+                document.getElementById("status_message").innerHTML = response.content
+            }
+        })
+
+    }
+
+    credentialInput = (event, type) => {
+        this.accountCredentials[type] = event.target.value
+    }
+    
     render() {
+        let userypesoptions = []
+        if(StartPage.availableUserTypes !== null){
+            StartPage.availableUserTypes.forEach(usertype => {
+                userypesoptions.push(
+                    <option value={usertype["user_type"]}>{usertype["user_type"]}</option>
+                )
+            })
+        }
+
+
       return (
         <div className="App">
             <p id="title">Home</p>
@@ -93,21 +152,67 @@ class StartPage extends Component {
                         </div>
                     </div>
                     <div id="homediv_right">
-                        <p id="login_header">Log into your account</p>
+                        {this.state.accountAvailable === true ? 
+                        <div>
+                            <p id="login_header">Log into your account</p>
 
-                    <p>Email</p>
-                    <input 
-                        onChange={(event) => {}} 
-                        type="email" />
-                    <p>Password</p>
-                    <input 
-                        onChange={(event) => {}} 
-                        type="email" />
-                    <p><button className="redirector" onClick={this.login}>Autentificare</button></p>
-                    <p>Nu ai un cont? <a href="">Creaza un cont</a></p>
+                            <p>Email</p>
+                            <input 
+                                onChange={(event) => {this.credentialInput(event, "email")}} 
+                                type="email" />
+
+                            <p>Password</p>
+                            <input 
+                                onChange={(event) => {this.credentialInput(event, "password")}} 
+                                type="password" />
+                            
+                            <p><button className="redirector" onClick={this.login}>Autentificare</button></p>
+                            <p>Nu ai un cont? <a href="#" onClick={() => {
+                                this.setState({accountAvailable : false})
+                                this.accountCredentials = {name : "", email : "", password : "", type: `${StartPage.availableUserTypes[0]["user_type"]}`, country : ""}
+                                }}>Creaza un cont</a></p>
+                        </div> : 
+                        <div>
+                            <p id="login_header">Create account</p>
+
+                            <p>Name</p>
+                            <input 
+                                onChange={(event) => {this.credentialInput(event, "name")}} 
+                                type="text" />
+                            
+                            <p>Email</p>
+                            <input 
+                                onChange={(event) => {this.credentialInput(event, "email")}} 
+                                type="email" />
+
+                            <p>Password</p>
+                            <input 
+                                onChange={(event) => {this.credentialInput(event, "password")}} 
+                                type="password" />
+
+                            <p>User type</p>
+                            <select onChange={(event) => {this.accountCredentials["type"] = event.target.value}}>
+                                {userypesoptions}
+                            </select>
+
+                            <p>Country</p>
+                            <input 
+                                onChange={(event) => {this.credentialInput(event, "country")}} 
+                                type="text" />
+                        
+                            <p><button className="redirector" onClick={this.createAccount}>Create account</button></p>
+                        </div>
+                        }
+                        <p id="status_message"></p>
+                        {this.state.accountSuccessfullyCreated == true ? 
+                            <p><a href="#" onClick={() => {
+                                this.setState({accountAvailable : true})
+                                this.accountCredentials = {email : "", password : ""}
+                                }}>Go to login.</a>
+                            </p> : <p></p>
+                        }
                     </div>
-                </div> :
-                <button className="redirector" onClick={this.logout}>Logout</button>
+                </div> : <p></p>
             }
         </div>
       );

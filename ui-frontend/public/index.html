@@ -28,8 +28,24 @@
           <img id="log_data_profile" src="images/user_logo.png" />
         </a>
         <h3 id="log_data_uname"></h3>
+        <button id="logoutButton" class="float-left submit-button" style="visibility: hidden;">Logout</button>
       </div>
     </div>
     <div id="root"></div>
   </body>
+  <script>
+    let userData = localStorage.getItem('user_data')
+    console.log(`User fucking data : ${userData}`)
+    try{
+      userData = JSON.parse(userData)
+      document.getElementById("logoutButton").style.visibility = "visible"
+    }
+    catch(e){
+      console.log("No user logged in!")
+    }
+    document.getElementById("logoutButton").onclick = function () {
+        localStorage.setItem("user_data", '')
+        location.href = "/";
+    };
+  </script>
 </html>

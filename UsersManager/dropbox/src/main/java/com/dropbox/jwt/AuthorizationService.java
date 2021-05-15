@@ -6,7 +6,7 @@ public class AuthorizationService {
     public enum UserTypes {ALL};
 
     private static final String authorizationModel = "BEARER";
-    private static final long sessionTime = 10 * 1000;//3600 * 1000;
+    private static final long sessionTime = 3600 * 1000;
 
     public static String generateUserIdentity(int id, String username, String userRole){
         JWT jwt = new JWT(id, username, userRole, sessionTime);

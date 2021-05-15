@@ -72,7 +72,7 @@ body {
 }
 
 .log_data{
-  margin-top: 35%;
+  margin-top: 25%;
   font-size: 25px;
 }
 
@@ -80,4 +80,8 @@ body {
   max-width: 100px;
   max-height: 100px;
   visibility: hidden;
+}
+
+#logoutButton{
+  font-size: 25px;
 }

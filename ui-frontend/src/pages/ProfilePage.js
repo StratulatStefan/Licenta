@@ -17,6 +17,7 @@ class ProfilePage extends Component {
     componentDidMount = () => {
         this.checkForConnectedUser()
     }
+
     checkForConnectedUser = () => {
         this.userData = localStorage.getItem('user_data')
         var status = (this.userData !== null && this.userData !== '')
@@ -24,7 +25,8 @@ class ProfilePage extends Component {
             isUserConnected : status,
         });
         if(status === true){
-            document.getElementById("log_data_uname").innerHTML = this.userData;
+            this.userData = JSON.parse(this.userData)
+            document.getElementById("log_data_uname").innerHTML = this.userData["name"];
             document.getElementById("log_data_profile").style.visibility = "visible";
         }
         else{
@@ -47,7 +49,7 @@ class ProfilePage extends Component {
     render() {
       return (
         <div className="App">
-          <p id="title">Home</p>
+          <p id="title">Profile Page</p>
           {this.state.isUserConnected === false ?
           <button className="redirector" onClick={this.login}>Autentificare</button>:
           <button className="redirector" onClick={this.logout}>Logout</button>}
