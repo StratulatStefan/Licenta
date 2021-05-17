@@ -16,6 +16,9 @@
 .Home .home_header{
     text-align: left;
 }
+.Home .upload_header{
+    text-align: center;
+}
 
 .Home p{
     display: inline-block;
@@ -31,14 +34,87 @@
     height: 40px;
 }
 
-.Home .home_header .home_searchbar input{
+.Home input{
     display: inline-block;
     text-align: center;
     font-size: 27px;
     margin-right: 20px;
+    color : #233e8b;
+    font-weight: bold;
 }
 
 .Home .home_header .home_searchbar button{
     font-size: 27px;
     background-color: transparent;
+    border : 2px solid #233e8b;
+}
+
+.Home .upload_div p{
+    font-size: 40px;
+    padding-top: 10%;
+}
+
+.Home .upload_div p #dropmessage{
+    padding-top: 5%;
+}
+
+.Home .upload_body button{
+    font-size: 30px;
+    color: #02475e;
+    font-weight: bold;
+    border: 5px solid #02475e;
+    border-radius: 15px;
+}
+
+.Home .upload_body{
+    display: flex;
+    padding-left: 15%;
+    padding-right: 15%;
+
+}
+
+.Home .upload_body .upload_div{
+    position: relative;
+    float: left;
+    height: 100%;
+    border : 5px solid #02475e;
+    border-radius: 25px;
+    height: 50%;
+    width: 50%;
+    margin: 0 auto;
+    margin-top: 5%;
+}
+
+.Home .upload_body .upload_data{
+    margin-top: 5%;
+    position: relative;
+    width: 50%;
+    float: left;
+    height: 900px;
+    border : 5px solid #02475e;
+    display: none;
+}
+
+.Home .upload_body .upload_data_details{
+    font-size: 20px;
+}
+
+.Home .upload_body #upload_date_filename{
+    font-size: 30px;
+}
+
+.Home .upload_body button{
+    margin-top: 5%;
+}
+
+.Home .upload_body input{
+    position: relative;
+    width: 70%;
+}
+
+.Home .upload_body #upload_data_preview{
+    height: 30%;
+    width: 70%;
+    border: 5px solid black;
+    border-radius: 20px;
 }

@@ -9,12 +9,16 @@ class MainPage extends Component {
         super(props)
         document.getElementById("page-name").innerHTML = "Home Page";
         this.userData = localStorage.getItem('user_data')
+        this.description = null
+        this.searchData = null
         this.state = {
             isUserConnected : false,
             userType : "",
             accountAvailable : true,
             accountSuccessfullyCreated : false
         }
+
+
     }
 
     componentDidMount = () => {
@@ -50,6 +54,10 @@ class MainPage extends Component {
         }
     }
 
+    search = () =>{
+        console.log(`searching ${this.userData}`)
+    }
+
     redirect = (destination) => {
         if(destination !== ""){
             this.props.history.push(destination)
@@ -66,8 +74,9 @@ class MainPage extends Component {
                     <div className="home_header">
                         <p>My files</p>
                         <div className="home_searchbar">
-                            <input type="text" placeholder="Search file.."/>
-                            <button>&#128269;</button>
+                            <input type="text" placeholder="Search file.."
+                                onChange={(event) => {this.searchData = event.target.value}}/>
+                            <button onClick={this.search}>&#128269;</button>
                         </div>
                     </div>
                     <hr/>
