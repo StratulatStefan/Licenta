@@ -2,10 +2,11 @@ import {Environment} from '../environment';
 import {HTTPResponseHandler} from '../services/HTTPResponseHandler';
 
 export class FileHandlerService{
-    static uploadFile = (file, description, usertype) => {
+    static uploadFile = (file, jwt, description, usertype) => {
         // https://www.smashingmagazine.com/2018/01/drag-drop-file-uploader-vanilla-js/
         console.log(`File : ${file}`)
         console.log(`Description : ${description}`)
+        console.log(`JWT : ${jwt}`)
         
         let url = `${Environment.frontend_proxy}/upload`
 
@@ -19,6 +20,7 @@ export class FileHandlerService{
                 mode : "cors",
                 body: formData,
                 headers : {
+                    'Authorization' : `Bearer ${jwt}`,
                     "version_description" : description,
                     "user_type" : usertype
                 }

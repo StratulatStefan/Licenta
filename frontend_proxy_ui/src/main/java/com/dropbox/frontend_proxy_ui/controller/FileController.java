@@ -1,5 +1,6 @@
 package com.dropbox.frontend_proxy_ui.controller;
 
+import com.dropbox.frontend_proxy_ui.jwt.AuthorizationService;
 import com.dropbox.frontend_proxy_ui.services.FileService;
 import com.dropbox.frontend_proxy_ui.services.ResponseHandlerService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,15 +17,31 @@ import java.util.Map;
 @Controller
 public class FileController {
 
+    AuthorizationService authorizationService = new AuthorizationService();
+
     @Autowired
     FileService fileService;
 
     @RequestMapping(path = "/proxy/upload", method = RequestMethod.POST)
     public ResponseEntity<Map<String, String>> uploadFIle(@RequestParam("file") MultipartFile file,
+                                           @RequestHeader("Authorization") String authorizationValue,
                                            @RequestHeader("version_description") String descriptionValue,
                                            @RequestHeader("user_type") String userType){
+
+        int userId = -1;
         try {
-            fileService.uploadFile(file, descriptionValue, userType);
+            AuthorizationService.UserTypes allowedUserTypes[] = new AuthorizationService.UserTypes[]{AuthorizationService.UserTypes.ALL};
+            Map<String, Object> userData = authorizationService.userAuthorization(authorizationValue, allowedUserTypes);
+            int x = 0;
+            userId = Integer.parseInt((String)userData.get("sub"));
+        }
+        catch (Exception exception){
+            Map<String, String> errorResponse = ResponseHandlerService.buildErrorStatus(exception.getMessage());
+            return new ResponseEntity(errorResponse, HttpStatus.UNAUTHORIZED);
+        }
+
+        try {
+            fileService.uploadFile(file, userId, descriptionValue, userType);
         }
         catch (Exception exception){
             Map<String, String> errorResponse = ResponseHandlerService.buildErrorStatus(exception.getMessage());

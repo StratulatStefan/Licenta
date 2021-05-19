@@ -3,19 +3,37 @@ import React, { Component } from 'react';
 import '../styles/pages-style.css';
 import '../styles/pages-home-style.css';
 import { FileHandlerService } from '../services/FileHandlerService';
+import {UsersHandlerService} from '../services/UsersHandlerService';
 
 class UploadPage extends Component {
     constructor(props){
         super(props)
         document.getElementById("page-name").innerHTML = "Upload Page";
+        this.userData = JSON.parse(localStorage.getItem('user_data'))
         this.descriptionData = null;
         this.state = {
-            currentFile : null
+            currentFile : null,
+            userType : "STANDARD"
         }
     }
 
     componentDidMount = () => {
         this.dragDropStyle("uploader")
+        //this.fetchUserType()
+    }
+
+    fetchUserType = () => {
+        if(this.userData !== null && this.userData !== ''){
+            UsersHandlerService.getUserRole(this.userData["jwt"]).then(response => {
+                if(response.code === 1){
+                    console.log("role : " + response["content"])
+                    this.setState({userType : response["content"]})
+                }
+                else if(response.code === 401){
+                    localStorage.setItem("user_data", '')
+                }
+            })
+        }
     }
 
     dragDropStyle = (div_name) => {
@@ -67,7 +85,7 @@ class UploadPage extends Component {
 
     uploadFile = () => {
         document.getElementById("dropmessage").innerHTML = "Uploading file..."
-        FileHandlerService.uploadFile(this.state.currentFile, this.descriptionData, "STANDARD").then(response => {
+        FileHandlerService.uploadFile(this.state.currentFile, this.userData["jwt"], this.descriptionData, this.state.userType).then(response => {
             if(response.code === 1){
                 document.getElementById("dropmessage").innerHTML = response.content
                 console.log(response.content)

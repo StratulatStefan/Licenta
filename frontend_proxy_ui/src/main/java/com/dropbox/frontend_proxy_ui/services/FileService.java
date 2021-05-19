@@ -31,11 +31,11 @@ public class FileService {
         }
     }
 
-    public void uploadFile(MultipartFile file, String description, String userType) throws Exception {
+    public void uploadFile(MultipartFile file, int userId, String description, String userType) throws Exception {
         String filePath = persistFileToBuffer(file);
 
         NewFileRequest newFileRequest = new NewFileRequest();
-        newFileRequest.setUserId("1");
+        newFileRequest.setUserId(String.format("%d", userId));
         newFileRequest.setFilename(filePath);
         newFileRequest.setFilesize(file.getSize());
         newFileRequest.setCrc(FileSystem.calculateCRC(filePath));
