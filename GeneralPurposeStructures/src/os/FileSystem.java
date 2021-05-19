@@ -127,11 +127,31 @@ public class FileSystem {
     }
 
     /**
-     * Functie care calculeaza CRC-ul unui fisier
+     * Functie care calculeaza CRC-ul unui fisier, avand ca parametru numele fisierului
      */
     public static long calculateCRC(String filename){
         try {
             InputStream inputStream = new BufferedInputStream(new FileInputStream(filename));
+            CRC32 crc = new CRC32();
+            int count;
+            byte[] buffer = new byte[1024 * 8];
+            while ((count = inputStream.read(buffer)) != -1)
+                crc.update(buffer, 0, count);
+            inputStream.close();
+            return crc.getValue();
+        }
+        catch (IOException exception){
+            ProfiPrinter.PrintException("IOException la calculateCRC : " + exception.getMessage());
+        }
+        return -1;
+    }
+
+    /**
+     * Functie care calculeaza CRC-ul unui fisier, avand ca parametru stream-ul de date
+     */
+    public static long calculateCRC(InputStream fileInputStream){
+        try {
+            InputStream inputStream = new BufferedInputStream(fileInputStream);
             CRC32 crc = new CRC32();
             int count;
             byte[] buffer = new byte[1024 * 8];

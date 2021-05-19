@@ -9,12 +9,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.io.BufferedInputStream;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStream;
 import java.util.Map;
-import java.util.zip.CRC32;
 
 // https://stackabuse.com/uploading-files-with-spring-boot/
 @CrossOrigin(origins = "http://localhost:3000")
@@ -26,9 +21,10 @@ public class FileController {
 
     @RequestMapping(path = "/proxy/upload", method = RequestMethod.POST)
     public ResponseEntity<Map<String, String>> uploadFIle(@RequestParam("file") MultipartFile file,
-                                           @RequestHeader("version_description") String descriptionValue){
+                                           @RequestHeader("version_description") String descriptionValue,
+                                           @RequestHeader("user_type") String userType){
         try {
-            fileService.redirectToStorage(file);
+            fileService.uploadFile(file, descriptionValue, userType);
         }
         catch (Exception exception){
             Map<String, String> errorResponse = ResponseHandlerService.buildErrorStatus(exception.getMessage());

@@ -2,7 +2,8 @@ import {Environment} from '../environment';
 import {HTTPResponseHandler} from '../services/HTTPResponseHandler';
 
 export class FileHandlerService{
-    static uploadFile = (file, description) => {
+    static uploadFile = (file, description, usertype) => {
+        // https://www.smashingmagazine.com/2018/01/drag-drop-file-uploader-vanilla-js/
         console.log(`File : ${file}`)
         console.log(`Description : ${description}`)
         
@@ -18,7 +19,8 @@ export class FileHandlerService{
                 mode : "cors",
                 body: formData,
                 headers : {
-                    "version_description" : description
+                    "version_description" : description,
+                    "user_type" : usertype
                 }
             }).then(response => {
                 if(response.ok){

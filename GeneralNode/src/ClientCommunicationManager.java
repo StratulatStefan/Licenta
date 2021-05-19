@@ -150,7 +150,6 @@ public class ClientCommunicationManager {
             @Override
             public void run(){
                 try {
-                    System.out.println("din nou aici!!!");
                     InputStream dataInputStream = new DataInputStream(clientSocket.getInputStream());
                     OutputStream dataOutputStream = null;
                     FileOutputStream fileOutputStream = null;

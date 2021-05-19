@@ -1,18 +1,32 @@
 package com.dropbox.frontend_proxy_ui;
 
-import com.dropbox.frontend_proxy_ui.services.FeedbackManagerService;
+import client_manager.ManagerResponse;
+import client_manager.data.ClientManagerRequest;
+import client_manager.data.DeleteFileRequest;
+import client_manager.data.NewFileRequest;
+import client_manager.data.RenameFileRequest;
+import com.dropbox.frontend_proxy_ui.proxy.FeedbackManager;
+import com.dropbox.frontend_proxy_ui.proxy.FileSender;
+import communication.Serializer;
+import log.ProfiPrinter;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import os.FileSystem;
+
+import java.io.DataInputStream;
+import java.io.DataOutputStream;
+import java.io.IOException;
+import java.net.Socket;
 
 @SpringBootApplication
 public class FrontendProxyUiApplication {
-	public static FeedbackManagerService feedbackManager = new FeedbackManagerService();
+	public static FeedbackManager feedbackManager = new FeedbackManager();
 
-	public static void main(String[] args) {
-		feedbackManager = new FeedbackManagerService();
+	public static void main(String[] args) throws IOException {
+		feedbackManager = new FeedbackManager();
 		new Thread(feedbackManager).start();
-		SpringApplication.run(FrontendProxyUiApplication.class, args);
 
+		SpringApplication.run(FrontendProxyUiApplication.class, args);
 	}
 
 }

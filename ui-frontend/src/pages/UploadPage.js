@@ -67,7 +67,7 @@ class UploadPage extends Component {
 
     uploadFile = () => {
         document.getElementById("dropmessage").innerHTML = "Uploading file..."
-        FileHandlerService.uploadFile(this.state.currentFile, this.descriptionData).then(response => {
+        FileHandlerService.uploadFile(this.state.currentFile, this.descriptionData, "STANDARD").then(response => {
             if(response.code === 1){
                 document.getElementById("dropmessage").innerHTML = response.content
                 console.log(response.content)

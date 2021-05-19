@@ -54,7 +54,7 @@ public class NewFileRequestFeedback implements Serializable {
      * @param filename numele fisierului (poate contine si calea)
      */
     public void setFilename(String filename){
-        String[] filePathItems = filename.split("\\/");
+        String[] filePathItems = filename.split("\\\\");
         this.filename = filePathItems[filePathItems.length - 1];
     }
 
