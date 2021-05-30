@@ -12,10 +12,6 @@ import java.io.Serializable;
 public class ManagerResponse implements Serializable {
     /** -------- Atribute -------- **/
     /**
-     * Raspunsul afirmativ al nodului general. (succes)
-     */
-    private String response;
-    /**
      * Raspuns negativ al nodului general. (exceptie sau eroare)
      */
     private String exception;
@@ -26,32 +22,8 @@ public class ManagerResponse implements Serializable {
      */
     public ManagerResponse(){};
 
-    /**
-     * Constructor care instantiaza raspunsul;
-     */
-    public ManagerResponse(String response){
-        this.response = response;
-    }
-
 
     /** -------- Gettere & Settere -------- **/
-    /**
-     * Setter pentru raspunsul nodului general.
-     */
-    public void setResponse(String response) {
-        this.response = response;
-    }
-    /**
-     * Getter pentru raspunsul nodului general
-     * Se incearca obtinerea raspunsului afirmativ; In cazul in care nu exista,
-     * se va genera o exceptie de tip NullPointerException, care va contine mesajul de eroare.
-     */
-    public String getResponse() throws NullPointerException {
-        if(response == null)
-            throw new NullPointerException(this.getException());
-        return response;
-    }
-
     /**
      * Setter pentru mesajul de exceptie, generat de o eroare.
      */

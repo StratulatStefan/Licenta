@@ -3,6 +3,7 @@ package tables;
 import communication.Address;
 import data.Pair;
 import log.ProfiPrinter;
+import model.FileAttributes;
 import model.FileAttributesForStorage;
 import model.FileVersionData;
 import node_manager.Beat.FileAttribute;
@@ -400,6 +401,17 @@ public class StorageStatusTable {
                 }
             }};
         }
+    }
+
+    public String getCandidateAddress(String userId, String filename, long crc) throws Exception{
+        int userFileId = this.getUserFile(userId, filename);
+        FileAttributesForStorage fileAttributes = this.statusTable.get(userId).get(userFileId);
+        for(Pair<String, FileVersionData> node : fileAttributes.getNodes()){
+            if(node.getSecond().getCrc() == crc || crc == -1){
+                return node.getFirst();
+            }
+        }
+        throw new Exception("No valid node found!");
     }
 
 

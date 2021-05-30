@@ -23,7 +23,7 @@ public class GeneralNode{
     /**
      * Adresa IP la care va fi mapat nodul intern
      */
-    private static String ipAddress;
+    public static String ipAddress;
 
     /**
      * Calea de baza la care se vor stoca fisierele

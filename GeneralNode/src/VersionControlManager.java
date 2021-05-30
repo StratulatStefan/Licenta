@@ -4,6 +4,7 @@ import model.VersionData;
 import os.FileSystem;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 import java.io.File;
 
@@ -67,6 +68,16 @@ public class VersionControlManager {
         String filepath = baseFilepath + userId + "\\" + filename;
         String metadataFilePath = filepath.substring(0, filepath.lastIndexOf(".")) + extension;
         return getLastVersionOfFile(metadataFilePath);
+    }
+
+    public List<VersionData> getVersionsForFile(String userId, String filename) throws IOException {
+        String filepath = baseFilepath + userId + "\\" + filename;
+        String metadataFilePath = filepath.substring(0, filepath.lastIndexOf(".")) + extension;
+        List<VersionData> versionData = new ArrayList<VersionData>();
+        for(String versionLine : FileSystem.getFileLines(metadataFilePath)){
+            versionData.add(new VersionData(versionLine));
+        }
+        return versionData;
     }
 
 }

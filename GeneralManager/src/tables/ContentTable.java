@@ -53,7 +53,7 @@ public class ContentTable {
                         crc = storageStatusTable.getCRCsForFile(user, filename);
                         versionNo = storageStatusTable.getLastVersionOfFile(user, filename);
                         nodesCount = userFilesNodesCount.get(filename);
-                        this.addRegister(user, filename, nodesCount, crc, "[VALID]", versionNo);
+                        this.addRegister(user, filename, nodesCount, crc, "[VALID]", -1, versionNo, "");
                     }
                     catch (Exception exception){
                         // nu prea avem cum sa ajunge aici la init intrucat exceptia se genereaza doar daca inregistrarea exista deja
@@ -73,9 +73,9 @@ public class ContentTable {
      * @param filename Numele fisierului;
      * @param replication_factor Factorul de replicare;
      */
-    public void addRegister(String userId, String filename, int replication_factor, long crc, String filestatus, String versionNo){
+    public void addRegister(String userId, String filename, int replication_factor, long crc, String filestatus,long filesize, String versionNo, String versionDescription ){
         synchronized (this.contentTable){
-            FileAttributes fileAttribute = new FileAttributes(filename, replication_factor, filestatus, crc, versionNo);
+            FileAttributes fileAttribute = new FileAttributes(filename, replication_factor, filestatus, crc, filesize, versionNo, versionDescription);
             if(this.containsUser(userId)){
                 this.contentTable.get(userId).add(fileAttribute);
             }
@@ -198,7 +198,7 @@ public class ContentTable {
         }
     }
 
-    public void updateFileVersionNo(String userId, String filename, int version) throws Exception {
+    public void updateFileVersion(String userId, String filename, int version, String description) throws Exception {
         synchronized (this.contentTable) {
             if (!this.containsUser(userId)) {
                 throw new Exception("Register not found!");
@@ -213,10 +213,32 @@ public class ContentTable {
                         else{
                             fileAttributes.setVersionNo("v" + version);
                         }
+                        fileAttributes.setVersionDescription(description);
                         return;
                     }
                     catch (NumberFormatException exception){
                         ProfiPrinter.PrintException("Exceptie de parsare la updateFileVersionNo");
+                    }
+
+                }
+            }
+            throw new Exception("Register not found!");
+        }
+    }
+
+    public void updateFileSize(String userId, String filename, long filesize) throws Exception{
+        synchronized (this.contentTable) {
+            if (!this.containsUser(userId)) {
+                throw new Exception("Register not found!");
+            }
+            for (FileAttributes fileAttributes : this.contentTable.get(userId)) {
+                if (fileAttributes.getFilename().equals(filename)) {
+                    try {
+                        fileAttributes.setFileSize(filesize);
+                        return;
+                    }
+                    catch (NumberFormatException exception){
+                        ProfiPrinter.PrintException("Exceptie de parsare la updateFileSize");
                     }
 
                 }
@@ -343,6 +365,37 @@ public class ContentTable {
             ProfiPrinter.PrintException("User not found!");
         }
         return null;
+    }
+
+    public long getFileSizeOfUserFile(String userId, String filename){
+        try {
+            for(FileAttributes file : this.getUserFiles(userId)){
+                if(file.getFilename().equals(filename)){
+                    return file.getFileSize();
+                }
+            }
+        }
+        catch (Exception exception){
+            ProfiPrinter.PrintException("User not found!");
+        }
+        return -1;
+    }
+
+    public List<HashMap<String, Object>> getUserFilesForFrontend(String userId) throws Exception {
+        List<HashMap<String, Object>> userFiles = new ArrayList<>();
+        for(FileAttributes file : this.getUserFiles(userId)){
+            if(file.getStatus().contains("DELETE")){
+                continue;
+            }
+            HashMap<String, Object> userFile = new HashMap<>();
+            userFile.put("filename", file.getFilename());
+            userFile.put("hash", file.getCrc());
+            userFile.put("version", file.getVersionNo());
+            userFile.put("version_description", file.getVersionDescription());
+            userFile.put("filesize", file.getFileSize());
+            userFiles.add(userFile);
+        }
+        return userFiles;
     }
 
 

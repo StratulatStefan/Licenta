@@ -3,6 +3,8 @@ import {UsersHandlerService} from '../services/UsersHandlerService';
 
 import '../styles/pages-style.css';
 import '../styles/pages-home-style.css';
+import { FileHandlerService } from '../services/FileHandlerService';
+import { Environment } from '../environment';
 
 class MainPage extends Component {
     constructor(props){
@@ -10,20 +12,23 @@ class MainPage extends Component {
         document.getElementById("page-name").innerHTML = "Home Page";
         this.userData = localStorage.getItem('user_data')
         this.description = null
+        this.newname = null
         this.searchData = null
         this.state = {
             isUserConnected : false,
             userType : "",
             accountAvailable : true,
-            accountSuccessfullyCreated : false
+            accountSuccessfullyCreated : false,
+            userFiles : null,
+            currentFileName : null,
+            fileDetails : null,
         }
-
-
     }
 
     componentDidMount = () => {
         this.checkForConnectedUser()
         this.fetchUserType()
+        this.fetchUserFiles()
     }
 
     fetchUserType = () => {
@@ -47,6 +52,15 @@ class MainPage extends Component {
         }
     }
 
+    fetchUserFiles = () =>{
+        FileHandlerService.getUserFiles(this.userData["jwt"]).then(response => {
+            console.log(response.content)
+            this.setState({
+                userFiles : response.content
+            })
+        })
+    }
+
     checkForConnectedUser = () => {
         this.userData = localStorage.getItem('user_data')
         if(this.userData === null || this.userData === ''){
@@ -67,7 +81,146 @@ class MainPage extends Component {
         }
     }
 
+    getFileSizeUnit = (filesize) => {
+        let units = ['', 'K', 'M', 'G']
+        let index = 0;
+        while(true){
+            if(filesize / 1024 > 1){
+                filesize = filesize / 1024;
+                index = index + 1;
+            }
+            else{
+                break
+            }
+        }
+        return Math.round(filesize * 100) / 100 + " " + units[index] + "B"
+    }
+
+    fileDetails = (file) => {
+        FileHandlerService.getFileHistory(this.userData["jwt"], file.filename).then(response => {
+            document.getElementById("file_details").style.visibility = "visible"
+            document.getElementById("details_filename").innerHTML = file.filename
+            document.getElementById("details_hash").innerHTML = file.hash.toString(16)
+            this.setState({fileDetails : response.content, currentFileName : file.filename})
+        })
+    }
+
+    downloadFile = () => {
+        this.resetFields()
+        document.getElementsByClassName("request_description")[0].style.visibility = "hidden"
+        document.getElementById("file_status").innerHTML = "Downloading file..."
+        FileHandlerService.downloadFile(this.userData["jwt"], this.state.currentFileName).then(response => {
+            console.log(response.content)
+            document.getElementById("file_status").innerHTML = "File successfully downloaded"
+            document.getElementById("downloaduri").href = response.content
+            document.getElementById("preview").src = response.content
+            document.getElementById("downloaduri").click()
+        })
+    }
+
+    deleteFile = () => {
+        this.resetFields()
+        document.getElementById("file_status").innerHTML = "Deleting file..."
+        document.getElementsByClassName("request_description")[0].style.visibility = "visible"
+
+        if(this.description === null || this.description === ""){
+            document.getElementById("file_status").innerHTML = "Invalid input!"
+        }
+        else{
+            FileHandlerService.deleteFile(this.userData["jwt"], this.state.currentFileName, this.description).then(response => {
+                document.getElementById("file_status").innerHTML = "File successfully deleted. Refresh."
+            })
+        }
+    }
+
+    renameFile = (state) => {
+        this.resetFields()
+        if(state === 0){
+            document.getElementsByClassName("request_description")[0].style.visibility = "visible"
+            document.getElementsByClassName("request_description")[1].style.visibility = "visible"
+            document.getElementsByClassName("request_description")[2].style.visibility = "visible"
+            document.getElementById("input_label").style.visibility = "visible"
+        }
+        else if(state === 1){
+            if(this.newname === null || this.newname === "" || this.description === null || this.description === ""){
+                document.getElementById("file_status").innerHTML = "Invalid input!"
+            }
+            else{
+                FileHandlerService.renameFile(this.userData["jwt"], this.state.currentFileName, this.newname, this.description).then(response => {
+                    document.getElementById("file_status").innerHTML = "File successfully rename. Refresh."
+                })
+            }
+        }
+
+    }
+
+    uploadNewVersionFile = () => {
+        this.resetFields()
+        document.getElementById("input_label").style.visibility = "visible"
+        document.getElementsByClassName("request_description")[0].style.visibility = "hidden"
+        document.getElementById("input_label").style.visibility = "visible"
+        document.getElementById("input_label").innerHTML = "Edit your file and upload it with the same name."
+        document.getElementsByClassName("request_description")[2].style.visibility = "visible"
+        document.getElementById("proceed_btn").innerHTML = "Upload"
+
+
+    }
+
+    resetFields = () => {
+        document.getElementsByClassName("request_description")[0].style.visibility = "visible"
+        document.getElementsByClassName("request_description")[1].style.visibility = "hidden"
+        document.getElementsByClassName("request_description")[2].style.visibility = "hidden"
+        document.getElementById("proceed_btn").innerHTML = "Rename"
+        document.getElementById("input_label").innerHTML = "New name : "
+        document.getElementById("input_label").style.visibility = "hidden"
+
+    }
+    
     render(){
+        var userFiles = []
+        if(this.state.userFiles !== null){
+            this.state.userFiles.forEach(userFile => {
+                let logosrc = `/images/file_logo/${userFile.filename.split(".")[1]}.png`
+                if(!Environment.available_logos.includes(userFile.filename.split(".")[1])){
+                    logosrc = `/images/file_logo/extra.png` 
+                }
+                userFiles.push(
+                    <tr id={`div_${userFile.filename}`}>
+                        <td>
+                            <img src={logosrc}></img>
+                        </td>
+                        <td className = "table_fname">
+                            <p><a href="#" onClick={() => this.fileDetails(userFile)}>{`${userFile.filename + ""}`}</a></p><br/>
+                            <span>{`Version : ${userFile.version}`}</span><br/>
+                            <span>{`Size : ${this.getFileSizeUnit(userFile.filesize)}`}</span>
+                        </td>
+                        <td className = "table_version">
+                            <p>{`${userFile.version_description}`}</p>
+                        </td>
+                        <td className = "table_version">
+                            <p>{`${userFile.hash.toString(16)}`}</p>
+                        </td>
+                    </tr>
+                )
+            })
+        }
+        var fileDetails = []
+        if(this.state.fileDetails !== null){
+            this.state.fileDetails.forEach(detail => {
+                console.log(detail)
+                fileDetails.push(
+                    <div className="details_history">
+                        <p>&#9673; {`${detail.version_desc}`}</p>
+                        <br/>
+                        <p>{`${detail.version_timestamp}`}</p>
+                        <br/>
+                        <p>{`${detail.version_hash.toString(16)}`}</p>
+                        <br/>
+                        <p>{`${detail.version_no}`}</p><br/>
+                    </div>)
+                fileDetails.push(<br/>)
+            })
+        }
         return(
             <div className="App">
                 <div className="Home">
@@ -80,6 +233,46 @@ class MainPage extends Component {
                         </div>
                     </div>
                     <hr/>
+                    <br/><br/>
+                    <div className = "home_body_main_div">
+                        <table className="home_body">
+                            {userFiles}
+                        </table>
+                        <div id="file_details">
+                            <p id="details_filename"></p>
+                            <p id="details_hash"></p>
+                            <hr/>
+                            <p className="details_activity">Actions</p><br/>
+                            <button className="file_button" onClick={this.downloadFile}>Download</button>
+                            <button className="file_button" onClick={this.deleteFile}>Delete</button>
+                            <button className="file_button" onClick={() => this.renameFile(0)}>Rename</button>
+                            <button className="file_button" onClick={this.uploadNewVersionFile}>Upload new version</button>
+                            <a id="downloaduri" href="/" download>Click to download</a><br/>
+                            <p><iframe id="preview" src="/" frameborder="0" height="400px"
+                            width="600px"></iframe></p>
+                            <br/>
+                            <div className="request_description">
+                                <p>Description : </p>
+                                <input
+                                    onChange={(event) => {this.description = event.target.value}} 
+                                    type="text" />
+                            </div>
+                            <div className="request_description">
+                                <p id="input_label">New name : </p>
+                                <input
+                                    onChange={(event) => {this.newname = event.target.value}} 
+                                    type="text" />
+                            </div>
+                            <div className="request_description">
+                                <button className="file_button" id="proceed_btn" onClick={() => this.renameFile(1)}>Rename</button>
+                            </div>
+                            <br/>
+                            <p id="file_status"></p>
+                            <hr/>
+                            <p className="details_activity">Activity</p><br/>
+                            {fileDetails} 
+                        </div>
+                    </div>
                 </div>
             </div>
         );

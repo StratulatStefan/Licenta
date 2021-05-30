@@ -118,3 +118,130 @@
     border: 5px solid black;
     border-radius: 20px;
 }
+
+
+.Home .userFile{
+    border: 5px solid black;
+    border-radius: 15px;
+    display: flex;
+    margin-bottom: 1%;
+}
+
+.Home td p{
+    font-size: 120%;
+}
+
+.Home td img{
+    border-radius: 15px;
+    margin-bottom: 1%;
+    position: relative;
+    width: 60px;
+    height: 70px;
+    padding: 15px;
+    margin-left: 20px;
+    margin-right: 20px;
+}
+
+.Home td button{
+    background: transparent;
+    border: none;
+    width: 50px;
+    height: 60px;
+}
+
+.Home td button > img:hover{
+    width: 60px;
+    height: 70px;
+}
+
+
+td{
+    text-align: left;
+    padding: 15px;
+}
+
+tr{
+    border: 5px solid black;
+    border-radius: 5px;
+}
+
+.table_fname{
+    width: 400px;
+}
+
+.table_version{
+    width: 300px;
+}
+
+.home_body_main_div{
+    display: flex;
+}
+
+#file_details{
+    width: 33%;
+    height: 800px;
+    border-left: 5px solid black;
+    visibility: hidden;
+    text-align: left;
+    padding-left: 3%;
+    display:block;
+}
+
+#file_details #details_filename{
+    font-size: 160%;
+}
+
+#file_details #details_hash, .details_activity{
+    font-size: 130%;
+
+}
+
+#file_details #details_hash{
+    float: right;
+}
+
+ul{
+    list-style-type:circle;
+}
+
+.home_body_main_div p{
+    font-size: 120%;
+
+}
+
+.details_history .details_desc{
+    text-align: left;
+    width: 65%;
+}
+
+.details_history .details_date{
+    text-align: right;
+}
+
+#file_details button{
+    text-align: center;
+    font-size: 22px;
+    margin-left: 20px;
+    font-weight: bold;
+    color: #005a8d;
+    border-radius: 10px;
+}
+
+#file_status{
+    width: 100%;
+    text-align: center;
+}
+
+.request_description{
+    text-align: center;
+    margin-top: 2%;
+    visibility: hidden;
+}
+.request_description input{
+    margin-left: 10px;
+    font-size: 100%;
+}
+
+#downloaduri{
+    visibility: hidden;
+}

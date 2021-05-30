@@ -1,8 +1,7 @@
+import client_manager.ManagerComplexeResponse;
 import client_manager.ManagerResponse;
-import client_manager.data.ClientManagerRequest;
-import client_manager.data.DeleteFileRequest;
-import client_manager.data.NewFileRequest;
-import client_manager.data.RenameFileRequest;
+import client_manager.ManagerTextResponse;
+import client_manager.data.*;
 import client_node.NewFileRequestFeedback;
 import communication.Address;
 import communication.Serializer;
@@ -10,8 +9,11 @@ import config.AppConfig;
 import data.Pair;
 import log.ProfiPrinter;
 import logger.LoggerService;
+import model.FileAttributes;
 import node_manager.FeedbackResponse;
 import os.FileSystem;
+import tables.ContentTable;
+import tables.StorageStatusTable;
 
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
@@ -20,6 +22,7 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.SocketTimeoutException;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -36,7 +39,10 @@ public class ClientCommunicationManager {
     public enum ClientRequest{
         NEW_FILE,
         DELETE_FILE,
-        RENAME_FILE
+        RENAME_FILE,
+        GET_USER_FILES,
+        GET_USER_FILE_HISTORY,
+        GET_NODE_FOR_DOWNLOAD
     }
 
     /**
@@ -114,6 +120,15 @@ public class ClientCommunicationManager {
         if(operation == RenameFileRequest.class){
             return ClientRequest.RENAME_FILE;
         }
+        if(operation == GetUserFiles.class){
+            return ClientRequest.GET_USER_FILES;
+        }
+        if(operation == GetUserFileHistory.class){
+            return ClientRequest.GET_USER_FILE_HISTORY;
+        }
+        if(operation == GetNodeForDownload.class){
+            return ClientRequest.GET_NODE_FOR_DOWNLOAD;
+        }
         return null;
     }
 
@@ -177,21 +192,22 @@ public class ClientCommunicationManager {
      * @param filename Numele fisierului.
      * @param userType Tipul utilizatorului, pe baza caruia se va determina si factorul de replicare, din fisierul de config.
      */
-    public void registerFileRequest(String user, String filename, long crc, long filesize, String userType, String status) throws Exception{
+    public void registerFileRequest(String user, String filename, long crc, long filesize, String userType, String status, String versionDescription) throws Exception{
         synchronized (GeneralManager.contentTable){
             try {
                 int replication_factor = getReplicationFactor(userType);
                 String newFileStatus = "[PENDING]";
                 if(!GeneralManager.contentTable.checkForUserFile(user, filename, -1)){
                     // aici putem ajunge doar la adaugarea unui nou fisier
-                    GeneralManager.contentTable.addRegister(user, filename, replication_factor, crc, newFileStatus, "v1");
+                    GeneralManager.contentTable.addRegister(user, filename, replication_factor, crc, newFileStatus, filesize, "v1", versionDescription);
                 }
                 else{
                     // aici putem ajunge si rename si alte operatii asupra fisierului
                     GeneralManager.contentTable.updateFileStatus(user, filename, newFileStatus);
                     GeneralManager.contentTable.updateReplicationFactor(user, filename, replication_factor);
                     GeneralManager.contentTable.updateFileCRC(user, filename, crc);
-                    GeneralManager.contentTable.updateFileVersionNo(user, filename, status.contains("DELETED")? 1 : -1);
+                    GeneralManager.contentTable.updateFileSize(user, filename, filesize);
+                    GeneralManager.contentTable.updateFileVersion(user, filename, status.contains("DELETED")? 1 : -1, versionDescription);
                 }
             }
             catch (Exception exception){
@@ -264,6 +280,7 @@ public class ClientCommunicationManager {
 
                         String userId = clientManagerRequest.getUserId();
                         String filename = clientManagerRequest.getFilename();
+                        String description = clientManagerRequest.getDescription();
                         ClientRequestStatus fileStatus = checkFileStatus(userId, filename, -1);
                         switch (clientRequest){
                             case NEW_FILE:{
@@ -294,11 +311,12 @@ public class ClientCommunicationManager {
                                             if(chain.equals("")){
                                                 chain = generateNewChain(filesize, replication_factor);
                                             }
-                                            response.setResponse(chain);
+                                            response = new ManagerTextResponse();
+                                            ((ManagerTextResponse)response).setResponse(chain);
                                             LoggerService.registerSuccess(GeneralManager.generalManagerIpAddress, "Token-ul a fost trimis catre client : " + chain);
                                             System.out.println("Inregistram noul fisier.");
                                             String status = GeneralManager.contentTable.getFileStatusForUser(userId, filename);
-                                            registerFileRequest(userId, filename, crc, filesize, usertype, status);
+                                            registerFileRequest(userId, filename, crc, filesize, usertype, status, description);
                                             waitForFeedbackFromClient(userId, filename, filesize, usertype);
                                             /*try {
                                                 GeneralManager.userDataTable.addUser(userId, usertype);
@@ -327,13 +345,15 @@ public class ClientCommunicationManager {
                                         String currentVersionNo = GeneralManager.statusTable.getLastVersionOfFile(userId, filename);
                                         long currentCRc = GeneralManager.statusTable.getCRCsForFile(userId, filename);
                                         String newName = ((RenameFileRequest)clientManagerRequest).getNewName();
+                                        long filesize = GeneralManager.contentTable.getFileSizeOfUserFile(userId, filename);
                                         List<String> candidateNodes = GeneralManager.statusTable.getAvailableNodesAddressesForFile(userId, filename);
                                         String feedbackResponseStatus = GeneralManager.fileSystemManager.renameFile(userId, filename, newName, candidateNodes, clientManagerRequest.getDescription());
                                         GeneralManager.contentTable.updateFileName(userId, filename, newName);
-                                        response.setResponse(feedbackResponseStatus);
+                                        response = new ManagerTextResponse();
+                                        ((ManagerTextResponse)response).setResponse(feedbackResponseStatus);
                                         confirmUserRequest(userId, newName);
-                                        GeneralManager.contentTable.addRegister(userId, filename, 0, currentCRc, "[DELETED]", currentVersionNo);
-                                        GeneralManager.contentTable.updateFileVersionNo(userId, newName, -1);
+                                        GeneralManager.contentTable.addRegister(userId, filename, 0, currentCRc, "[DELETED]", filesize, currentVersionNo, description);
+                                        GeneralManager.contentTable.updateFileVersion(userId, newName, -1, description);
                                         break;
                                     }
                                 }
@@ -351,11 +371,27 @@ public class ClientCommunicationManager {
                                         String filepath = GeneralManager.storagePath + candidateAddress + "/" + userId + "/" + filename;
                                        // GeneralManager.userStorageQuantityTable.registerMemoryRelease(clientManagerRequest.getUserId(), FileSystem.getFileSize(filepath));
                                         GeneralManager.contentTable.updateReplicationFactor(userId, filename, 0);
-                                        response.setResponse("OK");
+                                        response = new ManagerTextResponse();
+                                        ((ManagerTextResponse)response).setResponse("OK");
                                         GeneralManager.contentTable.updateFileStatus(userId, filename, "[VALID]");
                                         break;
                                     }
                                 }
+                                break;
+                            }
+                            case GET_USER_FILES:{
+                                response = new ManagerComplexeResponse();
+                                ((ManagerComplexeResponse)response).setResponse(GeneralManager.contentTable.getUserFilesForFrontend(userId));
+                                break;
+                            }
+                            case GET_USER_FILE_HISTORY:{
+                                response = new ManagerComplexeResponse();
+                                ((ManagerComplexeResponse)response).setResponse(GeneralManager.fileSystemManager.getUserFileHistoryForFrontend(userId, filename));
+                                break;
+                            }
+                            case GET_NODE_FOR_DOWNLOAD:{
+                                response = new ManagerTextResponse();
+                                ((ManagerTextResponse)response).setResponse(GeneralManager.statusTable.getCandidateAddress(userId, filename, -1));
                                 break;
                             }
                         }

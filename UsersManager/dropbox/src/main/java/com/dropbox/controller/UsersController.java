@@ -13,7 +13,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
-@CrossOrigin(origins = "http://localhost:3000")
+@CrossOrigin(origins = "http://localhost:5000")
 @RestController
 @RequestMapping(value = "/api/user")
 public class UsersController {

@@ -4,6 +4,7 @@ import communication.Address;
 import communication.Serializer;
 import config.AppConfig;
 import log.ProfiPrinter;
+import model.VersionData;
 import node_manager.*;
 import os.FileSystem;
 
@@ -11,6 +12,8 @@ import java.io.*;
 import java.net.InetSocketAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.Collections;
+import java.util.List;
 
 /**
  * Clasa are ca obiectiv prelucrarile fisierelor;
@@ -138,15 +141,15 @@ public class FileSystemManager implements Runnable{
                                 System.out.println("Am primit comanda de eliminare a fisierului.");
                                 String filepath = mainFilepath + address.getIpAddress() + "/" + userId + "/" + filename;
                                 int operation_status = FileSystem.deleteFile(filepath);
-                                FeedbackResponse feedbackResponse = new FeedbackResponse();
+                                FeedbackResponse feedbackResponse = new FeedbackTextResponse();
                                 switch (operation_status){
                                     case 0 : {
-                                        feedbackResponse.setStatus("Fisierul nu poate fi eliminat");
+                                        ((FeedbackTextResponse)feedbackResponse).setStatus("Fisierul nu poate fi eliminat");
                                         feedbackResponse.setSuccess(false);
                                         break;
                                     }
                                     case 1 : {
-                                        feedbackResponse.setStatus("Fisierul a fost eliminat cu succes!");
+                                        ((FeedbackTextResponse)feedbackResponse).setStatus("Fisierul a fost eliminat cu succes!");
                                         feedbackResponse.setSuccess(true);
 
                                         String metadataPath = FileSystem.changeFileExtension(filepath, ".metadata");
@@ -162,15 +165,15 @@ public class FileSystemManager implements Runnable{
                                 String newFilename = ((RenameRequest) fileSystemRequest).getNewName();
                                 String newPath = mainFilepath + address.getIpAddress() + "/" + userId + "/" + newFilename;
                                 int operation_status = FileSystem.renameFile(originalPath, newPath);
-                                FeedbackResponse feedbackResponse = new FeedbackResponse();
+                                FeedbackResponse feedbackResponse = new FeedbackTextResponse();
                                 switch (operation_status){
                                     case 0 : {
-                                        feedbackResponse.setStatus("Eroare la redenumirea fisierului!");
+                                        ((FeedbackTextResponse)feedbackResponse).setStatus("Eroare la redenumirea fisierului!");
                                         feedbackResponse.setSuccess(false);
                                         break;
                                     }
                                     case 1 : {
-                                        feedbackResponse.setStatus("Fisierul a fost redenumit cu succes!");
+                                        ((FeedbackTextResponse)feedbackResponse).setStatus("Fisierul a fost redenumit cu succes!");
                                         feedbackResponse.setSuccess(true);
 
                                         String metadataPath = FileSystem.changeFileExtension(originalPath, ".metadata");
@@ -181,12 +184,19 @@ public class FileSystemManager implements Runnable{
                                         break;
                                     }
                                     case 2 : {
-                                        feedbackResponse.setStatus("Nu se poate redenumi fisierul! Exista deja un fisier cu noul nume!");
+                                        ((FeedbackTextResponse)feedbackResponse).setStatus("Nu se poate redenumi fisierul! Exista deja un fisier cu noul nume!");
                                         feedbackResponse.setSuccess(false);
                                         break;
                                     }
                                 }
                                 sendFeedbackToGeneraManage(dataOutputStream, feedbackResponse);
+                            }
+                            else if(fileSystemRequest.getClass() == VersionsRequest.class){
+                                System.out.println("Am primit cerere pentru istoricul unui fisier al unui user.");
+                                List<VersionData> versionDataList = GeneralNode.versionControlManager.getVersionsForFile(userId, filename);
+                                FeedbackComplexeResponse feedbackComplexeResponse = new FeedbackComplexeResponse();
+                                feedbackComplexeResponse.setResponse(Collections.singletonList(versionDataList));
+                                sendFeedbackToGeneraManage(dataOutputStream, feedbackComplexeResponse);
                             }
                         }
                         catch (ClassCastException exception){
@@ -222,6 +232,8 @@ public class FileSystemManager implements Runnable{
         };
     }
 
+
+
     public void sendFeedbackToGeneraManage(DataOutputStream dataOutputStream, FeedbackResponse feedbackResponse){
         try{
             dataOutputStream.write(Serializer.serialize(feedbackResponse));
@@ -229,6 +241,22 @@ public class FileSystemManager implements Runnable{
         catch (IOException exception){
             ProfiPrinter.PrintException("Exceptie IO la sendFeedbackToGeneraManage : " + exception.getMessage());
         }
+    }
+
+    public static void downloadFile(Socket socket, String userId, String filename) throws IOException {
+        String filepath = "D:/Facultate/Licenta/Storage/" + GeneralNode.ipAddress + "/" + userId + "/" + filename;
+
+        DataOutputStream outputStream = new DataOutputStream(socket.getOutputStream());
+        BufferedInputStream inputStream = new BufferedInputStream(new FileInputStream(filepath));
+
+        byte[] binaryFile = new byte[bufferSize];
+        int count;
+        while ((count = inputStream.read(binaryFile)) > 0) {
+            outputStream.write(binaryFile, 0, count);
+        }
+
+        inputStream.close();
+        outputStream.close();
     }
 
     /**

@@ -148,7 +148,7 @@ public class FileAttributesForStorage{
      */
     public void addNode(String nodeAddress, long crc, String versionNo) throws Exception{
         if(!this.containsAddress(nodeAddress))
-            this.nodes.add(new Pair<String, FileVersionData>(nodeAddress, new FileVersionData(crc, versionNo)));
+            this.nodes.add(new Pair<String, FileVersionData>(nodeAddress, new FileVersionData(crc, versionNo, "")));
         else
             throw new Exception("Node already exists!");
     }

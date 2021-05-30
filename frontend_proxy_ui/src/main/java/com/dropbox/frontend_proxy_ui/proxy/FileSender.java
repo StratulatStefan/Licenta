@@ -1,9 +1,11 @@
 package com.dropbox.frontend_proxy_ui.proxy;
 
 import client_manager.data.ClientManagerRequest;
+import client_node.DownloadFileRequest;
 import client_node.FileHeader;
 import client_node.NewFileRequestFeedback;
 import com.dropbox.frontend_proxy_ui.FrontendProxyUiApplication;
+import com.dropbox.frontend_proxy_ui.controller.FileController;
 import communication.Serializer;
 import log.ProfiPrinter;
 import org.springframework.web.multipart.MultipartFile;
@@ -92,7 +94,7 @@ public class FileSender {
         }
     }
 
-    public static void waitForFeedback(String userId, String token, String filename, long timeout, long CRC) throws InterruptedException {
+    public static void waitForFeedback(String userId, String token, String filename, long timeout, long CRC) throws Exception {
         int total_nodes = 0;
         int received_nodes = 0;
         final int[] valid_nodes = {0};
@@ -150,6 +152,7 @@ public class FileSender {
             if(valid_nodes[0] >= 1){
                 System.out.println("Sending confirmation feedback to general manager");
                 sendFeedbackToGM(userId, fname, "OK");
+                FileController.uploadPendingQueue.addToQueue(userId, filename);
             }
         }
     }
@@ -176,5 +179,38 @@ public class FileSender {
                 }
             }
         }).start();
+    }
+
+    public static String downloadFile(String destionationAddress, String userId, String filename){
+        try {
+            DownloadFileRequest downloadFileRequest = new DownloadFileRequest();
+            downloadFileRequest.setFilename(filename);
+            downloadFileRequest.setUserId(userId);
+
+            Socket socket = new Socket(destionationAddress, generalManagerPort);
+
+            DataOutputStream outputStream = new DataOutputStream(socket.getOutputStream());
+            outputStream.write(Serializer.serialize(downloadFileRequest));
+            String filepath = "D:\\Facultate\\Licenta\\Licenta\\ui-frontend\\build\\buffer\\" + filename;
+            FileOutputStream fileOutputStream = new FileOutputStream(filepath);
+
+            InputStream dataInputStream = new DataInputStream(socket.getInputStream());
+
+            byte[] binaryFile = new byte[bufferSize];
+            int count;
+            while ((count = dataInputStream.read(binaryFile)) > 0) {
+                fileOutputStream.write(binaryFile, 0, count);
+            }
+
+            fileOutputStream.close();
+            dataInputStream.close();
+            outputStream.close();
+            socket.close();
+            return "/buffer/" + filename;
+        }
+        catch (Exception exception){
+            ProfiPrinter.PrintException("Exceptie la trimiterea unui nou fisier: " + exception.getMessage());
+            return null;
+        }
     }
 }

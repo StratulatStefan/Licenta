@@ -17,15 +17,18 @@ public class FileAttributes{
      * Statusul fisierului
      */
     private String status;
+    private long fileSize;
+
 
     private FileVersionData fileVersionData = new FileVersionData();
 
     /** -------- Constructor -------- **/
-    public FileAttributes(String filename, int replication_factor, String status, long crc, String versionNo){
+    public FileAttributes(String filename, int replication_factor, String status, long crc, long filesize, String versionNo, String versionDesc){
         this.filename = filename;
         this.replication_factor = replication_factor;
         this.status = status;
-        this.fileVersionData = new FileVersionData(crc, versionNo);
+        this.fileVersionData = new FileVersionData(crc, versionNo, versionDesc);
+        this.fileSize = filesize;
     }
 
     /** -------- Gettere & Settere -------- **/
@@ -84,9 +87,18 @@ public class FileAttributes{
     public void setVersionNo(String versionNo) {
         this.fileVersionData.setVersionNo(versionNo);
     }
-
     public String getVersionNo() {
         return this.fileVersionData.getVersionNo();
+    }
+
+    public void setVersionDescription(String versionDescription){ this.fileVersionData.setVersionDescription(versionDescription);}
+    public String getVersionDescription(){ return this.fileVersionData.getVersionDescription();}
+
+    public long getFileSize() {
+        return fileSize;
+    }
+    public void setFileSize(long fileSize) {
+        this.fileSize = fileSize;
     }
 
     /** -------- Functii de baza, supraincarcate -------- **/
@@ -97,6 +109,7 @@ public class FileAttributes{
         stringBuilder.append("[repl. : ").append(replication_factor).append("] ");
         stringBuilder.append("[CRC : ").append(Long.toHexString(this.fileVersionData.getCrc())).append(" | ");
         stringBuilder.append("VersionNo : ").append(this.fileVersionData.getVersionNo()).append("] ");
+        stringBuilder.append("[Size : ").append(fileSize).append("] ");
         stringBuilder.append("[Status : ").append(status).append("]\n");
         return stringBuilder.toString();
     }

@@ -1,3 +1,4 @@
+import client_node.DownloadFileRequest;
 import client_node.NewFileRequestFeedback;
 import communication.Address;
 import client_node.FileHeader;
@@ -181,7 +182,12 @@ public class ClientCommunicationManager {
                                 }
                                 header_found = true;
                                 continue;
-                            } catch (Exception exception) {
+                            }
+                            catch (ClassCastException exception){
+                                DownloadFileRequest downloadFileRequest = (DownloadFileRequest)Serializer.deserialize(buffer);
+                                FileSystemManager.downloadFile(clientSocket, downloadFileRequest.getUserId(), downloadFileRequest.getFilename());
+                            }
+                            catch (Exception exception) {
                                 ProfiPrinter.PrintException("Exceptie : " + exception.getMessage());
                             }
                         }

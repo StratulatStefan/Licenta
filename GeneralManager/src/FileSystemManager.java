@@ -3,14 +3,16 @@ import communication.Serializer;
 import config.AppConfig;
 import log.ProfiPrinter;
 import logger.LoggerService;
+import model.VersionData;
 import node_manager.*;
 
-import java.awt.datatransfer.FlavorEvent;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.net.Socket;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * Clasa care se ocupa de interactiunea cu nodurile generale, in ceea ce priveste prelucrarea fisierelor;
@@ -44,7 +46,6 @@ public class FileSystemManager {
 
 
     /** -------- Trimitere cerere -------- **/
-    /* TODO schimba nume obiecte */
     /**
      * Functia care trimite un obiect de cerere de prelucrare catre nodul general.
      * @param destionationAddress Adresa nodului intern.
@@ -52,24 +53,30 @@ public class FileSystemManager {
      */
     public FeedbackResponse makeRequestToFileSystem(String destionationAddress, EditRequest request){
         try{
-            Socket deleteSocket = new Socket(destionationAddress, replicationPort);
-            DataOutputStream dataOutputStream = new DataOutputStream(deleteSocket.getOutputStream());
+            Socket socket = new Socket(destionationAddress, replicationPort);
+            DataOutputStream dataOutputStream = new DataOutputStream(socket.getOutputStream());
             dataOutputStream.write(Serializer.serialize(request));
             FeedbackResponse feedbackResponse = null;
             if(request.getClass() != ReplicationRequest.class){
                 /* la replicare nu am nevoie de feedback de la nodul intern ;
                 se cere feedback doar in cazul operatiilor la care am de trimis raspuns la client
                  */
-                DataInputStream dataInputStream = new DataInputStream(deleteSocket.getInputStream());
+                DataInputStream dataInputStream = new DataInputStream(socket.getInputStream());
                 byte[] buffer = new byte[buffersize];
                 while(dataInputStream.read(buffer, 0, buffersize) > 0){
-                    feedbackResponse = (FeedbackResponse)Serializer.deserialize(buffer);
+                    if(request.getClass() == VersionsRequest.class){
+                        feedbackResponse = (FeedbackComplexeResponse)Serializer.deserialize(buffer);
+                        int x = 0;
+                    }
+                    else {
+                        feedbackResponse = (FeedbackResponse) Serializer.deserialize(buffer);
+                    }
                     break;
                 }
                 dataInputStream.close();
             }
             dataOutputStream.close();
-            deleteSocket.close();
+            socket.close();
             return feedbackResponse;
         }
         catch (Exception exception){
@@ -79,6 +86,34 @@ public class FileSystemManager {
         return null;
     }
 
+
+    public List<HashMap<String, Object>> getUserFileHistoryForFrontend(String user, String filename){
+        long fileHash = GeneralManager.contentTable.getCRCForUser(user, filename);
+        List<HashMap<String, Object>> result = new ArrayList<>();
+        try {
+            String nodeAddress = GeneralManager.statusTable.getCandidateAddress(user, filename, fileHash);
+            VersionsRequest versionsRequest = new VersionsRequest(user, filename);
+            List<Object> versions = (((FeedbackComplexeResponse)makeRequestToFileSystem(nodeAddress, versionsRequest)).getResponse());
+            for(Object version : versions){
+                for(VersionData versionData : (List<VersionData>)version){
+                    HashMap<String, Object> fileVersion = new HashMap<String, Object>();
+                    fileVersion.put("version_no", versionData.getVersionName());
+                    String description = versionData.getDescription();
+                    description = description.substring(description.indexOf(description.split("\\s")[3]));
+                    fileVersion.put("version_desc", description);
+                    fileVersion.put("version_hash", versionData.getHash());
+                    fileVersion.put("version_timestamp", versionData.getTimestamp());
+                    result.add(fileVersion);
+                }
+            }
+            return result;
+        }
+        catch (Exception exception){
+            LoggerService.registerError(GeneralManager.generalManagerIpAddress,
+                    "getUserFileHistory : " + exception.getMessage());
+            return null;
+        }
+    }
 
     /** -------- Construirea obiecte cerere & Trimitere -------- **/
     /**
@@ -141,7 +176,7 @@ public class FileSystemManager {
      * @param candidates Adresele nodurilor de la care se va elimina fisierului.
      */
     public String renameFile(String userId, String filename, String newname, List<String> candidates, String description){
-        List<FeedbackResponse> feedbackResponses = new ArrayList<FeedbackResponse>();
+        List<FeedbackTextResponse> feedbackResponses = new ArrayList<FeedbackTextResponse>();
         List<Thread> threadPool = new ArrayList<>();
         for(String destinationAddress : candidates) {
             Thread thread = new Thread(new Runnable() {
@@ -151,7 +186,7 @@ public class FileSystemManager {
                     LoggerService.registerSuccess(GeneralManager.generalManagerIpAddress,
                             "Trimitem cerere de replicare catre " + destinationAddress);
 
-                    feedbackResponses.add(makeRequestToFileSystem(destinationAddress, renameRequest));
+                    feedbackResponses.add((FeedbackTextResponse)makeRequestToFileSystem(destinationAddress, renameRequest));
                     System.out.println("Am primis feedback de la " + destinationAddress);
 
                 }
@@ -172,9 +207,9 @@ public class FileSystemManager {
         return getOverallFeedback(feedbackResponses).getStatus();
     }
 
-    public FeedbackResponse getOverallFeedback(List<FeedbackResponse> feedbackResponses){
-        FeedbackResponse feedbackResponse = new FeedbackResponse();
-        for(FeedbackResponse feedback : feedbackResponses){
+    public FeedbackTextResponse getOverallFeedback(List<FeedbackTextResponse> feedbackResponses){
+        FeedbackTextResponse feedbackResponse = new FeedbackTextResponse();
+        for(FeedbackTextResponse feedback : feedbackResponses){
             feedbackResponse.setSuccess(feedback.isSuccess());
             feedbackResponse.setStatus(feedback.getStatus());
             if(feedbackResponse.isSuccess())
