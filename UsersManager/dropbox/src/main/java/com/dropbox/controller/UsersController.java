@@ -13,7 +13,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
-@CrossOrigin(origins = "http://localhost:5000")
+@CrossOrigin(origins = "http://localhost:3000")
 @RestController
 @RequestMapping(value = "/api/user")
 public class UsersController {
@@ -146,7 +146,7 @@ public class UsersController {
     /**
      * ============== UPDATE ==============
      */
-    @RequestMapping(value = "s", method = RequestMethod.PUT)
+    @RequestMapping(value = "", method = RequestMethod.PUT)
     ResponseEntity<Map<String, String>> updateUser(@RequestBody HashMap<String, Object> updateValue,
                                                    @RequestHeader("Authorization") String authorizationValue){
         int id = -1;

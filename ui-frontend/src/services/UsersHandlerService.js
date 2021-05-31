@@ -223,6 +223,7 @@ export class UsersHandlerService{
                 },
                 body : JSON.stringify({"type" : newplan})
             }).then(response => {
+                console.log(response)
                 if(response.ok){
                     response.json().then(response => {
                         resolve({

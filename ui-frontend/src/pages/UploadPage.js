@@ -4,6 +4,7 @@ import '../styles/pages-style.css';
 import '../styles/pages-home-style.css';
 import { FileHandlerService } from '../services/FileHandlerService';
 import {UsersHandlerService} from '../services/UsersHandlerService';
+import { GeneralPurposeService } from '../services/GeneralPurposeService';
 
 class UploadPage extends Component {
     constructor(props){
@@ -54,13 +55,7 @@ class UploadPage extends Component {
         dropArea.addEventListener('drop', this.handleDropFiles, false)
     }
 
-    getCurrentTimestamp = (currentdate) => {
-        return currentdate.getDate() + "/"
-            + (currentdate.getMonth()+1)  + "/" 
-            + currentdate.getFullYear() + " "  
-            + currentdate.getHours() + ":"  
-            + currentdate.getMinutes()
-    }
+    
 
     handleDropFiles = (e) => {
         document.getElementById("upload_data").style.display = "block"
@@ -72,8 +67,8 @@ class UploadPage extends Component {
       
         document.getElementById("upload_date_filename").innerHTML = file.name
         document.getElementById("upload_date_filesize").innerHTML = `Size : ${Math.round(file.size / 1024 * 100) / 100} KB`
-        document.getElementById("upload_date_timedate_last_modified").innerHTML = `Last modified : ${this.getCurrentTimestamp(file.lastModifiedDate)}`
-        document.getElementById("upload_date_timedate").innerHTML = `Upload data : ${this.getCurrentTimestamp(new Date())}`
+        document.getElementById("upload_date_timedate_last_modified").innerHTML = `Last modified : ${GeneralPurposeService.getCurrentTimestamp(file.lastModifiedDate)}`
+        document.getElementById("upload_date_timedate").innerHTML = `Upload data : ${GeneralPurposeService.getCurrentTimestamp(new Date())}`
         document.getElementById("upload_date_type").innerHTML = `Type : ${file.type}`
         document.getElementById("upload_data_preview").src = URL.createObjectURL(file)
 

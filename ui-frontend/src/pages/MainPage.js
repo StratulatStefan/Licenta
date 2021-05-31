@@ -5,6 +5,7 @@ import '../styles/pages-style.css';
 import '../styles/pages-home-style.css';
 import { FileHandlerService } from '../services/FileHandlerService';
 import { Environment } from '../environment';
+import { GeneralPurposeService } from '../services/GeneralPurposeService';
 
 class MainPage extends Component {
     constructor(props){
@@ -37,24 +38,23 @@ class MainPage extends Component {
         }
         catch(e){
             // am ajuns pe aceasta pagina din alta parte, prin click pe meniu, prin scriere directa in link
-            if(this.userData !== null && this.userData !== ''){
-                this.userData = JSON.parse(this.userData)
-                UsersHandlerService.getUserRole(this.userData["jwt"]).then(response => {
-                    if(response.code === 1){
-                        console.log(`props fetch: ${response["content"]}`)
-                        this.setState({userType : response["content"]})
-                    }
-                    else if(response.code === 401){
-                        localStorage.setItem("user_data", '')
-                    }
-                })
-            }
+            UsersHandlerService.getUserRole(this.userData["jwt"]).then(response => {
+                if(response.code === 1){
+                    console.log(`props fetch: ${response["content"]}`)
+                    this.setState({userType : response["content"]})
+                }
+                else if(response.code === 401){
+                    localStorage.setItem("user_data", '')
+                }
+            })
         }
     }
 
     fetchUserFiles = () =>{
         FileHandlerService.getUserFiles(this.userData["jwt"]).then(response => {
-            console.log(response.content)
+            console.log("========== user files ==========")
+            response.content.forEach(console.log)
+            console.log("================================")
             this.setState({
                 userFiles : response.content
             })
@@ -65,6 +65,9 @@ class MainPage extends Component {
         this.userData = localStorage.getItem('user_data')
         if(this.userData === null || this.userData === ''){
             this.redirect("")
+        }
+        else{
+            this.userData = JSON.parse(this.userData)
         }
     }
 
@@ -79,21 +82,6 @@ class MainPage extends Component {
         else{
             this.props.history.push("/")
         }
-    }
-
-    getFileSizeUnit = (filesize) => {
-        let units = ['', 'K', 'M', 'G']
-        let index = 0;
-        while(true){
-            if(filesize / 1024 > 1){
-                filesize = filesize / 1024;
-                index = index + 1;
-            }
-            else{
-                break
-            }
-        }
-        return Math.round(filesize * 100) / 100 + " " + units[index] + "B"
     }
 
     fileDetails = (file) => {
@@ -185,14 +173,14 @@ class MainPage extends Component {
                     logosrc = `/images/file_logo/extra.png` 
                 }
                 userFiles.push(
-                    <tr id={`div_${userFile.filename}`}>
+                    <tr key={`div_${userFile.filename}`}>
                         <td>
-                            <img src={logosrc}></img>
+                            <img alt="logo" src={logosrc}></img>
                         </td>
                         <td className = "table_fname">
                             <p><a href="#" onClick={() => this.fileDetails(userFile)}>{`${userFile.filename + ""}`}</a></p><br/>
                             <span>{`Version : ${userFile.version}`}</span><br/>
-                            <span>{`Size : ${this.getFileSizeUnit(userFile.filesize)}`}</span>
+                            <span>{`Size : ${GeneralPurposeService.getFileSizeUnit(userFile.filesize)}`}</span>
                         </td>
                         <td className = "table_version">
                             <p>{`${userFile.version_description}`}</p>
@@ -236,7 +224,9 @@ class MainPage extends Component {
                     <br/><br/>
                     <div className = "home_body_main_div">
                         <table className="home_body">
-                            {userFiles}
+                            <tbody>
+                                {userFiles}
+                            </tbody>
                         </table>
                         <div id="file_details">
                             <p id="details_filename"></p>
@@ -248,8 +238,7 @@ class MainPage extends Component {
                             <button className="file_button" onClick={() => this.renameFile(0)}>Rename</button>
                             <button className="file_button" onClick={this.uploadNewVersionFile}>Upload new version</button>
                             <a id="downloaduri" href="/" download>Click to download</a><br/>
-                            <p><iframe id="preview" src="/" frameborder="0" height="400px"
-                            width="600px"></iframe></p>
+                            <p><iframe id="preview" src="#"></iframe></p>
                             <br/>
                             <div className="request_description">
                                 <p>Description : </p>

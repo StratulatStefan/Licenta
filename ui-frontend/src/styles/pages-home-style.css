@@ -245,3 +245,9 @@ ul{
 #downloaduri{
     visibility: hidden;
 }
+
+iframe{
+    height: 400px;
+    width: 600px;
+    visibility: hidden;
+}

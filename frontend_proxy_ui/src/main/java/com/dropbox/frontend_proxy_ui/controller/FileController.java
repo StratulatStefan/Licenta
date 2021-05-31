@@ -18,7 +18,7 @@ import java.util.List;
 import java.util.Map;
 
 // https://stackabuse.com/uploading-files-with-spring-boot/
-@CrossOrigin(origins = "http://localhost:5000")
+@CrossOrigin(origins = "http://localhost:3000")
 @Controller
 public class FileController {
     AuthorizationService authorizationService = new AuthorizationService();
