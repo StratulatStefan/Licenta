@@ -7,6 +7,9 @@ import { FileHandlerService } from '../services/FileHandlerService';
 import { Environment } from '../environment';
 import { GeneralPurposeService } from '../services/GeneralPurposeService';
 import { AdminHandlerService } from '../services/AdminHandlerService';
+//import SockJsClient from 'react-stomp';
+import { Client } from '@stomp/stompjs';
+
 
 class MainPage extends Component {
     constructor(props){
@@ -25,9 +28,11 @@ class MainPage extends Component {
             currentFileName : null,
             availableNodes : null,
             fileDetails : null,
-            log : []
+            log : [],
+            latestMessage : null
         }
         this.logCriteria = {message_type : "ALL", node_address : "ALL", date1 : GeneralPurposeService.getCurrentTimestampForLogging("1 year")}
+        this.websocketClientRef = null;
     }
 
     componentDidMount = () => {
@@ -38,14 +43,40 @@ class MainPage extends Component {
             }
             else{
                 this.fetchAvailableNodes()
+                this.initWebSocketsCommunication()
+
+                const client = new Client({
+                    brokerURL: "ws://127.0.0.100:8090/content",
+                    reconnectDelay: 5000,
+                    heartbeatIncoming: 4000,
+                    heartbeatOutgoing: 4000,
+                    onConnect: () => {
+                        console.log("Connected!!")
+                        client.subscribe('/topic/test', function (msg) {
+                            if (msg.body) {
+                              var jsonBody = JSON.parse(msg.body);
+                              console.log(jsonBody)
+                            }
+                          });
+                      },
+                    onDisconnect: () => {
+                        console.log("Disconnected!!")
+                      }
+                  });
+              
+                  client.activate();
             }
         })
+    }
+
+    initWebSocketsCommunication = () => {
+        console.log("init web sockets communication")
+
     }
 
     fetchAvailableNodes = () => {
         AdminHandlerService.fetchAvailableNodesFromAPI().then(response => {
             this.setState({availableNodes : response.content})
-            console.log(response.content)
         })
     }
 
@@ -241,6 +272,12 @@ class MainPage extends Component {
         })
     }
 
+    sendMessage = () => {
+        this.websocketClientRef.sendMessage('/app/test', JSON.stringify({
+            name: "salut",
+        }));
+    };
+
     render(){
         var userFiles = []
         var fileDetails = []
@@ -386,6 +423,23 @@ class MainPage extends Component {
                             </div>
                         </div> : 
                         <div>
+                            {/*<SockJsClient url='http://127.0.0.100:8090/content/'
+                                topics={['/topic/test']}
+                                onConnect={() => {
+                                    console.log("connected");
+                                    this.sendMessage()
+                                }}
+                                onDisconnect={() => {
+                                    console.log("Disconnected");
+                                }}
+                                onMessage={(msg) => {
+                                    console.log(msg);
+                                }}
+                                ref={(client) => {
+                                    this.websocketClientRef = client
+                                }}
+                                debug={false}
+                            />*/}
                             <div className="home_header">
                                 <p id="admin_title">Admin console</p>
                                 <button className="admin_action_buttons" onClick = {() => this.adminAction("log")}>Display Log</button>
@@ -426,7 +480,7 @@ class MainPage extends Component {
                                     <button onClick={() => this.fetchLogByCriteriaUpdate(null, null)}>&#x27F3;</button><br/><br/>
                                     <button onClick={() => this.cleanLog()}>Clean log with given criteria</button>
                                     <br/>
-                                    {this.state.log.length == 0 ? 
+                                    {this.state.log.length === 0 ? 
                                         <p>No log register found!</p> : 
                                         <table>
                                             <tbody>
@@ -457,3 +511,5 @@ export default MainPage;
 //https://developer.okta.com/blog/2018/09/25/spring-webflux-websockets-react
 //https://dev.to/fpeluso/a-simple-websocket-between-java-and-react-5c98
 //https://blog.cloudboost.io/simple-chat-react-java-6923b54d65a0
+
+// https://programming.vip/docs/four-ways-of-integrating-websocket-with-spring-boot.html
