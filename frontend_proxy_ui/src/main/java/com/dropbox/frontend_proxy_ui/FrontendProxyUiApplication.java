@@ -6,6 +6,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
 import org.springframework.messaging.simp.config.MessageBrokerRegistry;
+import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.web.servlet.config.annotation.CorsRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 import org.springframework.web.socket.config.annotation.EnableWebSocketMessageBroker;
@@ -16,6 +17,7 @@ import org.springframework.web.socket.config.annotation.WebSocketMessageBrokerCo
 import java.io.IOException;
 
 @Import(WebSocketConfig.class)
+@EnableScheduling
 @SpringBootApplication
 public class FrontendProxyUiApplication{
 	public static FeedbackManager feedbackManager = new FeedbackManager();

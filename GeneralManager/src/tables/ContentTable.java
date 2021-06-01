@@ -1,5 +1,6 @@
 package tables;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -11,7 +12,7 @@ import model.FileAttributes;
  * Clasa care incapsuleaza tabela ce va contine toate fisierele care ar trebui sa se afle la nodul general,
  * impreuna cu utilizatorul caruia ii apartin si factorul de replicare.
  */
-public class ContentTable {
+public class ContentTable implements Serializable {
     /** -------- Atribute -------- **/
     /**
      * Flag care sugereaza daca tabela necesita initializare;
@@ -398,6 +399,9 @@ public class ContentTable {
         return userFiles;
     }
 
+    public HashMap<String, List<FileAttributes>> getContentTable() {
+        return contentTable;
+    }
 
     /** -------- Functii de baza, supraincarcate -------- **/
     @Override

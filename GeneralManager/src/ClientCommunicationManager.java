@@ -42,9 +42,9 @@ public class ClientCommunicationManager {
         RENAME_FILE,
         GET_USER_FILES,
         GET_USER_FILE_HISTORY,
-        GET_NODE_FOR_DOWNLOAD
+        GET_NODE_FOR_DOWNLOAD,
+        GET_CONTENT_TABLE
     }
-
     /**
      * Enum care va cuprinde statusul unui anumit fisier, raportat la tabela stocarii.
      */
@@ -71,6 +71,36 @@ public class ClientCommunicationManager {
     public void readConfigParams(){
         bufferSize = Integer.parseInt(AppConfig.getParam("buffersize"));
         dataTransmissionPort = Integer.parseInt(AppConfig.getParam("dataTransmissionPort"));
+    }
+
+    /**
+     * Functie care identifica tipul operatiei solicitate de utilizator
+     * @param operation String-ul ce identifica operatia
+     * @return Tipul operatiei sau null daca nu s-a identificat nicio operatie valida
+     */
+    public ClientRequest getOperationType(Class<? extends ClientManagerRequest> operation){
+        if(operation == NewFileRequest.class){
+            return ClientRequest.NEW_FILE;
+        }
+        if(operation == DeleteFileRequest.class){
+            return ClientRequest.DELETE_FILE;
+        }
+        if(operation == RenameFileRequest.class){
+            return ClientRequest.RENAME_FILE;
+        }
+        if(operation == GetUserFiles.class){
+            return ClientRequest.GET_USER_FILES;
+        }
+        if(operation == GetUserFileHistory.class){
+            return ClientRequest.GET_USER_FILE_HISTORY;
+        }
+        if(operation == GetNodeForDownload.class){
+            return ClientRequest.GET_NODE_FOR_DOWNLOAD;
+        }
+        if(operation == GetContentTableRequest.class){
+            return ClientRequest.GET_CONTENT_TABLE;
+        }
+        return null;
     }
 
     /**
@@ -104,34 +134,6 @@ public class ClientCommunicationManager {
             return ClientRequestStatus.FILE_NOT_FOUND;
         }
     }
-
-    /**
-     * Functie care identifica tipul operatiei solicitate de utilizator
-     * @param operation String-ul ce identifica operatia
-     * @return Tipul operatiei sau null daca nu s-a identificat nicio operatie valida
-     */
-    public ClientRequest getOperationType(Class<? extends ClientManagerRequest> operation){
-        if(operation == NewFileRequest.class){
-            return ClientRequest.NEW_FILE;
-        }
-        if(operation == DeleteFileRequest.class){
-            return ClientRequest.DELETE_FILE;
-        }
-        if(operation == RenameFileRequest.class){
-            return ClientRequest.RENAME_FILE;
-        }
-        if(operation == GetUserFiles.class){
-            return ClientRequest.GET_USER_FILES;
-        }
-        if(operation == GetUserFileHistory.class){
-            return ClientRequest.GET_USER_FILE_HISTORY;
-        }
-        if(operation == GetNodeForDownload.class){
-            return ClientRequest.GET_NODE_FOR_DOWNLOAD;
-        }
-        return null;
-    }
-
 
     /** -------- Functii de generare & inregistrare -------- **/
     /**
@@ -283,6 +285,7 @@ public class ClientCommunicationManager {
         return new Runnable() {
             @Override
             public void run(){
+                boolean skip = false;
                 try {
                     ManagerResponse response = new ManagerResponse();
                     DataInputStream dataInputStream = new DataInputStream(clientSocket.getInputStream());
@@ -291,13 +294,12 @@ public class ClientCommunicationManager {
                     byte[] buffer = new byte[bufferSize];
                     while(dataInputStream.read(buffer, 0, bufferSize) > 0){
                         ClientManagerRequest clientManagerRequest = (ClientManagerRequest) Serializer.deserialize(buffer);
-                        ClientRequest clientRequest = getOperationType(clientManagerRequest.getClass());
 
                         String userId = clientManagerRequest.getUserId();
                         String filename = clientManagerRequest.getFilename();
                         String description = clientManagerRequest.getDescription();
                         ClientRequestStatus fileStatus = checkFileStatus(userId, filename, -1);
-                        switch (clientRequest){
+                        switch (getOperationType(clientManagerRequest.getClass())){
                             case NEW_FILE:{
                                 boolean crcMatch = false;
                                 long crc = ((NewFileRequest)clientManagerRequest).getCrc();
@@ -402,8 +404,16 @@ public class ClientCommunicationManager {
                                 ((ManagerTextResponse)response).setResponse(GeneralManager.statusTable.getCandidateAddress(userId, filename, -1));
                                 break;
                             }
+                            case GET_CONTENT_TABLE:{
+                                skip = true;
+                                ContentTable contentTable = GeneralManager.contentTable;
+                                dataOutputStream.write(Serializer.serialize(GeneralManager.contentTable.getContentTable()));
+                                break;
+                            }
                         }
-                        dataOutputStream.write(Serializer.serialize(response));
+                        if(!skip) {
+                            dataOutputStream.write(Serializer.serialize(response));
+                        }
                     }
                     System.out.println("Cerinta clientului a fost realizata..");
                     dataInputStream.close();

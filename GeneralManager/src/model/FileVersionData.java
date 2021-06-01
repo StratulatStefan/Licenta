@@ -1,6 +1,8 @@
 package model;
 
-public class FileVersionData{
+import java.io.Serializable;
+
+public class FileVersionData implements Serializable {
     private long crc;
     private String versionNo;
     private String versionDescription;

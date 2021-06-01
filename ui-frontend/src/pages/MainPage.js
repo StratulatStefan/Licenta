@@ -29,10 +29,10 @@ class MainPage extends Component {
             availableNodes : null,
             fileDetails : null,
             log : [],
-            latestMessage : null
+            websocket : {"connected" : false, "subscription" : null}
         }
         this.logCriteria = {message_type : "ALL", node_address : "ALL", date1 : GeneralPurposeService.getCurrentTimestampForLogging("1 year")}
-        this.websocketClientRef = null;
+        this.webSocketConnection = null;
     }
 
     componentDidMount = () => {
@@ -43,35 +43,22 @@ class MainPage extends Component {
             }
             else{
                 this.fetchAvailableNodes()
-                this.initWebSocketsCommunication()
-
-                const client = new Client({
-                    brokerURL: "ws://127.0.0.100:8090/content",
-                    reconnectDelay: 5000,
-                    heartbeatIncoming: 4000,
-                    heartbeatOutgoing: 4000,
+                this.webSocketConnection = new Client({
+                    brokerURL: "ws://127.0.0.100:8090/wbsocket",
+                    reconnectDelay: 100,
+                    heartbeatIncoming: 3000,
+                    heartbeatOutgoing: 3000,
                     onConnect: () => {
-                        console.log("Connected!!")
-                        client.subscribe('/topic/test', function (msg) {
-                            if (msg.body) {
-                              var jsonBody = JSON.parse(msg.body);
-                              console.log(jsonBody)
-                            }
-                          });
-                      },
+                        console.log("Websocket connected!")
+                        this.setState({websocket : {"connected" : true}})
+                    },
                     onDisconnect: () => {
-                        console.log("Disconnected!!")
-                      }
-                  });
-              
-                  client.activate();
+                        console.log("Websocket disconnected.")
+                    }
+                });
+                this.webSocketConnection.activate();
             }
         })
-    }
-
-    initWebSocketsCommunication = () => {
-        console.log("init web sockets communication")
-
     }
 
     fetchAvailableNodes = () => {
@@ -218,27 +205,38 @@ class MainPage extends Component {
 
     adminAction = (actionName) => {
         this.adminContentRefresh()
+        let current_topic = null
         switch(actionName){
             case "log":{
                 document.getElementById("admin_log_view").style.display = "block"
                 this.fetchLogByCriteriaUpdate(null, null)
-                
                 break;
             }
             case "content":{
                 document.getElementById("admin_content_view").style.display = "block"
+                current_topic = "/topic/content"
                 break;
             }
             case "nodes":{
                 document.getElementById("admin_nodes_view").style.display = "block"
+                current_topic = "/topic/nodes"
                 break;
             }
             case "replication":{
                 document.getElementById("admin_replication_content").style.display = "block"
+                current_topic = "/topic/replication"
                 break;
             }
             default : break;
         }
+        if(this.state.websocket.connected === true){
+            this.setState({websocket : {"connected" : true, "subscription" : this.webSocketConnection.subscribe(current_topic, function (msg) {
+                if (msg.body) {
+                    console.log(msg.body)
+                }
+            })}})
+        }
+
     }
 
     fetchLogByCriteriaUpdate = (criteria, updatevalue) => {
@@ -258,10 +256,13 @@ class MainPage extends Component {
     }
 
     adminContentRefresh = () => {
-            document.getElementById("admin_log_view").style.display            = "none"
-            document.getElementById("admin_content_view").style.display        = "none"
-            document.getElementById("admin_nodes_view").style.display          = "none"
-            document.getElementById("admin_replication_content").style.display = "none"
+        document.getElementById("admin_log_view").style.display            = "none"
+        document.getElementById("admin_content_view").style.display        = "none"
+        document.getElementById("admin_nodes_view").style.display          = "none"
+        document.getElementById("admin_replication_content").style.display = "none"
+        if(this.state.websocket.connected === true && this.state.websocket.subscription !== undefined){
+            this.state.websocket.subscription.unsubscribe()
+        }
     }
     
     cleanLog = () =>{
@@ -271,12 +272,6 @@ class MainPage extends Component {
             }
         })
     }
-
-    sendMessage = () => {
-        this.websocketClientRef.sendMessage('/app/test', JSON.stringify({
-            name: "salut",
-        }));
-    };
 
     render(){
         var userFiles = []
@@ -423,23 +418,6 @@ class MainPage extends Component {
                             </div>
                         </div> : 
                         <div>
-                            {/*<SockJsClient url='http://127.0.0.100:8090/content/'
-                                topics={['/topic/test']}
-                                onConnect={() => {
-                                    console.log("connected");
-                                    this.sendMessage()
-                                }}
-                                onDisconnect={() => {
-                                    console.log("Disconnected");
-                                }}
-                                onMessage={(msg) => {
-                                    console.log(msg);
-                                }}
-                                ref={(client) => {
-                                    this.websocketClientRef = client
-                                }}
-                                debug={false}
-                            />*/}
                             <div className="home_header">
                                 <p id="admin_title">Admin console</p>
                                 <button className="admin_action_buttons" onClick = {() => this.adminAction("log")}>Display Log</button>

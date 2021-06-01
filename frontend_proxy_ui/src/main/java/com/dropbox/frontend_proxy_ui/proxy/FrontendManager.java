@@ -11,7 +11,9 @@ import os.FileSystem;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
+import java.io.Serializable;
 import java.net.Socket;
+import java.util.HashMap;
 
 public class FrontendManager {
     private static final int bufferSize = 1024;
@@ -29,6 +31,9 @@ public class FrontendManager {
         }
         else if(operation == GetNodeForDownload.class){
             op = "[GET NODE CANDIDATE FOR DOWNLOAD]";
+        }
+        else if(operation == GetContentTableRequest.class){
+            op = "[GET CONTENT TABLE]";
         }
         else {
             String[] fname = clientRequest.getFilename().split("\\\\");
@@ -57,15 +62,15 @@ public class FrontendManager {
             byte[] buffer = new byte[bufferSize];
             ManagerResponse userResponse = null;
             while(socketInputStream.read(buffer, 0, bufferSize) > 0){
-                if(operation == GetUserFiles.class){
+                if(operation == GetUserFiles.class || operation == GetUserFileHistory.class){
                     userResponse = (ManagerComplexeResponse) Serializer.deserialize(buffer);
                 }
-                else if(operation == GetUserFileHistory.class){
-                    userResponse = (ManagerComplexeResponse) Serializer.deserialize(buffer);
+                else if(operation == GetContentTableRequest.class){
+                    ContentTable result = (ContentTable)Serializer.deserialize(buffer);
+                    int x = 0;
                 }
                 else {
                     userResponse = (ManagerTextResponse) Serializer.deserialize(buffer);
-                    int x = 0;
                 }
                 break;
             }

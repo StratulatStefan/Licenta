@@ -1,9 +1,11 @@
 package model;
 
+import java.io.Serializable;
+
 /**
  * Clasa care contine atributele unui fisier
  */
-public class FileAttributes{
+public class FileAttributes implements Serializable {
     /** -------- Atribute -------- **/
     /**
      * Numele fisierului
@@ -20,7 +22,7 @@ public class FileAttributes{
     private long fileSize;
 
 
-    private FileVersionData fileVersionData = new FileVersionData();
+    private FileVersionData fileVersionData;
 
     /** -------- Constructor -------- **/
     public FileAttributes(String filename, int replication_factor, String status, long crc, long filesize, String versionNo, String versionDesc){

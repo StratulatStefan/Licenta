@@ -2,6 +2,7 @@ package client_manager;
 
 import client_manager.ManagerResponse;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
@@ -31,6 +32,12 @@ public class ManagerComplexeResponse extends ManagerResponse {
     public void setResponse(List<HashMap<String, Object>> response) {
         this.response = response;
     }
+
+    public void addResponse(HashMap<String, Object> response){
+        this.response = new ArrayList<>();
+        this.response.add(response);
+    }
+
     /**
      * Getter pentru raspunsul nodului general
      * Se incearca obtinerea raspunsului afirmativ; In cazul in care nu exista,
