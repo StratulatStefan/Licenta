@@ -35,13 +35,17 @@ public class FileService {
         }
     }
 
-    public String uploadFile(MultipartFile file, int userId, String description, String userType) throws Exception {
+    public String uploadFile(MultipartFile file, int userId, String description, String userType, long availableStorage) throws Exception {
+        long filesize = file.getSize();
+        if(filesize > availableStorage){
+            throw new Exception("Not enough memory storage!");
+        }
         String filePath = persistFileToBuffer(file);
 
         NewFileRequest newFileRequest = new NewFileRequest();
         newFileRequest.setUserId(String.format("%d", userId));
         newFileRequest.setFilename(filePath);
-        newFileRequest.setFilesize(file.getSize());
+        newFileRequest.setFilesize(filesize);
         newFileRequest.setCrc(FileSystem.calculateCRC(filePath));
         newFileRequest.setUserType(userType);
         newFileRequest.setDescription(description);

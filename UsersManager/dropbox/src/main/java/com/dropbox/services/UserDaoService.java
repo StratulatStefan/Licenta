@@ -137,6 +137,14 @@ public class UserDaoService implements UserDao {
         mySQLManager.update(user);
     }
 
+    @Override
+    public void updateNumberOfFiles(int id_user, int count) throws Exception {
+        User user = getUserById(id_user);
+        int currentNumberOfFiles = user.getNumber_of_file();
+
+        user.setNumber_of_file(currentNumberOfFiles + count);
+        mySQLManager.update(user);
+    }
 
     /**
      * ============== DELETE ==============

@@ -251,3 +251,59 @@ iframe{
     width: 600px;
     visibility: hidden;
 }
+
+.admin_action_buttons{
+    text-align: center;
+    font-size: 25px;
+    margin-left: 20px;
+    font-weight: bold;
+    color: #005a8d;
+    border-radius: 10px;
+}
+
+#admin_title{
+    margin-right: 25%;
+}
+
+.admin_div_view{
+    display: none;
+    margin: 0 auto;
+}
+
+.admin_div_view p{
+    font-size: 25px;
+}
+
+.admin_div_view #admin_view_title{
+    font-size: 30px;
+}
+
+
+.admin_div_view select{
+    margin-right: 3%;
+    font-weight: bold;
+}
+
+.admin_div_view table{
+    width: 80%;
+    margin-left: 10%;
+}
+.admin_div_view table p{
+    font-size: 20px;
+}
+
+.admin_div_view td, th {
+    border: 1px solid #1597bb;
+    text-align: center;
+    padding: 8px;
+  }
+
+  
+.admin_div_view button{
+    font-size: 30px;
+    color: #02475e;
+    font-weight: bold;
+    border: 5px solid #02475e;
+    border-radius: 15px;
+    margin-bottom: 1%;
+}

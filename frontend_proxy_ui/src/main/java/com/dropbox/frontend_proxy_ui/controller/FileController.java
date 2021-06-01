@@ -32,6 +32,7 @@ public class FileController {
     public ResponseEntity<Map<String, String>> uploadFIle(@RequestParam("file") MultipartFile file,
                                            @RequestHeader("Authorization") String authorizationValue,
                                            @RequestHeader("version_description") String descriptionValue,
+                                           @RequestHeader("available_storage") long availableStorage,
                                            @RequestHeader("user_type") String userType){
 
         int userId = -1;
@@ -46,7 +47,7 @@ public class FileController {
         }
 
         try {
-            String filepath = fileService.uploadFile(file, userId, descriptionValue, userType);
+            String filepath = fileService.uploadFile(file, userId, descriptionValue, userType, availableStorage);
             while(!uploadPendingQueue.containsRegister(String.format("%d", userId), filepath));
             uploadPendingQueue.popFromQueue();
             Map<String, String> successResponse =

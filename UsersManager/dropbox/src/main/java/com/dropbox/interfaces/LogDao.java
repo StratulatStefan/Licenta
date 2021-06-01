@@ -30,5 +30,6 @@ public interface LogDao {
      */
     void deleteLogRegister(int registerId) throws Exception;
     void deleteLogRegisterByCriteria(HashMap<String, Object> criteria) throws Exception;
+    void deleteAll() throws Exception;
 
 }

@@ -30,6 +30,7 @@ public interface UserDao {
     void updateCountry(int id_user, String country) throws Exception;
     void updatePassword(int id_user, String password) throws Exception;
     void updateType(int id_user, String type) throws Exception;
+    void updateNumberOfFiles(int id_user, int count) throws Exception;
 
 
     /**

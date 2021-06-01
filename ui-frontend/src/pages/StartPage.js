@@ -82,7 +82,9 @@ class StartPage extends Component {
     }
 
     login = () => {
-        this.accountCredentials = {"email" : "stefanc.stratulat@gmail.com", "password" : "parola.dropbox123"}
+        //this.accountCredentials = {"email" : "stefanc.stratulat@gmail.com", "password" : "parola.dropbox123"}
+        this.accountCredentials = {"email" : "dropbox.com@dpbox.com", "password" : "82467913"}
+        console.log(this.accountCredentials)
         UsersHandlerService.login(this.accountCredentials).then(response => {
             if(response.code === 1){
                 localStorage.setItem("user_data", JSON.stringify(response.content))
@@ -97,7 +99,6 @@ class StartPage extends Component {
     }
 
     createAccount = () => {
-        console.log(this.accountCredentials)
         UsersHandlerService.register(this.accountCredentials).then(response => {
             console.log(response)
             if(response.code === 1){

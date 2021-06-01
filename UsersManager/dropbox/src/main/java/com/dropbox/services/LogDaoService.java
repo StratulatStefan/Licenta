@@ -34,10 +34,16 @@ public class LogDaoService implements LogDao {
 
     @Override
     public List<Log> getLogRegistersByCriteria(HashMap<String, Object> criteria) throws NullPointerException {
-        List<Log> logRegisters =  mySQLManager.findByCriteria(Log.class, criteria)
-                .stream()
-                .map(register -> (Log)register)
-                .collect(Collectors.toList());
+        List<Log> logRegisters =  null;
+        if(criteria.size() == 0){
+            logRegisters = mySQLManager.findlAll(Log.class);
+        }
+        else{
+            logRegisters = mySQLManager.findByCriteria(Log.class, criteria)
+                    .stream()
+                    .map(register -> (Log)register)
+                    .collect(Collectors.toList());
+        }
         if(logRegisters.size() == 0)
             throw new NullPointerException("No valid log register found!");
         if(criteria.containsKey("date1")) {
@@ -69,6 +75,13 @@ public class LogDaoService implements LogDao {
         List<Log> candidateRegisters = getLogRegistersByCriteria(criteria);
         for(int registerId : candidateRegisters.stream().map(Log::getRegisterId).collect(Collectors.toList())){
             deleteLogRegister(registerId);
+        }
+    }
+
+    @Override
+    public void deleteAll() throws Exception {
+        for(Log logRegister : mySQLManager.findlAll(Log.class)){
+            deleteLogRegister(logRegister.getRegisterId());
         }
     }
 }

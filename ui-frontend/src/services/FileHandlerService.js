@@ -1,17 +1,24 @@
 import {Environment} from '../environment';
 import {HTTPResponseHandler} from '../services/HTTPResponseHandler';
+import { UsersHandlerService } from './UsersHandlerService';
 
 export class FileHandlerService{
     static uploadFile = (file, jwt, description, usertype) => {
         // https://www.smashingmagazine.com/2018/01/drag-drop-file-uploader-vanilla-js/
-        console.log(`File : ${file}`)
-        console.log(`Description : ${description}`)
-        console.log(`JWT : ${jwt}`)
         
         let url = `${Environment.frontend_proxy}/upload`
 
+        let additional_user_data = localStorage.getItem("additional_user_data")
+        if(additional_user_data === null || additional_user_data === ""){
+            UsersHandlerService.getAdditionalUserData(jwt).then(response => {
+                additional_user_data = response.content
+                localStorage.setItem("additional_user_data", JSON.stringify(additional_user_data))
+            })
+        }
+        else{
+            additional_user_data = JSON.parse(additional_user_data)
+        }
         let formData = new FormData()
-          
         formData.append('file', file)
           
         return new Promise((resolve) => {
@@ -22,7 +29,8 @@ export class FileHandlerService{
                 headers : {
                     'Authorization' : `Bearer ${jwt}`,
                     "version_description" : description,
-                    "user_type" : usertype
+                    "user_type" : usertype,
+                    "available_storage" : additional_user_data.storage_quantity
                 }
             }).then(response => {
                 if(response.ok){

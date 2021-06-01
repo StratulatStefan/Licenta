@@ -189,6 +189,32 @@ public class UsersController {
         }
     }
 
+    @RequestMapping(value = "/{userId}/storage", method = RequestMethod.PUT)
+    ResponseEntity<Map<String, String>> updateUserStorage(@PathVariable int userId,
+                                                          @RequestBody HashMap<String, Object> updateValue){
+        try{
+            for(String key : new ArrayList<>(updateValue.keySet())){
+                if(key.equals("storage_quantity_release")){
+                    userDao.updateStorageQuantity(userId, (int) updateValue.get(key));
+                    userDao.updateNumberOfFiles(userId, -1);
+                }
+                else if(key.equals("storage_quantity_consumption")){
+                    userDao.updateStorageQuantity(userId, -(int) updateValue.get(key));
+                    userDao.updateNumberOfFiles(userId, +1);
+                }
+                else{
+                    throw new NullPointerException("Invalid update field : " + key + "!");
+                }
+            }
+            Map<String, String> statusResponse = ResponseHandlerService.buildSuccessStatus("Field successfully updated!");
+            return new ResponseEntity(statusResponse, HttpStatus.OK);
+        }
+        catch (Exception nullPointerException){
+            Map<String, String> errorResponse = ResponseHandlerService.buildErrorStatus(nullPointerException.getMessage());
+            return new ResponseEntity(errorResponse, HttpStatus.NOT_FOUND);
+        }
+    }
+
     /**
      * ============== DELETE ==============
      */

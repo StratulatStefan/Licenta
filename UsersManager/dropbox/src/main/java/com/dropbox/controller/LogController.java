@@ -60,7 +60,7 @@ public class LogController {
                                                        @RequestParam(name = "date1", required = false, defaultValue = "") String date1,
                                                        @RequestParam(name = "date2", required = false, defaultValue = "") String date2) {
         try {
-            SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd/hh:mm");
+            SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd hh:mm");
             HashMap<String, Object> criterias = new HashMap<>(){{
                 if(!nodeAddress.equals(""))
                     put("node_address", nodeAddress);
@@ -117,7 +117,12 @@ public class LogController {
                 if(!date2.equals(""))
                     put("date1", dateFormat.parse(date2));
             }};
-            logDao.deleteLogRegisterByCriteria(criterias);
+            if(criterias.size() == 0){
+                logDao.deleteAll();
+            }
+            else {
+                logDao.deleteLogRegisterByCriteria(criterias);
+            }
             Map<String, String> statusResponse = ResponseHandlerService.buildSuccessStatus("Log registers successfully deleted!");
             return new ResponseEntity(statusResponse, HttpStatus.OK);
         }

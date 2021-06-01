@@ -7,7 +7,9 @@ import communication.Address;
 import communication.Serializer;
 import config.AppConfig;
 import data.Pair;
+import http.HttpConnectionService;
 import log.ProfiPrinter;
+import logger.LogMsgType;
 import logger.LoggerService;
 import model.FileAttributes;
 import node_manager.FeedbackResponse;
@@ -17,14 +19,12 @@ import tables.StorageStatusTable;
 
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
+import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.SocketTimeoutException;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
+import java.util.*;
 
 /**
  * Clasa care va incapsula toata interactiunea dintre nodul general si client (frontend).
@@ -234,6 +234,21 @@ public class ClientCommunicationManager {
         }
     }
 
+    public void registerUserMemoryConsumption(String user, long size, boolean consumption){
+        HttpConnectionService httpConnectionService = new HttpConnectionService();
+        String apiPath = AppConfig.getParam("usersHTTPAddress") + "/" + user + "/storage";
+        Map<String, Object> consumptionData = new HashMap<String, Object>(){{
+            put(consumption? "storage_quantity_consumption" : "storage_quantity_release", size);
+        }};
+        try{
+            String registerResponse = httpConnectionService.putRequest(apiPath, consumptionData);
+            LoggerService.registerSuccess(GeneralManager.generalManagerIpAddress, registerResponse);
+        }
+        catch (IOException exception){
+            ProfiPrinter.PrintException("Eroare la inregistrarea noului fisier : "+ exception.getMessage());
+        }
+    }
+
 
     /** -------- Main -------- **/
     /** Functie care inglobeaza activitatea principala a fiecarui nod, aceea de a asigura comunicarea cu celelalte noduri
@@ -318,13 +333,6 @@ public class ClientCommunicationManager {
                                             String status = GeneralManager.contentTable.getFileStatusForUser(userId, filename);
                                             registerFileRequest(userId, filename, crc, filesize, usertype, status, description);
                                             waitForFeedbackFromClient(userId, filename, filesize, usertype);
-                                            /*try {
-                                                GeneralManager.userDataTable.addUser(userId, usertype);
-                                            }
-                                            catch (Exception exception){
-                                                ProfiPrinter.PrintException(exception.getMessage());
-                                            }*/
-                                            //GeneralManager.userStorageQuantityTable.registerMemoryConsumption(userId, usertype, filesize);
                                         }
                                         else {
                                             response.setException("eroare");
@@ -369,7 +377,7 @@ public class ClientCommunicationManager {
                                         GeneralManager.contentTable.updateFileStatus(userId, filename, "[PENDING]");
                                         String candidateAddress = GeneralManager.statusTable.getAvailableNodesAddressesForFile(userId, filename).get(0);
                                         String filepath = GeneralManager.storagePath + candidateAddress + "/" + userId + "/" + filename;
-                                       // GeneralManager.userStorageQuantityTable.registerMemoryRelease(clientManagerRequest.getUserId(), FileSystem.getFileSize(filepath));
+                                        registerUserMemoryConsumption(userId, FileSystem.getFileSize(filepath), false);
                                         GeneralManager.contentTable.updateReplicationFactor(userId, filename, 0);
                                         response = new ManagerTextResponse();
                                         ((ManagerTextResponse)response).setResponse("OK");
@@ -426,6 +434,7 @@ public class ClientCommunicationManager {
                     LoggerService.registerSuccess(GeneralManager.generalManagerIpAddress,
                             "Feedback valid de la frontend! Confirmam stocarea noului fisier.");
                     confirmUserRequest(userId, filename);
+                    registerUserMemoryConsumption(userId, filesize, true);
                 }
                 else{
                     LoggerService.registerError(GeneralManager.generalManagerIpAddress,

@@ -1,5 +1,6 @@
 import React, { Component } from 'react';
 import {UsersHandlerService} from '../services/UsersHandlerService';
+import { GeneralPurposeService } from '../services/GeneralPurposeService';
 
 import '../styles/pages-style.css';
 
@@ -73,6 +74,7 @@ class ProfilePage extends Component {
             if(response.code === 1){
                 this.setState({additionalUserData : response.content})
                 console.log(response.content)
+                localStorage.setItem("additional_user_data", JSON.stringify(response.content))
             }
             else{
                 console.log(response.content)
@@ -141,25 +143,25 @@ class ProfilePage extends Component {
                     let total_storage = ProfilePage.availableUserTypes[this.state.additionalUserData["type"]]["available_storage"]
                     let available_storage = this.state.additionalUserData["storage_quantity"]
                     let used_storage = total_storage - available_storage
-                    let number_of_files = 0
+                    let number_of_files = this.state.additionalUserData["number_of_file"]
                     userDetails = 
                         <div className = "accountData">
                             <p className="accountDataField" >
                                 Total Storage
                                 <span className = "accountDataValue">
-                                    {total_storage} KB ({total_storage >> 20} GB)
+                                    {GeneralPurposeService.getFileSizeUnit(total_storage)}
                                 </span>
                             </p>
                             <p className="accountDataField" >
                                 Used Storage
                                 <span className = "accountDataValue">
-                                    {used_storage} KB ({used_storage >> 20} GB)
+                                    {GeneralPurposeService.getFileSizeUnit(used_storage)}
                                 </span>
                             </p>
                             <p className="accountDataField" >
                                 Available Storage
                                 <span className = "accountDataValue">
-                                    {available_storage} KB ({available_storage >> 20} GB)
+                                    {GeneralPurposeService.getFileSizeUnit(available_storage)}
                                 </span>
                             </p>
                             <p className="accountDataField" >
@@ -173,10 +175,11 @@ class ProfilePage extends Component {
                     let businessPlans = []
                     Object.keys(ProfilePage.availableUserTypes).forEach(usertype => {
                         if(usertype !== this.state.additionalUserData["type"]){
+                            let index = 0;
                             businessPlans.push(
-                                <div className="upgradeplan">
+                                <div key={`${index}_upgradeplan`} className="upgradeplan">
                                     <p>{usertype}</p>
-                                    <p>{ProfilePage.availableUserTypes[usertype]["available_storage"]  >> 20} GB</p>
+                                    <p>{GeneralPurposeService.getFileSizeUnit(ProfilePage.availableUserTypes[usertype]["available_storage"])}</p>
                                     <p>{ProfilePage.availableUserTypes[usertype]["price_dollars"]} $</p>
                                     <button className="redirector" onClick={() => this.updatePlan(usertype)}>Update to {usertype}</button>
                                     <br/>

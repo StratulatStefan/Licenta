@@ -6,6 +6,7 @@ import '../styles/pages-home-style.css';
 import { FileHandlerService } from '../services/FileHandlerService';
 import { Environment } from '../environment';
 import { GeneralPurposeService } from '../services/GeneralPurposeService';
+import { AdminHandlerService } from '../services/AdminHandlerService';
 
 class MainPage extends Component {
     constructor(props){
@@ -17,37 +18,57 @@ class MainPage extends Component {
         this.searchData = null
         this.state = {
             isUserConnected : false,
-            userType : "",
+            userType : null,
             accountAvailable : true,
             accountSuccessfullyCreated : false,
             userFiles : null,
             currentFileName : null,
+            availableNodes : null,
             fileDetails : null,
+            log : []
         }
+        this.logCriteria = {message_type : "ALL", node_address : "ALL", date1 : GeneralPurposeService.getCurrentTimestampForLogging("1 year")}
     }
 
     componentDidMount = () => {
         this.checkForConnectedUser()
-        this.fetchUserType()
-        this.fetchUserFiles()
+        this.fetchUserType().then(_ => {
+            if(this.state.userType !== "ADMIN"){
+                this.fetchUserFiles()
+            }
+            else{
+                this.fetchAvailableNodes()
+            }
+        })
+    }
+
+    fetchAvailableNodes = () => {
+        AdminHandlerService.fetchAvailableNodesFromAPI().then(response => {
+            this.setState({availableNodes : response.content})
+            console.log(response.content)
+        })
     }
 
     fetchUserType = () => {
-        try{
-            this.setState({userType : this.props.location.state.detail["user_type"]})
-        }
-        catch(e){
-            // am ajuns pe aceasta pagina din alta parte, prin click pe meniu, prin scriere directa in link
-            UsersHandlerService.getUserRole(this.userData["jwt"]).then(response => {
-                if(response.code === 1){
-                    console.log(`props fetch: ${response["content"]}`)
-                    this.setState({userType : response["content"]})
-                }
-                else if(response.code === 401){
-                    localStorage.setItem("user_data", '')
-                }
-            })
-        }
+        return new Promise(resolve => {
+            try{
+                this.setState({userType : this.props.location.state.detail["user_type"]})
+                resolve(null)
+            }
+            catch(e){
+                // am ajuns pe aceasta pagina din alta parte, prin click pe meniu, prin scriere directa in link
+                UsersHandlerService.getUserRole(this.userData["jwt"]).then(response => {
+                    if(response.code === 1){
+                        console.log(`props fetch: ${response["content"]}`)
+                        this.setState({userType : response["content"]})
+                    }
+                    else if(response.code === 401){
+                        localStorage.setItem("user_data", '')
+                    }
+                    resolve(null)
+                })
+            }
+        })
     }
 
     fetchUserFiles = () =>{
@@ -163,105 +184,268 @@ class MainPage extends Component {
         document.getElementById("input_label").style.visibility = "hidden"
 
     }
+
+    adminAction = (actionName) => {
+        this.adminContentRefresh()
+        switch(actionName){
+            case "log":{
+                document.getElementById("admin_log_view").style.display = "block"
+                this.fetchLogByCriteriaUpdate(null, null)
+                
+                break;
+            }
+            case "content":{
+                document.getElementById("admin_content_view").style.display = "block"
+                break;
+            }
+            case "nodes":{
+                document.getElementById("admin_nodes_view").style.display = "block"
+                break;
+            }
+            case "replication":{
+                document.getElementById("admin_replication_content").style.display = "block"
+                break;
+            }
+            default : break;
+        }
+    }
+
+    fetchLogByCriteriaUpdate = (criteria, updatevalue) => {
+        if(criteria !== null && updatevalue !== null){
+            this.logCriteria[criteria] = updatevalue
+        }
+        console.log(this.logCriteria)
+        AdminHandlerService.fetchLog(this.logCriteria).then(response => {
+            if(response.code === 1){
+                this.setState({log : response.content})
+            }
+            else{
+                this.setState({log : []})
+            }
+            console.log(response.content)
+        })
+    }
+
+    adminContentRefresh = () => {
+            document.getElementById("admin_log_view").style.display            = "none"
+            document.getElementById("admin_content_view").style.display        = "none"
+            document.getElementById("admin_nodes_view").style.display          = "none"
+            document.getElementById("admin_replication_content").style.display = "none"
+    }
     
+    cleanLog = () =>{
+        AdminHandlerService.cleanLog(this.logCriteria).then(response => {
+            if(response.code === 1){
+                this.fetchLogByCriteriaUpdate(null, null)
+            }
+        })
+    }
+
     render(){
         var userFiles = []
-        if(this.state.userFiles !== null){
-            this.state.userFiles.forEach(userFile => {
-                let logosrc = `/images/file_logo/${userFile.filename.split(".")[1]}.png`
-                if(!Environment.available_logos.includes(userFile.filename.split(".")[1])){
-                    logosrc = `/images/file_logo/extra.png` 
-                }
-                userFiles.push(
-                    <tr key={`div_${userFile.filename}`}>
-                        <td>
-                            <img alt="logo" src={logosrc}></img>
-                        </td>
-                        <td className = "table_fname">
-                            <p><a href="#" onClick={() => this.fileDetails(userFile)}>{`${userFile.filename + ""}`}</a></p><br/>
-                            <span>{`Version : ${userFile.version}`}</span><br/>
-                            <span>{`Size : ${GeneralPurposeService.getFileSizeUnit(userFile.filesize)}`}</span>
-                        </td>
-                        <td className = "table_version">
-                            <p>{`${userFile.version_description}`}</p>
-                        </td>
-                        <td className = "table_version">
-                            <p>{`${userFile.hash.toString(16)}`}</p>
-                        </td>
-                    </tr>
-                )
-            })
-        }
         var fileDetails = []
-        if(this.state.fileDetails !== null){
-            this.state.fileDetails.forEach(detail => {
-                console.log(detail)
-                fileDetails.push(
-                    <div className="details_history">
-                        <p>&#9673; {`${detail.version_desc}`}</p>
-                        <br/>
-                        <p>{`${detail.version_timestamp}`}</p>
-                        <br/>
-                        <p>{`${detail.version_hash.toString(16)}`}</p>
-                        <br/>
-                        <p>{`${detail.version_no}`}</p><br/>
-                    </div>)
-                fileDetails.push(<br/>)
-            })
+        var availableNodesSelect = []
+        var logData = []
+        if(this.state.userType !== null && this.state.userType !== "ADMIN"){
+            if(this.state.userFiles !== null){
+                this.state.userFiles.forEach(userFile => {
+                    let logosrc = `/images/file_logo/${userFile.filename.split(".")[1]}.png`
+                    if(!Environment.available_logos.includes(userFile.filename.split(".")[1])){
+                        logosrc = `/images/file_logo/extra.png` 
+                    }
+                    userFiles.push(
+                        <tr key={`div_${userFile.filename}`}>
+                            <td>
+                                <img alt="logo" src={logosrc}></img>
+                            </td>
+                            <td className = "table_fname">
+                                <p><a href="#" onClick={() => this.fileDetails(userFile)}>{`${userFile.filename + ""}`}</a></p><br/>
+                                <span>{`Version : ${userFile.version}`}</span><br/>
+                                <span>{`Size : ${GeneralPurposeService.getFileSizeUnit(userFile.filesize)}`}</span>
+                            </td>
+                            <td className = "table_version">
+                                <p>{`${userFile.version_description}`}</p>
+                            </td>
+                            <td className = "table_version">
+                                <p>{`${userFile.hash.toString(16)}`}</p>
+                            </td>
+                        </tr>
+                    )
+                })
+            }
+            if(this.state.fileDetails !== null){
+                this.state.fileDetails.forEach(detail => {
+                    console.log(detail)
+                    fileDetails.push(
+                        <div className="details_history">
+                            <p>&#9673; {`${detail.version_desc}`}</p>
+                            <br/>
+                            <p>{`${detail.version_timestamp}`}</p>
+                            <br/>
+                            <p>{`${detail.version_hash.toString(16)}`}</p>
+                            <br/>
+                            <p>{`${detail.version_no}`}</p><br/>
+                        </div>)
+                    fileDetails.push(<br/>)
+                })
+            }
+        }
+        else if(this.state.userType === "ADMIN"){
+            if(this.state.availableNodes != null){
+                this.state.availableNodes.forEach(node => {
+                    availableNodesSelect.push(<option key={`optionkey_${node["ip_address"]}`} value={node["ip_address"]}>{node["ip_address"]}</option>)
+                })
+            }
+            if(this.state.log !== null){
+                this.state.log.forEach(log_register => {
+                    logData.push(
+                        <tr key={`log_${log_register.registerId}`}>
+                            <td>
+                                <p>{log_register.registerId}</p>
+                            </td>
+                            <td>
+                                <p>{log_register.node_address}</p>
+                            </td>
+                            <td>
+                                <p>{log_register.message_type}</p>
+                            </td>
+                            <td>
+                                <p>{log_register.description}</p>
+                            </td>
+                            <td>
+                                <p>{log_register.register_date}</p>
+                            </td>
+                        </tr>
+                    )
+                })
+            }
         }
         return(
             <div className="App">
                 <div className="Home">
-                    <div className="home_header">
-                        <p>My files</p>
-                        <div className="home_searchbar">
-                            <input type="text" placeholder="Search file.."
-                                onChange={(event) => {this.searchData = event.target.value}}/>
-                            <button onClick={this.search}>&#128269;</button>
-                        </div>
-                    </div>
-                    <hr/>
-                    <br/><br/>
-                    <div className = "home_body_main_div">
-                        <table className="home_body">
-                            <tbody>
-                                {userFiles}
-                            </tbody>
-                        </table>
-                        <div id="file_details">
-                            <p id="details_filename"></p>
-                            <p id="details_hash"></p>
+                    {this.state.userType !== "ADMIN" ? 
+                        <div>
+                            <div className="home_header">
+                                <p>My files</p>
+                                <div className="home_searchbar">
+                                    <input type="text" placeholder="Search file.."
+                                        onChange={(event) => {this.searchData = event.target.value}}/>
+                                    <button onClick={this.search}>&#128269;</button>
+                                </div>
+                            </div>
                             <hr/>
-                            <p className="details_activity">Actions</p><br/>
-                            <button className="file_button" onClick={this.downloadFile}>Download</button>
-                            <button className="file_button" onClick={this.deleteFile}>Delete</button>
-                            <button className="file_button" onClick={() => this.renameFile(0)}>Rename</button>
-                            <button className="file_button" onClick={this.uploadNewVersionFile}>Upload new version</button>
-                            <a id="downloaduri" href="/" download>Click to download</a><br/>
-                            <p><iframe id="preview" src="#"></iframe></p>
-                            <br/>
-                            <div className="request_description">
-                                <p>Description : </p>
-                                <input
-                                    onChange={(event) => {this.description = event.target.value}} 
-                                    type="text" />
+                            <br/><br/>
+                            <div className = "home_body_main_div">
+                                <table className="home_body">
+                                    <thead>
+                                        <tr>
+                                            <th>Register ID</th>
+                                            <th>Source Address</th>
+                                            <th>Message Type</th>
+                                            <th>Description</th>
+                                            <th>Register Date</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {userFiles}
+                                    </tbody>
+                                </table>
+                                <div id="file_details">
+                                    <p id="details_filename"></p>
+                                    <p id="details_hash"></p>
+                                    <hr/>
+                                    <p className="details_activity">Actions</p><br/>
+                                    <button className="file_button" onClick={this.downloadFile}>Download</button>
+                                    <button className="file_button" onClick={this.deleteFile}>Delete</button>
+                                    <button className="file_button" onClick={() => this.renameFile(0)}>Rename</button>
+                                    <button className="file_button" onClick={this.uploadNewVersionFile}>Upload new version</button>
+                                    <a id="downloaduri" href="/" download>Click to download</a><br/>
+                                    <p><iframe id="preview" src="#"></iframe></p>
+                                    <br/>
+                                    <div className="request_description">
+                                        <p>Description : </p>
+                                        <input
+                                            onChange={(event) => {this.description = event.target.value}} 
+                                            type="text" />
+                                    </div>
+                                    <div className="request_description">
+                                        <p id="input_label">New name : </p>
+                                        <input
+                                            onChange={(event) => {this.newname = event.target.value}} 
+                                            type="text" />
+                                    </div>
+                                    <div className="request_description">
+                                        <button className="file_button" id="proceed_btn" onClick={() => this.renameFile(1)}>Rename</button>
+                                    </div>
+                                    <br/>
+                                    <p id="file_status"></p>
+                                    <hr/>
+                                    <p className="details_activity">Activity</p><br/>
+                                    {fileDetails} 
+                                </div>
                             </div>
-                            <div className="request_description">
-                                <p id="input_label">New name : </p>
-                                <input
-                                    onChange={(event) => {this.newname = event.target.value}} 
-                                    type="text" />
+                        </div> : 
+                        <div>
+                            <div className="home_header">
+                                <p id="admin_title">Admin console</p>
+                                <button className="admin_action_buttons" onClick = {() => this.adminAction("log")}>Display Log</button>
+                                <button className="admin_action_buttons" onClick = {() => this.adminAction("content")}>Content Table</button>
+                                <button className="admin_action_buttons" onClick = {() => this.adminAction("nodes")}>Nodes Status</button>
+                                <button className="admin_action_buttons" onClick = {() => this.adminAction("replication")}>Replication Manager Status</button>
+                                <hr/>
+                                <br/><br/>
                             </div>
-                            <div className="request_description">
-                                <button className="file_button" id="proceed_btn" onClick={() => this.renameFile(1)}>Rename</button>
+                                <div id="admin_log_view" className="admin_div_view">
+                                    <p id="admin_view_title">Select log fetch criteria</p><br/>
+                                    <p>Message type</p>
+                                    <select onChange={(event) => {this.fetchLogByCriteriaUpdate("message_type",event.target.value)}}>
+                                        <option value="ALL">ALL</option>
+                                        <option value="SUCCESS">SUCCESS</option>
+                                        <option value="WARNING">WARNING</option>
+                                        <option value="ERROR">ERROR</option>
+                                    </select>
+                                    <p>Source node</p>
+                                    <select onChange={(event) => {this.fetchLogByCriteriaUpdate("node_address",event.target.value)}}>
+                                        <option value="ALL">ALL</option>
+                                        {availableNodesSelect}
+                                    </select>
+                                    <p>Time interval</p>
+                                    <select onChange={(event) => {this.fetchLogByCriteriaUpdate("date1",GeneralPurposeService.getCurrentTimestampForLogging(event.target.value))}}>
+                                        <option value="1 year">1 year</option>
+                                        <option value="1 month">1 month</option>
+                                        <option value="1 week">1 week</option>
+                                        <option value="1 day">1 day</option>
+                                        <option value="12 hours">12 hours</option>
+                                        <option value="6 hours">6 hours</option>
+                                        <option value="2 hours">2 hours</option>
+                                        <option value="1 hour">1 hour</option>
+                                        <option value="30 minutes">30 minutes</option>
+                                        <option value="15 minutes">15 minutes</option>
+                                        <option value="5 minutes">5 minutes</option>
+                                    </select>
+                                    <button onClick={() => this.fetchLogByCriteriaUpdate(null, null)}>&#x27F3;</button><br/><br/>
+                                    <button onClick={() => this.cleanLog()}>Clean log with given criteria</button>
+                                    <br/>
+                                    {this.state.log.length == 0 ? 
+                                        <p>No log register found!</p> : 
+                                        <table>
+                                            <tbody>
+                                                {logData}
+                                            </tbody>
+                                        </table>
+                                    }
+                                </div>
+                                <div id="admin_content_view" className="admin_div_view">
+                                    <p id="admin_view_title">Fetching content...</p>
+                                </div>
+                                <div id="admin_nodes_view" className="admin_div_view">
+                                    <p id="admin_view_title">Fetching available nodes...</p>
+                                </div>
+                                <div id="admin_replication_content" className="admin_div_view">
+                                    <p id="admin_view_title">Fetching replication manager status...</p>
+                                </div>
                             </div>
-                            <br/>
-                            <p id="file_status"></p>
-                            <hr/>
-                            <p className="details_activity">Activity</p><br/>
-                            {fileDetails} 
-                        </div>
-                    </div>
+                    }
                 </div>
             </div>
         );
@@ -269,3 +453,7 @@ class MainPage extends Component {
 }
 
 export default MainPage;
+
+//https://developer.okta.com/blog/2018/09/25/spring-webflux-websockets-react
+//https://dev.to/fpeluso/a-simple-websocket-between-java-and-react-5c98
+//https://blog.cloudboost.io/simple-chat-react-java-6923b54d65a0
