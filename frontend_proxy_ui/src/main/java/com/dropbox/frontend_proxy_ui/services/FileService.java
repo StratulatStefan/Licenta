@@ -102,4 +102,12 @@ public class FileService {
         String nodeCandidate = this.getNodeCandidateForFile(userId, filename).getResponse();
         return FileSender.downloadFile(nodeCandidate, String.format("%d", userId), filename);
     }
+
+    public ManagerComplexeResponse getNodesStoringUserFile(String user, String filename) throws IOException, ClassNotFoundException {
+        GetNodesForFileRequest getNodesForFileRequest = new GetNodesForFileRequest();
+        getNodesForFileRequest.setUserId(user);
+        getNodesForFileRequest.setFilename(filename);
+
+        return (ManagerComplexeResponse) FrontendManager.managerOperationRequest(getNodesForFileRequest);
+    }
 }

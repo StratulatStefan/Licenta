@@ -25,6 +25,7 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.SocketTimeoutException;
 import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * Clasa care va incapsula toata interactiunea dintre nodul general si client (frontend).
@@ -43,7 +44,12 @@ public class ClientCommunicationManager {
         GET_USER_FILES,
         GET_USER_FILE_HISTORY,
         GET_NODE_FOR_DOWNLOAD,
-        GET_CONTENT_TABLE
+        GET_CONTENT_TABLE,
+        GET_NODES_FOR_USER_FILE,
+        GET_NODES_STORAGE_QUANTITY,
+        GET_STORAGE_STATUS,
+        GET_REPLICATION_STATUS,
+        GET_CONNECTION_TABLE
     }
     /**
      * Enum care va cuprinde statusul unui anumit fisier, raportat la tabela stocarii.
@@ -99,6 +105,21 @@ public class ClientCommunicationManager {
         }
         if(operation == GetContentTableRequest.class){
             return ClientRequest.GET_CONTENT_TABLE;
+        }
+        if(operation == GetNodesStorageQuantityRequest.class){
+            return ClientRequest.GET_NODES_STORAGE_QUANTITY;
+        }
+        if(operation == GetNodesForFileRequest.class){
+            return ClientRequest.GET_NODES_FOR_USER_FILE;
+        }
+        if(operation == GetStorageStatusRequest.class){
+            return ClientRequest.GET_STORAGE_STATUS;
+        }
+        if(operation == GetReplicationStatusRequest.class){
+            return ClientRequest.GET_REPLICATION_STATUS;
+        }
+        if(operation == GetConnectionTableRequest.class){
+            return ClientRequest.GET_CONNECTION_TABLE;
         }
         return null;
     }
@@ -405,15 +426,60 @@ public class ClientCommunicationManager {
                                 break;
                             }
                             case GET_CONTENT_TABLE:{
-                                skip = true;
-                                List<FileAttributes> contentTable = GeneralManager.contentTable.getContentTable();
-                                dataOutputStream.write(Serializer.serialize(GeneralManager.contentTable.getContentTable()));
+                                response = new ManagerComplexeResponse();
+                                List<Object> contentTable = GeneralManager.contentTable.getContentTable()
+                                        .stream()
+                                        .map(node -> (Object)node)
+                                        .collect(Collectors.toList());
+                                ((ManagerComplexeResponse)response).setResponse(contentTable);
+                                break;
+                            }
+                            case GET_NODES_FOR_USER_FILE:{
+                                List<Object> fileNodes = GeneralManager.statusTable.getAvailableNodesAddressesForFile(userId, filename)
+                                        .stream()
+                                        .map(node -> (Object)node)
+                                        .collect(Collectors.toList());
+                                response = new ManagerComplexeResponse();
+                                ((ManagerComplexeResponse)response).setResponse(fileNodes);
+                            }
+                            case GET_NODES_STORAGE_QUANTITY:{
+                                List<Object> fileNodes = GeneralManager.nodeStorageQuantityTable.getStorageQuantityTable()
+                                        .stream()
+                                        .map(node -> (Object)node)
+                                        .collect(Collectors.toList());
+                                response = new ManagerComplexeResponse();
+                                ((ManagerComplexeResponse)response).setResponse(fileNodes);
+                                break;
+                            }
+                            case GET_STORAGE_STATUS:{
+                                response = new ManagerComplexeResponse();
+                                List<Object> contentTable = GeneralManager.statusTable.getStorageStatusTable()
+                                        .stream()
+                                        .map(node -> (Object)node)
+                                        .collect(Collectors.toList());
+                                ((ManagerComplexeResponse)response).setResponse(contentTable);
+                                break;
+                            }
+                            case GET_REPLICATION_STATUS:{
+                                response = new ManagerComplexeResponse();
+                                List<Object> replicationTable = ReplicationManager.getReplicationStatusTable()
+                                        .stream()
+                                        .map(node -> (Object)node)
+                                        .collect(Collectors.toList());
+                                ((ManagerComplexeResponse)response).setResponse(replicationTable);
+                                break;
+                            }
+                            case GET_CONNECTION_TABLE :{
+                                response = new ManagerComplexeResponse();
+                                List<Object> connectionTable = GeneralManager.connectionTable.getConnectionTable()
+                                        .stream()
+                                        .map(node -> (Object)node)
+                                        .collect(Collectors.toList());
+                                ((ManagerComplexeResponse)response).setResponse(connectionTable);
                                 break;
                             }
                         }
-                        if(!skip) {
-                            dataOutputStream.write(Serializer.serialize(response));
-                        }
+                        dataOutputStream.write(Serializer.serialize(response));
                     }
                     System.out.println("Cerinta clientului a fost realizata..");
                     dataInputStream.close();

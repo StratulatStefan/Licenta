@@ -307,3 +307,7 @@ iframe{
     border-radius: 15px;
     margin-bottom: 1%;
 }
+
+.admin_div_view a{
+    font-weight: bold;
+}

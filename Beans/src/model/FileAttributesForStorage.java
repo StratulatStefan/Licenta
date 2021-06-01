@@ -2,14 +2,16 @@ package model;
 
 import data.Pair;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
 /**
  * Clasa care inglobeaza atributele fiecarui fisier
  */
-public class FileAttributesForStorage{
+public class FileAttributesForStorage implements Serializable {
     /** -------- Atribute -------- **/
+    private String userId;
     /**
      * Numele fisierului
      */
@@ -180,6 +182,13 @@ public class FileAttributesForStorage{
         return false;
     }
 
+    public String getUserId() {
+        return userId;
+    }
+
+    public void setUserId(String userId) {
+        this.userId = userId;
+    }
 
     /** -------- Functii de baza, supraincarcate -------- **/
     @Override

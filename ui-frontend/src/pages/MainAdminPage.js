@@ -3,12 +3,9 @@ import {UsersHandlerService} from '../services/UsersHandlerService';
 
 import '../styles/pages-style.css';
 import '../styles/pages-home-style.css';
-import { FileHandlerService } from '../services/FileHandlerService';
-import { Environment } from '../environment';
 import { GeneralPurposeService } from '../services/GeneralPurposeService';
 import { AdminHandlerService } from '../services/AdminHandlerService';
 import { Client } from '@stomp/stompjs';
-
 
 class MainAdminPage extends Component {
     constructor(props){
@@ -21,31 +18,37 @@ class MainAdminPage extends Component {
             accountAvailable : true,
             availableNodes : null,
             log : [],
-            websocket : {"connected" : false, "subscription" : null}
+            websocket : {"connected" : false, "subscription" : null},
+            content : null,
+            content_nodes_data : []
         }
         this.logCriteria = {message_type : "ALL", node_address : "ALL", date1 : GeneralPurposeService.getCurrentTimestampForLogging("1 year")}
         this.webSocketConnection = null;
     }
 
     componentDidMount = () => {
+        this.initWebSocketConnection()
         this.checkForConnectedUser()
         this.fetchUserType().then(_ => {
             this.fetchAvailableNodes()
-            this.webSocketConnection = new Client({
-                brokerURL: "ws://127.0.0.100:8090/wbsocket",
-                reconnectDelay: 100,
-                heartbeatIncoming: 3000,
-                heartbeatOutgoing: 3000,
-                onConnect: () => {
-                    console.log("Websocket connected!")
-                    this.setState({websocket : {"connected" : true}})
-                },
-                onDisconnect: () => {
-                    console.log("Websocket disconnected.")
-                }
-            });
-            this.webSocketConnection.activate();
         })
+    }
+    
+    initWebSocketConnection = () => {
+        this.webSocketConnection = new Client({
+            brokerURL: "ws://127.0.0.100:8090/wbsocket",
+            reconnectDelay: 10,
+            heartbeatIncoming: 3000,
+            heartbeatOutgoing: 3000,
+            onConnect: () => {
+                console.log("Websocket connected!")
+                this.setState({websocket : {"connected" : true}})
+            },
+            onDisconnect: () => {
+                console.log("Websocket disconnected.")
+            }
+        });
+        this.webSocketConnection.activate();
     }
 
     fetchAvailableNodes = () => {
@@ -88,7 +91,9 @@ class MainAdminPage extends Component {
 
     handleContentTable = (message) => {
         if (message.body) {
+            document.getElementById("admin_view_title_0").innerHTML = "Content table successfully fetched!"
             let content = JSON.parse(message.body)
+            this.setState({content : content})
             console.log(content)
         }
     }
@@ -100,6 +105,18 @@ class MainAdminPage extends Component {
     }
 
     handleNodesActivity = (message) => {
+        if (message.body) {
+            console.log(message.body)
+        }
+    }
+
+    handleStorageStatus = (message) => {
+        if (message.body) {
+            console.log(message.body)
+        }
+    }
+
+    handleConnectionTable = (message) => {
         if (message.body) {
             console.log(message.body)
         }
@@ -127,10 +144,22 @@ class MainAdminPage extends Component {
                 handleFunction = this.handleNodesActivity
                 break;
             }
+            case "storage":{
+                document.getElementById("admin_nodes_view").style.display = "block"
+                current_topic = "/topic/storage"
+                handleFunction = this.handleStorageStatus
+                break;
+            }
             case "replication":{
                 document.getElementById("admin_replication_content").style.display = "block"
                 current_topic = "/topic/replication"
                 handleFunction = this.handleReplicationManagerStatus
+                break;
+            }
+            case "connection":{
+                document.getElementById("admin_replication_content").style.display = "block"
+                current_topic = "/topic/connection"
+                handleFunction = this.handleConnectionTable
                 break;
             }
             default : break;
@@ -175,9 +204,30 @@ class MainAdminPage extends Component {
         })
     }
 
+    fetchReplicationNodesForFile = (userId, filename) => {
+        console.log("Fetching nodes that store " + filename + " of user " + userId)
+        this.setState({content_nodes_data : []})
+        AdminHandlerService.fetchNodesStoringFile(userId, filename).then(response => {
+            if(response.code === 1){
+                response.content.forEach(address => {
+                    console.log(address)
+                    AdminHandlerService.fetchNodeData(address).then(response => {
+                        if(response.code === 1){
+                            let content_nodes = this.state.content_nodes_data
+                            content_nodes.push(response.content)
+                            this.setState({content_nodes_data : content_nodes})
+                        }
+                    })
+                })
+            }
+        })
+    }
+
     render(){
         var availableNodesSelect = []
         var logData = []
+        var content = []
+        var replicationNodesForFile = []
         if(this.state.userType !== null){
             if(this.state.availableNodes != null){
                 this.state.availableNodes.forEach(node => {
@@ -188,9 +238,6 @@ class MainAdminPage extends Component {
                 this.state.log.forEach(log_register => {
                     logData.push(
                         <tr key={`log_${log_register.registerId}`}>
-                            <td>
-                                <p>{log_register.registerId}</p>
-                            </td>
                             <td>
                                 <p>{log_register.node_address}</p>
                             </td>
@@ -207,6 +254,39 @@ class MainAdminPage extends Component {
                     )
                 })
             }
+            if(this.state.content != null){
+                this.state.content.forEach(content_register => {
+                    content.push(
+                        <tr key={`content_${content_register.userId}_${content_register.filename}`}>
+                            <td><p>{content_register.userId}</p></td>
+                            <td><p>{content_register.filename}</p></td>
+                            <td><p>{content_register.versionNo}</p></td>
+                            <td><p>{content_register.crc.toString(16)}</p></td>
+                            <td><p>{GeneralPurposeService.getFileSizeUnit(content_register.filesize)}</p></td>
+                            <td>
+                                <a href="#"
+                                    onClick={() => this.fetchReplicationNodesForFile(content_register.userId, content_register.filename)} 
+                                    onMouseOver={() => {document.getElementById("admin_view_title_1").innerHTML = "Click to see the nodes that store this file"}}
+                                    onMouseLeave={() => {document.getElementById("admin_view_title_1").innerHTML = "&nbsp;"}} >
+                                    {content_register.replication_factor}
+                                </a>
+                            </td>
+                            <td><p>{content_register.status}</p></td>
+                        </tr>
+                    )
+                })
+            }
+            if(this.state.content_nodes_data !== []){
+                this.state.content_nodes_data.forEach(node => {
+                    replicationNodesForFile.push(
+                        <div>
+                            <p>{node.ip_address} | </p>
+                            <p>{node.location_country} | </p>
+                            <p>{node.status}</p>
+                        </div>
+                    )
+                })
+            }
         }
         return(
             <div className="App">
@@ -215,8 +295,10 @@ class MainAdminPage extends Component {
                         <p id="admin_title">Admin console</p>
                         <button className="admin_action_buttons" onClick = {() => this.adminAction("log")}>Display Log</button>
                         <button className="admin_action_buttons" onClick = {() => this.adminAction("content")}>Content Table</button>
+                        <button className="admin_action_buttons" onClick = {() => this.adminAction("storage")}>Storage Status Table</button>
                         <button className="admin_action_buttons" onClick = {() => this.adminAction("nodes")}>Nodes Status</button>
                         <button className="admin_action_buttons" onClick = {() => this.adminAction("replication")}>Replication Manager Status</button>
+                        <button className="admin_action_buttons" onClick = {() => this.adminAction("connection")}>Connection Table</button>
                         <hr/>
                         <br/><br/>
                     </div>
@@ -261,7 +343,31 @@ class MainAdminPage extends Component {
                             }
                         </div>
                         <div id="admin_content_view" className="admin_div_view">
-                            <p id="admin_view_title">Fetching content...</p>
+                            <p id="admin_view_title_0">Fetching content...</p><br/><br/>
+                            <p id="admin_view_title_1">&nbsp;</p>
+                            <br/>
+                            {this.state.content === null || this.state.content.length === 0 ? 
+                                <p>No log register found!</p> : 
+                                <div>
+                                    <table>
+                                        <thead>
+                                        <tr>
+                                            <th>User ID</th>
+                                            <th>Filename</th>
+                                            <th>Version No</th>
+                                            <th>Hash</th>
+                                            <th>Filesize</th>
+                                            <th>Replication Factor</th>
+                                            <th>Status</th>
+                                        </tr>
+                                        </thead>
+                                        <tbody>
+                                            {content}
+                                        </tbody>
+                                        {replicationNodesForFile}
+                                    </table>
+                                </div>
+                            }
                         </div>
                         <div id="admin_nodes_view" className="admin_div_view">
                             <p id="admin_view_title">Fetching available nodes...</p>

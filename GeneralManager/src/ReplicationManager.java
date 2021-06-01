@@ -16,6 +16,8 @@ public class ReplicationManager implements Runnable{
      */
     private static int replicationFrequency;
 
+    private static List<String> replicationStatusTable = new ArrayList<>();
+
     /**
      * Portul pe care este deschis socket-ul de pe nodul intern
      */
@@ -72,10 +74,14 @@ public class ReplicationManager implements Runnable{
         return availableNodes.subList(0, count);
     }
 
+    public static List<String> getReplicationStatusTable(){
+        return replicationStatusTable;
+    }
 
     /** -------- Main -------- **/
     public void run(){
         while(true) {
+            replicationStatusTable.clear();
             System.out.println(GeneralManager.statusTable);
             System.out.println(GeneralManager.contentTable);
             System.out.println(GeneralManager.nodeStorageQuantityTable);

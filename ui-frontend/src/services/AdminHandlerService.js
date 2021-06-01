@@ -110,4 +110,64 @@ export class AdminHandlerService{
             })
         })
     }
+
+    static sanitizeForURL = (content) => {
+        return content.replace(".", "%2E").replace("_", "%5F");
+    }
+
+    static fetchNodesStoringFile = (userId, filename) => {
+        let url = `${Environment.frontend_proxy}/nodesforfile?user=${userId}&filename=${AdminHandlerService.sanitizeForURL(filename)}`
+        console.log(url)
+        return new Promise((resolve) => {
+            fetch(url, {
+                method: 'GET',
+                mode : "cors",
+            }).then(response => {
+                if(response.ok){
+                    response.json().then(response => {
+                        resolve({
+                            "code" : 1,
+                            "content" : response
+                        })
+                    });
+                }
+                else{
+                    HTTPResponseHandler.handleErrorStatus(response).then(status => {
+                        resolve({
+                            "code" : status.code,
+                            "content" : status.message
+                        })
+                    });
+                }
+            })
+        })
+    }
+
+    static fetchNodeData = (nodeAddress) => {
+        let url = `${Environment.rest_api}/internalnode/${nodeAddress}`
+        
+        return new Promise((resolve) => {
+            fetch(url, {
+                method: 'GET',
+                mode : "cors",
+            }).then(response => {
+                if(response.ok){
+                    response.json().then(response => {
+                        resolve({
+                            "code" : 1,
+                            "content" : response
+                        })
+                    });
+                }
+                else{
+                    HTTPResponseHandler.handleErrorStatus(response).then(status => {
+                        resolve({
+                            "code" : status.code,
+                            "content" : status.message
+                        })
+                    });
+                }
+            })
+        })
+    } 
 }

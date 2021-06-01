@@ -73,6 +73,7 @@ public class NodeStorageQuantityTable extends StorageQuantityTable {
             return availableQuantities.stream().filter(node -> node.getSecond() > 0).map(Pair::getFirst).collect(Collectors.toList());
         }
     }
+
     /** -------- Functii de baza, supraincarcate -------- **/
     @Override
     public String toString() {

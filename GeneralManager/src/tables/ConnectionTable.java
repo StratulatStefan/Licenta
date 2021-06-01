@@ -2,6 +2,7 @@ package tables;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import data.Pair;
 import communication.Address;
@@ -130,7 +131,6 @@ public class ConnectionTable {
         }
         return disconnected;
     }
-
 
     /** -------- Functii de baza, supraincarcate -------- **/
     /**

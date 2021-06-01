@@ -4,6 +4,7 @@ import model.StorageQuantity;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 
 /**
  * Clasa care va contine detaliile referitoare la cantitatile de stocare disponibile;
@@ -90,6 +91,18 @@ public abstract class StorageQuantityTable {
             return this.storageStatus.containsKey(key);
         }
 
+    }
+
+    public List<HashMap<String, Object>> getStorageQuantityTable(){
+        List<HashMap<String, Object>> storageTable = new ArrayList<>();
+        for(String nodeAddress : new ArrayList<>(storageStatus.keySet())){
+            storageTable.add(new HashMap(){{
+                put("ip_address", nodeAddress);
+                put("total_storage", storageStatus.get(nodeAddress).getTotalStorage());
+                put("used_storage", storageStatus.get(nodeAddress).getUsedStorage());
+            }});
+        }
+        return storageTable;
     }
 
 

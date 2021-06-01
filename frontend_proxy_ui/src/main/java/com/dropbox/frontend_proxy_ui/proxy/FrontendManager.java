@@ -14,6 +14,7 @@ import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.Serializable;
 import java.net.Socket;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 
@@ -36,6 +37,21 @@ public class FrontendManager {
         }
         else if(operation == GetContentTableRequest.class){
             op = "[GET CONTENT TABLE]";
+        }
+        else if(operation == GetNodesForFileRequest.class){
+            op = "[GET NODES FOR FILE OF USER]";
+        }
+        else if(operation == GetNodesStorageQuantityRequest.class){
+            op = "[GET NODES STORAGE QUANTITY TABLE]";
+        }
+        else if(operation == GetStorageStatusRequest.class){
+            op = "[GET STORAGE STATUS TABLE]";
+        }
+        else if(operation == GetReplicationStatusRequest.class){
+            op = "[GET REPLICATION STATUS TABLE]";
+        }
+        else if(operation == GetConnectionTableRequest.class){
+            op = "[GET CONNECTION TABLE]";
         }
         else {
             String[] fname = clientRequest.getFilename().split("\\\\");
@@ -63,16 +79,26 @@ public class FrontendManager {
             socketInputStream = new DataInputStream(generalManagerSocket.getInputStream());
             byte[] buffer = new byte[bufferSize];
             ManagerResponse userResponse = null;
+            List<Class<? extends ClientManagerRequest>> complexeGetOperations = Arrays.asList(
+                    GetUserFiles.class,
+                    GetUserFileHistory.class,
+                    GetContentTableRequest.class,
+                    GetNodesForFileRequest.class,
+                    GetNodesStorageQuantityRequest.class,
+                    GetStorageStatusRequest.class,
+                    GetReplicationStatusRequest.class,
+                    GetConnectionTableRequest.class
+            );
             while(socketInputStream.read(buffer, 0, bufferSize) > 0){
-                if(operation == GetUserFiles.class || operation == GetUserFileHistory.class){
-                    userResponse = (ManagerComplexeResponse) Serializer.deserialize(buffer);
+                boolean found_complexe = false;
+                for(Class<? extends ClientManagerRequest> complexeOp : complexeGetOperations){
+                    if(complexeOp == operation){
+                        userResponse = (ManagerComplexeResponse) Serializer.deserialize(buffer);
+                        found_complexe = true;
+                        break;
+                    }
                 }
-                else if(operation == GetContentTableRequest.class){
-                    userResponse = new ManagerComplexeResponse();
-                    ((ManagerComplexeResponse)userResponse).setResponse((List<Object>)Serializer.deserialize(buffer));
-                    int x = 0;
-                }
-                else {
+                if(!found_complexe){
                     userResponse = (ManagerTextResponse) Serializer.deserialize(buffer);
                 }
                 break;

@@ -414,6 +414,16 @@ public class StorageStatusTable {
         throw new Exception("No valid node found!");
     }
 
+    public List<FileAttributesForStorage> getStorageStatusTable() throws Exception {
+        List<FileAttributesForStorage> results =  new ArrayList<>();
+        for(String userId : new ArrayList<>(this.statusTable.keySet())){
+            for(FileAttributesForStorage fileAttributesForStorage : this.statusTable.get(userId)){
+                fileAttributesForStorage.setUserId(userId);
+                results.add(fileAttributesForStorage);
+            }
+        }
+        return results;
+    }
 
     /** -------- Functii de baza, supraincarcate -------- **/
     @Override

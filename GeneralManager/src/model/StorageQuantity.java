@@ -1,12 +1,15 @@
 package model;
 
 import data.Pair;
+import sun.plugin2.message.Serializer;
+
+import java.io.Serializable;
 
 /**
  * Clasa care descrie cantitatea stocarii unei entitati;
  * Entitate : user/nod intern
  */
-public class StorageQuantity{
+public class StorageQuantity implements Serializable {
     /** -------- Atribute -------- **/
     /**
      * Cantitatea totala de memorie disponibila pentru o entitate

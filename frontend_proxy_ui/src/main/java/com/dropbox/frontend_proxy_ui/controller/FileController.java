@@ -158,7 +158,7 @@ public class FileController {
 
     @RequestMapping(path = "/proxy/{filename}", method = RequestMethod.GET)
     public ResponseEntity<String> downloadFile(@PathVariable String filename,
-                                                     @RequestHeader("Authorization") String authorizationValue){
+                                               @RequestHeader("Authorization") String authorizationValue){
         int userId = -1;
         try {
             AuthorizationService.UserTypes allowedUserTypes[] = new AuthorizationService.UserTypes[]{AuthorizationService.UserTypes.ALL};
@@ -172,6 +172,18 @@ public class FileController {
 
         try {
             return new ResponseEntity(ResponseHandlerService.buildSuccessStatus(fileService.downloadFile(userId, filename)), HttpStatus.OK);
+        }
+        catch (Exception exception){
+            Map<String, String> errorResponse = ResponseHandlerService.buildErrorStatus(exception.getMessage());
+            return new ResponseEntity(errorResponse, HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    @RequestMapping(path = "/proxy/nodesforfile", method = RequestMethod.GET)
+    public ResponseEntity<List<Object>> getNodesOfFile(@RequestParam(name="user", required = true, defaultValue = "1") String userId,
+                                                       @RequestParam(name="filename", required = true, defaultValue = "") String filename){
+        try {
+            return new ResponseEntity(fileService.getNodesStoringUserFile(userId, filename).getResponse(), HttpStatus.OK);
         }
         catch (Exception exception){
             Map<String, String> errorResponse = ResponseHandlerService.buildErrorStatus(exception.getMessage());
