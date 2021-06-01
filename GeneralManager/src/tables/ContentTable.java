@@ -382,8 +382,8 @@ public class ContentTable implements Serializable {
         return -1;
     }
 
-    public List<HashMap<String, Object>> getUserFilesForFrontend(String userId) throws Exception {
-        List<HashMap<String, Object>> userFiles = new ArrayList<>();
+    public List<Object> getUserFilesForFrontend(String userId) throws Exception {
+        List<Object> userFiles = new ArrayList<>();
         for(FileAttributes file : this.getUserFiles(userId)){
             if(file.getStatus().contains("DELETE")){
                 continue;
@@ -399,8 +399,15 @@ public class ContentTable implements Serializable {
         return userFiles;
     }
 
-    public HashMap<String, List<FileAttributes>> getContentTable() {
-        return contentTable;
+    public List<FileAttributes> getContentTable() throws Exception {
+        List<FileAttributes> results =  new ArrayList<>();
+        for(String userId : new ArrayList<>(this.contentTable.keySet())){
+            for(FileAttributes fileAttribute : this.getUserFiles(userId)){
+                fileAttribute.setUserId(userId);
+                results.add(fileAttribute);
+            }
+        }
+        return results;
     }
 
     /** -------- Functii de baza, supraincarcate -------- **/

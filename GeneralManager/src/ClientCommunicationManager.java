@@ -406,7 +406,7 @@ public class ClientCommunicationManager {
                             }
                             case GET_CONTENT_TABLE:{
                                 skip = true;
-                                ContentTable contentTable = GeneralManager.contentTable;
+                                List<FileAttributes> contentTable = GeneralManager.contentTable.getContentTable();
                                 dataOutputStream.write(Serializer.serialize(GeneralManager.contentTable.getContentTable()));
                                 break;
                             }

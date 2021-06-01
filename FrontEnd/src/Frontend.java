@@ -11,7 +11,7 @@ import log.ProfiPrinter;
 import os.FileSystem;
 
 public class Frontend {
-    private static final int bufferSize = 1024;
+    private static final int bufferSize = 4096;
 
     private static String generalManagerAddress = "127.0.0.1";
 

@@ -13,7 +13,7 @@ import java.util.List;
 
 public class FeedbackManager implements Runnable{
     private final List<NewFileRequestFeedback> feedbackList;
-    private final static int bufferSize = 1024;
+    private final static int bufferSize = 4096;
 
     public FeedbackManager(){
         this.feedbackList = new ArrayList<NewFileRequestFeedback>();

@@ -11,7 +11,7 @@ public class ManagerComplexeResponse extends ManagerResponse {
     /**
      * Raspunsul afirmativ al nodului general. (succes)
      */
-    private List<HashMap<String, Object>> response;
+    private List<Object> response;
 
     /** -------- Constructori -------- **/
     /**
@@ -21,7 +21,7 @@ public class ManagerComplexeResponse extends ManagerResponse {
     /**
      * Constructor care instantiaza raspunsul;
      */
-    public ManagerComplexeResponse(List<HashMap<String, Object>> response){
+    public ManagerComplexeResponse(List<Object> response){
         this.response = response;
     }
 
@@ -29,7 +29,7 @@ public class ManagerComplexeResponse extends ManagerResponse {
     /**
      * Setter pentru raspunsul nodului general.
      */
-    public void setResponse(List<HashMap<String, Object>> response) {
+    public void setResponse(List<Object> response) {
         this.response = response;
     }
 
@@ -43,7 +43,7 @@ public class ManagerComplexeResponse extends ManagerResponse {
      * Se incearca obtinerea raspunsului afirmativ; In cazul in care nu exista,
      * se va genera o exceptie de tip NullPointerException, care va contine mesajul de eroare.
      */
-    public List<HashMap<String, Object>> getResponse() throws NullPointerException {
+    public List<Object> getResponse() throws NullPointerException {
         if(response == null)
             throw new NullPointerException(this.getException());
         return response;

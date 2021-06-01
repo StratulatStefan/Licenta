@@ -6,6 +6,7 @@ import client_manager.ManagerTextResponse;
 import client_manager.data.*;
 import communication.Serializer;
 import log.ProfiPrinter;
+import model.FileAttributes;
 import os.FileSystem;
 
 import java.io.DataInputStream;
@@ -14,9 +15,10 @@ import java.io.IOException;
 import java.io.Serializable;
 import java.net.Socket;
 import java.util.HashMap;
+import java.util.List;
 
 public class FrontendManager {
-    private static final int bufferSize = 1024;
+    private static final int bufferSize = 4096;
     private static String generalManagerAddress = "127.0.0.1";
     private static int generalManagerPort = 8081;
 
@@ -66,7 +68,8 @@ public class FrontendManager {
                     userResponse = (ManagerComplexeResponse) Serializer.deserialize(buffer);
                 }
                 else if(operation == GetContentTableRequest.class){
-                    ContentTable result = (ContentTable)Serializer.deserialize(buffer);
+                    userResponse = new ManagerComplexeResponse();
+                    ((ManagerComplexeResponse)userResponse).setResponse((List<Object>)Serializer.deserialize(buffer));
                     int x = 0;
                 }
                 else {

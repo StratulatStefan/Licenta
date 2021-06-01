@@ -9,7 +9,7 @@ public class Serializer {
     /** -------- Functiile de serializare si deserializare -------- **/
     /**
      * Functia serializeaza un obiect primit ca parametru. Se tine cont de faptul ca orice mesaj
-     * trimis prin retea trebuie sa aiba 1024 octeti; Asadar, acolo unde este cazul, se completeaza
+     * trimis prin retea trebuie sa aiba 4096 octeti; Asadar, acolo unde este cazul, se completeaza
      * cu zerouri.
      * Obiect -> Stream binar care poate fi transmis prin canalul de comunicatie
      * @param object Obiectul ce se doreste a fi serializat
@@ -22,10 +22,10 @@ public class Serializer {
         objectOutputStream.flush();
 
         byte[] content = byteArrayOutputStream.toByteArray();
-        byte[] data = new byte[1024 - content.length];
-        byte[] result = new byte[1024];
+        byte[] data = new byte[2048 - content.length];
+        byte[] result = new byte[2048];
         System.arraycopy(content, 0, result, 0,  content.length);
-        System.arraycopy(data, 0 , result, content.length, 1024 - content.length);
+        System.arraycopy(data, 0 , result, content.length, 2048 - content.length);
 
         objectOutputStream.close();
         byteArrayOutputStream.close();

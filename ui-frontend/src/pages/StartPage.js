@@ -34,7 +34,7 @@ class StartPage extends Component {
         }
 
         if(this.state.isUserConnected === true && this.state.userType !== ""){
-            this.redirect("/home")
+            this.redirect(this.state.userType === "ADMIN" ? "/ahome" : "/uhome")
         }
     }
 

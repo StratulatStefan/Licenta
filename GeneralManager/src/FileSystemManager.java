@@ -87,9 +87,9 @@ public class FileSystemManager {
     }
 
 
-    public List<HashMap<String, Object>> getUserFileHistoryForFrontend(String user, String filename){
+    public List<Object> getUserFileHistoryForFrontend(String user, String filename){
         long fileHash = GeneralManager.contentTable.getCRCForUser(user, filename);
-        List<HashMap<String, Object>> result = new ArrayList<>();
+        List<Object> result = new ArrayList<>();
         try {
             String nodeAddress = GeneralManager.statusTable.getCandidateAddress(user, filename, fileHash);
             VersionsRequest versionsRequest = new VersionsRequest(user, filename);

@@ -25,7 +25,7 @@ import java.util.function.Consumer;
 public class FileSender {
     private static final String ipAddress = "127.0.0.100";
 
-    private static final int bufferSize = 1024;
+    private static final int bufferSize = 4096;
 
     private static int generalManagerPort = 8081;
 

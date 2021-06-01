@@ -21,7 +21,11 @@ public class WebSocketController {
         try {
             GetContentTableRequest getContentTableRequest = new GetContentTableRequest();
             ManagerComplexeResponse response = (ManagerComplexeResponse) FrontendManager.managerOperationRequest(getContentTableRequest);
-            int x = 0;
+            if(response.getException() != null){
+                throw new Exception(response.getException());
+            }
+            this.template.convertAndSend("/topic/content", response.getResponse());
+
         }
         catch (Exception exception){
             this.template.convertAndSend("/topic/content",new HashMap<String, String>(){{put("exception", exception.getMessage());}});
