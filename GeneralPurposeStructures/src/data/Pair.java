@@ -8,7 +8,7 @@ import java.util.Objects;
  * @param <A> Tipul de date al primului membru al perechii.
  * @param <B> Tipul de date al celui de-al doilea membru al perechii.
  */
-public class Pair<A, B>{
+public class Pair<A, B> implements Serializable{
     /** -------- Atribute -------- **/
     /**
      * Primul membru al perechii.

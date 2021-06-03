@@ -79,9 +79,7 @@ public class LogDaoService implements LogDao {
     }
 
     @Override
-    public void deleteAll() throws Exception {
-        for(Log logRegister : mySQLManager.findlAll(Log.class)){
-            deleteLogRegister(logRegister.getRegisterId());
-        }
+    public void deleteAll(){
+        mySQLManager.removeAll(Log.class);
     }
 }

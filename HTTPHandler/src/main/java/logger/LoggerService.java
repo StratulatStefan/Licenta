@@ -19,12 +19,12 @@ public class LoggerService {
             put("message_type", messageType.toString());
             put("description", messageDescription);
         }};
-        try{
+        /*try{
             String logResponse = httpConnectionService.postRequest(loggerServerPath, logData);
         }
         catch (IOException exception){
             ProfiPrinter.PrintException("Eroare la logging.");
-        }
+        }*/
     }
 
     public static void registerSuccess(String nodeAddress, String messageDescription){

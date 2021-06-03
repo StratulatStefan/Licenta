@@ -96,11 +96,11 @@ public abstract class StorageQuantityTable {
     public List<HashMap<String, Object>> getStorageQuantityTable(){
         List<HashMap<String, Object>> storageTable = new ArrayList<>();
         for(String nodeAddress : new ArrayList<>(storageStatus.keySet())){
-            storageTable.add(new HashMap(){{
-                put("ip_address", nodeAddress);
-                put("total_storage", storageStatus.get(nodeAddress).getTotalStorage());
-                put("used_storage", storageStatus.get(nodeAddress).getUsedStorage());
-            }});
+            HashMap<String, Object> node = new HashMap<>();
+            node.put("ip_address", nodeAddress);
+            node.put("total_storage", storageStatus.get(nodeAddress).getTotalStorage());
+            node.put("used_storage", storageStatus.get(nodeAddress).getUsedStorage());
+            storageTable.add(node);
         }
         return storageTable;
     }

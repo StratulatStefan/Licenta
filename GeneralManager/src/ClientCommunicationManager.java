@@ -306,11 +306,15 @@ public class ClientCommunicationManager {
         return new Runnable() {
             @Override
             public void run(){
-                boolean skip = false;
+                ManagerResponse response = new ManagerResponse();
+                DataOutputStream dataOutputStream = null;
                 try {
-                    ManagerResponse response = new ManagerResponse();
+                    dataOutputStream = new DataOutputStream(clientSocket.getOutputStream());
+                } catch (IOException exception) {
+                    exception.printStackTrace();
+                }
+                try {
                     DataInputStream dataInputStream = new DataInputStream(clientSocket.getInputStream());
-                    DataOutputStream dataOutputStream = new DataOutputStream(clientSocket.getOutputStream());
                     String chain = "";
                     byte[] buffer = new byte[bufferSize];
                     while(dataInputStream.read(buffer, 0, bufferSize) > 0){
@@ -441,6 +445,7 @@ public class ClientCommunicationManager {
                                         .collect(Collectors.toList());
                                 response = new ManagerComplexeResponse();
                                 ((ManagerComplexeResponse)response).setResponse(fileNodes);
+                                break;
                             }
                             case GET_NODES_STORAGE_QUANTITY:{
                                 List<Object> fileNodes = GeneralManager.nodeStorageQuantityTable.getStorageQuantityTable()
@@ -487,6 +492,14 @@ public class ClientCommunicationManager {
                     clientSocket.close();
                 }
                 catch (Exception exception){
+                    response.setException(exception.getMessage());
+
+                    try {
+                        dataOutputStream.write(Serializer.serialize(response));
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+
                     ProfiPrinter.PrintException(exception.getMessage());
                     LoggerService.registerError(GeneralManager.generalManagerIpAddress,
                         String.format("Could not properly close connection with my friend : [%s : %d]", clientSocket.getLocalAddress(), clientSocket.getLocalPort())

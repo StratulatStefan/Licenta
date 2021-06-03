@@ -99,17 +99,21 @@ public class ReplicationManager implements Runnable{
                             // eroare de sincronizare; se va rezolva la iteratia urmatoare a for-ului prin useri
                             continue;
                         }
-                        System.out.print("\t User " + userId + " | File : " + userFile + "  -->  ");
+                        String replicationStatus = "\t User " + userId + " | File : " + userFile + "  -->  ";
                         if (replication_factor == availableNodesForFile.size()) {
                             if(GeneralManager.contentTable.getFileStatusForUser(userId, userFile).contains("PENDING")) {
-                                System.out.println("[UNKNOWN]\n");
+                                replicationStatus += "[UNKNOWN]\n";
+                                System.out.println(replicationStatus);
+                                replicationStatusTable.add(replicationStatus);
                                 continue;
                             }
                             long crc = GeneralManager.contentTable.getCRCForUser(userId, userFile);
                             String versionNo = GeneralManager.contentTable.getVersionForUser(userId, userFile);
                             String corruptedFileAddress = this.checkForFileCorruption(crc, versionNo, availableNodesForFile);
                             if(corruptedFileAddress == null) {
-                                System.out.println("[OK].");
+                                replicationStatus += "[OK].";
+                                System.out.println(replicationStatus);
+                                replicationStatusTable.add(replicationStatus);
                             }
                             else{
                                 List<String> candidatesForDeletion = new ArrayList<String>(){{
@@ -127,7 +131,9 @@ public class ReplicationManager implements Runnable{
                             this.deletion(replication_factor, userId, userFile, candidates);
                         }
                         else{
-                            System.out.println("[UNKNOWN]\n");
+                            replicationStatus += "[UNKNOWN]\n";
+                            System.out.println(replicationStatus);
+                            replicationStatusTable.add(replicationStatus);
                         }
                     }
                     // verificam daca sunt fisiere care sunt in storage status table, dar nu sunt in tabela de content (situatie intalnita atunci cand un nod moare si, intre timp,

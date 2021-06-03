@@ -1,11 +1,14 @@
 package com.dropbox.sql_handler;
 
 import com.dropbox.model.Log;
+import org.hibernate.SessionFactory;
+import org.hibernate.ejb.HibernateEntityManagerFactory;
 
 import javax.persistence.EntityExistsException;
 import javax.persistence.EntityManager;
 import javax.persistence.Query;
 import javax.persistence.RollbackException;
+import java.sql.Statement;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -44,6 +47,13 @@ public class MySQLManager<T> {
             entityManager.getTransaction().rollback();
             return  1;
         }
+    }
+
+    public void removeAll(Class<T> tableType){
+        entityManager.getTransaction().begin();
+        Query deleteQuery = entityManager.createQuery("DELETE from " + tableType.getSimpleName());
+        deleteQuery.executeUpdate();
+        entityManager.getTransaction().commit();
     }
 
     public List<T> findlAll(Class<T> tableType){

@@ -22,10 +22,10 @@ public class Serializer {
         objectOutputStream.flush();
 
         byte[] content = byteArrayOutputStream.toByteArray();
-        byte[] data = new byte[2048 - content.length];
-        byte[] result = new byte[2048];
+        byte[] data = new byte[4096 - content.length];
+        byte[] result = new byte[4096];
         System.arraycopy(content, 0, result, 0,  content.length);
-        System.arraycopy(data, 0 , result, content.length, 2048 - content.length);
+        System.arraycopy(data, 0 , result, content.length, 4096 - content.length);
 
         objectOutputStream.close();
         byteArrayOutputStream.close();

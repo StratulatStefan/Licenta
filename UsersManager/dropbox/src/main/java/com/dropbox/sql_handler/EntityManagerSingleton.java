@@ -7,13 +7,14 @@ public class EntityManagerSingleton {
     private static EntityManager entityManager = null;
 
     public static EntityManager getEntityManager(){
-        if(entityManager == null){
-            System.out.println("Initializing the entity manager for SQL");
-            entityManager = Persistence.createEntityManagerFactory("com.dropbox.sql").createEntityManager();
-        }
-        else{
-            System.out.println("Using the existent entity manager for SQL");
-        }
-        return entityManager;
+        //if(entityManager == null){
+        System.out.println("Initializing the entity manager for SQL");
+        //entityManager = Persistence.createEntityManagerFactory("com.dropbox.sql").createEntityManager();
+        return Persistence.createEntityManagerFactory("com.dropbox.sql").createEntityManager();
+        //}
+        //else{
+            //System.out.println("Using the existent entity manager for SQL");
+        //}
+        //return entityManager;
     }
 }

@@ -385,7 +385,7 @@ public class ContentTable implements Serializable {
     public List<Object> getUserFilesForFrontend(String userId) throws Exception {
         List<Object> userFiles = new ArrayList<>();
         for(FileAttributes file : this.getUserFiles(userId)){
-            if(file.getStatus().contains("DELETE")){
+            if(file.getStatus().contains("DELETE") || file.getStatus().contains("PENDING")){
                 continue;
             }
             HashMap<String, Object> userFile = new HashMap<>();

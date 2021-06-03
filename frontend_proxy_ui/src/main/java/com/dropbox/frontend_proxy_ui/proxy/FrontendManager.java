@@ -138,8 +138,8 @@ public class FrontendManager {
                         FileSender.sendFile(requestData, token);
                         long timeElapsed = System.currentTimeMillis() - start;
                         long fileCRC = FileSystem.calculateCRC(requestData.getFilename());
-                        FileSystem.deleteFile(requestData.getFilename());
                         FileSender.waitForFeedback(requestData.getUserId(), token, requestData.getFilename(), timeElapsed, fileCRC);
+                        FileSystem.deleteFile(requestData.getFilename());
                     }
                     else if(operation == DeleteFileRequest.class){
                         System.out.println("Delete file request : " + requestData.getFilename() + " -> " + response);

@@ -20,7 +20,8 @@ class MainAdminPage extends Component {
             log : [],
             websocket : {"connected" : false, "subscription" : null},
             content : null,
-            content_nodes_data : []
+            content_nodes_data : [],
+            storagestatus : null
         }
         this.logCriteria = {message_type : "ALL", node_address : "ALL", date1 : GeneralPurposeService.getCurrentTimestampForLogging("1 year")}
         this.webSocketConnection = null;
@@ -92,9 +93,8 @@ class MainAdminPage extends Component {
     handleContentTable = (message) => {
         if (message.body) {
             document.getElementById("admin_view_title_0").innerHTML = "Content table successfully fetched!"
-            let content = JSON.parse(message.body)
-            this.setState({content : content})
-            console.log(content)
+            this.setState({content : JSON.parse(message.body)})
+            console.log(message.body)
         }
     }
 
@@ -112,6 +112,7 @@ class MainAdminPage extends Component {
 
     handleStorageStatus = (message) => {
         if (message.body) {
+            this.setState({storagestatus : JSON.parse(message.body)})
             console.log(message.body)
         }
     }
@@ -123,7 +124,16 @@ class MainAdminPage extends Component {
     }
 
     adminAction = (actionName) => {
-        this.adminContentRefresh()
+        document.getElementById("admin_log_view").style.display               = "none"
+        document.getElementById("admin_content_view").style.display           = "none"
+        document.getElementById("admin_nodes_view").style.display             = "none"
+        document.getElementById("admin_replication_view").style.display       = "none"
+        document.getElementById("admin_connectiontable_view").style.display   = "none"
+        document.getElementById("admin_storagestatus_view").style.display     = "none"
+        if(this.state.websocket.connected === true && this.state.websocket.subscription !== undefined){
+            this.state.websocket.subscription.unsubscribe()
+        }
+
         let current_topic = null
         let handleFunction = null
         switch(actionName){
@@ -138,26 +148,26 @@ class MainAdminPage extends Component {
                 handleFunction = this.handleContentTable
                 break;
             }
+            case "storage":{
+                document.getElementById("admin_storagestatus_view").style.display = "block"
+                current_topic = "/topic/storage"
+                handleFunction = this.handleStorageStatus
+                break;
+            }
             case "nodes":{
                 document.getElementById("admin_nodes_view").style.display = "block"
                 current_topic = "/topic/nodes"
                 handleFunction = this.handleNodesActivity
                 break;
             }
-            case "storage":{
-                document.getElementById("admin_nodes_view").style.display = "block"
-                current_topic = "/topic/storage"
-                handleFunction = this.handleStorageStatus
-                break;
-            }
             case "replication":{
-                document.getElementById("admin_replication_content").style.display = "block"
+                document.getElementById("admin_replication_view").style.display = "block"
                 current_topic = "/topic/replication"
                 handleFunction = this.handleReplicationManagerStatus
                 break;
             }
             case "connection":{
-                document.getElementById("admin_replication_content").style.display = "block"
+                document.getElementById("admin_connectiontable_view").style.display = "block"
                 current_topic = "/topic/connection"
                 handleFunction = this.handleConnectionTable
                 break;
@@ -186,16 +196,6 @@ class MainAdminPage extends Component {
         })
     }
 
-    adminContentRefresh = () => {
-        document.getElementById("admin_log_view").style.display            = "none"
-        document.getElementById("admin_content_view").style.display        = "none"
-        document.getElementById("admin_nodes_view").style.display          = "none"
-        document.getElementById("admin_replication_content").style.display = "none"
-        if(this.state.websocket.connected === true && this.state.websocket.subscription !== undefined){
-            this.state.websocket.subscription.unsubscribe()
-        }
-    }
-    
     cleanLog = () =>{
         AdminHandlerService.cleanLog(this.logCriteria).then(response => {
             if(response.code === 1){
@@ -208,6 +208,7 @@ class MainAdminPage extends Component {
         console.log("Fetching nodes that store " + filename + " of user " + userId)
         this.setState({content_nodes_data : []})
         AdminHandlerService.fetchNodesStoringFile(userId, filename).then(response => {
+            console.log(response.content)
             if(response.code === 1){
                 response.content.forEach(address => {
                     console.log(address)
@@ -335,11 +336,14 @@ class MainAdminPage extends Component {
                             <br/>
                             {this.state.log.length === 0 ? 
                                 <p>No log register found!</p> : 
-                                <table>
-                                    <tbody>
-                                        {logData}
-                                    </tbody>
-                                </table>
+                                <div>
+                                    <table>
+                                        <tbody>
+                                            {logData}
+                                        </tbody>
+                                    </table>
+                                </div>
+
                             }
                         </div>
                         <div id="admin_content_view" className="admin_div_view">
@@ -364,7 +368,33 @@ class MainAdminPage extends Component {
                                         <tbody>
                                             {content}
                                         </tbody>
-                                        {replicationNodesForFile}
+                                    </table>
+                                    {replicationNodesForFile}
+                                </div>
+                            }
+                        </div>
+                        <div id="admin_storagestatus_view" className="admin_div_view">
+                            <p id="admin_view_title_0">Fetching internal nodes storage status...</p><br/><br/>
+                            <p id="admin_view_title_1">&nbsp;</p>
+                            <br/>
+                            {this.state.content === null || this.state.content.length === 0 ? 
+                                <p>No log register found!</p> : 
+                                <div>
+                                    <table>
+                                        <thead>
+                                        <tr>
+                                            <th>User ID</th>
+                                            <th>Filename</th>
+                                            <th>Version No</th>
+                                            <th>Hash</th>
+                                            <th>Filesize</th>
+                                            <th>Replication Factor</th>
+                                            <th>Status</th>
+                                        </tr>
+                                        </thead>
+                                        <tbody>
+                                            {content}
+                                        </tbody>
                                     </table>
                                 </div>
                             }
@@ -372,7 +402,10 @@ class MainAdminPage extends Component {
                         <div id="admin_nodes_view" className="admin_div_view">
                             <p id="admin_view_title">Fetching available nodes...</p>
                         </div>
-                        <div id="admin_replication_content" className="admin_div_view">
+                        <div id="admin_connectiontable_view" className="admin_div_view">
+                            <p id="admin_view_title">Fetching available nodes...</p>
+                        </div>
+                        <div id="admin_replication_view" className="admin_div_view">
                             <p id="admin_view_title">Fetching replication manager status...</p>
                         </div>
                 </div>

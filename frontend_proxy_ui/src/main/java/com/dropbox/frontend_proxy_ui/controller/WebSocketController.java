@@ -17,40 +17,28 @@ public class WebSocketController {
     private SimpMessagingTemplate template;
 
     void fetchContentAndSend(ClientManagerRequest requestObject, String topic){
-        try {
-            ManagerComplexeResponse response = (ManagerComplexeResponse) FrontendManager.managerOperationRequest(requestObject);
-            if(response.getException() != null)
-                throw new Exception(response.getException());
-            this.template.convertAndSend("/topic/" + topic, response.getResponse());
-        }
-        catch (Exception exception){
-            this.template.convertAndSend("/topic/" + topic,new HashMap<String, String>(){{put("exception", exception.getMessage());}});
-        }
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    ManagerComplexeResponse response = (ManagerComplexeResponse) FrontendManager.managerOperationRequest(requestObject);
+                    if(response.getException() != null)
+                        throw new Exception(response.getException());
+                    template.convertAndSend("/topic/" + topic, response.getResponse());
+                }
+                catch (Exception exception){
+                    template.convertAndSend("/topic/" + topic,new HashMap<String, String>(){{put("exception", exception.getMessage());}});
+                }
+            }
+        }).start();
     }
 
-    @Scheduled(fixedRate = 2000)
+    @Scheduled(fixedRate = 4000)
     public void sendContent(){
-        fetchContentAndSend(new GetContentTableRequest(), "content");
+        //fetchContentAndSend(new GetContentTableRequest(), "content");
+        //fetchContentAndSend(new GetNodesStorageQuantityRequest(), "nodes");
+        //fetchContentAndSend(new GetStorageStatusRequest(), "storage");
+        //fetchContentAndSend(new GetReplicationStatusRequest(), "replication");
+        //fetchContentAndSend(new GetConnectionTableRequest(), "connection");
     }
-
-    @Scheduled(fixedRate = 2000)
-    public void sendNodes(){
-        fetchContentAndSend(new GetNodesStorageQuantityRequest(), "nodes");
-    }
-
-    @Scheduled(fixedRate = 2000)
-    public void sendStorageTable(){
-        fetchContentAndSend(new GetStorageStatusRequest(), "storage");
-    }
-
-    @Scheduled(fixedRate = 2000)
-    public void sendReplication(){
-        fetchContentAndSend(new GetReplicationStatusRequest(), "replication");
-    }
-
-    @Scheduled(fixedRate = 2000)
-    public void sendConnectionTable(){
-        fetchContentAndSend(new GetConnectionTableRequest(), "connection");
-    }
-
 }
