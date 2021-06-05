@@ -2,11 +2,10 @@
 <html lang="en">
   <head>
     <meta charset="utf-8" />
-    <link rel="icon" href="%PUBLIC_URL%/favicon.ico" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link rel="icon"          href="%PUBLIC_URL%/favicon.ico" />
     <link rel="shortcut icon" href="%PUBLIC_URL%/favicon.ico" />
-    <link rel="manifest" href="%PUBLIC_URL%/manifest.json" />
-    <script src="https://cdn.jsdelivr.net/npm/sockjs-client@1/dist/sockjs.min.js"></script>
+    <link rel="manifest"      href="%PUBLIC_URL%/manifest.json" />
     <title>Dropbox</title>
   </head>
   <body>
@@ -17,9 +16,16 @@
         </a>
       </h2>
       <h3 id="page-name"></h3>
-      <a class="menu-option" href="/home">Home</a>
-      <a class="menu-option" href="/upload">Upload</a>
-      <a class="menu-option" href="about">About</a>
+      <a class="menu-option" href="/"       id="home_redirector">Home</a>
+      <a class="menu-option" href="/upload" id="upload_redirector">Upload</a>
+      <a class="menu-option" href="/about"  id="about_redirector">About</a>
+      <a class="menu-option" href="#"       id="log_redirector">Log</a>
+      <a class="menu-option" href="#"       id="content-table_redirector">Content Table</a>
+      <a class="menu-option" href="#"       id="storage-table_redirector">Storage Status Table</a>
+      <a class="menu-option" href="#"       id="nodes-status_redirector">Nodes Status</a>
+      <a class="menu-option" href="#"       id="replication-status_redirector">Replication Status</a>
+      <a class="menu-option" href="#"       id="connection-table_redirector">Connection Table</a>
+
       <div class="log_data">
         <a href="/profile">
           <img id="log_data_profile" src="images/user_logo.png" />
@@ -33,13 +39,13 @@
   <script>
     let userData = localStorage.getItem('user_data')
     try{
-      userData = JSON.parse(userData)
-      document.getElementById("logoutButton").style.visibility = "visible"
-      document.getElementById("log_data_uname").innerHTML = userData["name"];
-      document.getElementById("log_data_profile").style.visibility = "visible";
+        userData = JSON.parse(userData)
+        document.getElementById("logoutButton").style.visibility = "visible"
+        document.getElementById("log_data_uname").innerHTML = userData["name"];
+        document.getElementById("log_data_profile").style.visibility = "visible";
     }
     catch(e){
-      console.log("No user logged in!")
+        console.log("No user logged in!")
     }
     document.getElementById("logoutButton").onclick = function () {
         localStorage.setItem("user_data", '')

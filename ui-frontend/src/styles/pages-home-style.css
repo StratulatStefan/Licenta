@@ -3,122 +3,33 @@
     margin-top: 4%;
     margin-left: 3%;
     font-size: 20px;
-    /*border: 5px solid black;*/
     width: 95%;
     height: 1000px;
 }
 
-.Home hr{
-    border : 3px solid #126e82;
-    border-radius: 30px;
-}
 
 .Home .home_header{
     text-align: left;
 }
+
 .Home .upload_header{
     text-align: center;
+    margin-top: -2%;
+    font-size: 100%;
 }
 
 .Home p{
     display: inline-block;
 }
 
-.Home .search-container{
-    font-size: 240px;
-}
-
-.Home .home_header .home_searchbar{
-    padding-top: 1%;
-    float: right;
-    height: 40px;
-}
-
 .Home input{
     display: inline-block;
     text-align: center;
-    font-size: 27px;
+    font-size: 80%;
     margin-right: 20px;
     color : #233e8b;
     font-weight: bold;
 }
-
-.Home .home_header .home_searchbar button{
-    font-size: 27px;
-    background-color: transparent;
-    border : 2px solid #233e8b;
-}
-
-.Home .upload_div p{
-    font-size: 40px;
-    padding-top: 10%;
-}
-
-.Home .upload_div p #dropmessage{
-    padding-top: 5%;
-}
-
-.Home .upload_body button{
-    font-size: 30px;
-    color: #02475e;
-    font-weight: bold;
-    border: 5px solid #02475e;
-    border-radius: 15px;
-}
-
-.Home .upload_body{
-    display: flex;
-    padding-left: 15%;
-    padding-right: 15%;
-
-}
-
-.Home .upload_body .upload_div{
-    position: relative;
-    float: left;
-    height: 100%;
-    border : 5px solid #02475e;
-    border-radius: 25px;
-    height: 50%;
-    width: 50%;
-    margin: 0 auto;
-    margin-top: 5%;
-}
-
-.Home .upload_body .upload_data{
-    margin-top: 5%;
-    position: relative;
-    width: 50%;
-    float: left;
-    height: 900px;
-    border : 5px solid #02475e;
-    display: none;
-}
-
-.Home .upload_body .upload_data_details{
-    font-size: 20px;
-}
-
-.Home .upload_body #upload_date_filename{
-    font-size: 30px;
-}
-
-.Home .upload_body button{
-    margin-top: 5%;
-}
-
-.Home .upload_body input{
-    position: relative;
-    width: 70%;
-}
-
-.Home .upload_body #upload_data_preview{
-    height: 30%;
-    width: 70%;
-    border: 5px solid black;
-    border-radius: 20px;
-}
-
 
 .Home .userFile{
     border: 5px solid black;
@@ -127,37 +38,25 @@
     margin-bottom: 1%;
 }
 
+.Home td{
+    border-bottom: 5px solid #6e7e86;
+    text-align: center;
+    padding: 15px;
+}
+
 .Home td p{
-    font-size: 120%;
+    font-size: 90%;
 }
 
 .Home td img{
     border-radius: 15px;
     margin-bottom: 1%;
     position: relative;
-    width: 60px;
-    height: 70px;
+    width: 50px;
+    height: 60px;
     padding: 15px;
     margin-left: 20px;
     margin-right: 20px;
-}
-
-.Home td button{
-    background: transparent;
-    border: none;
-    width: 50px;
-    height: 60px;
-}
-
-.Home td button > img:hover{
-    width: 60px;
-    height: 70px;
-}
-
-
-td{
-    text-align: left;
-    padding: 15px;
 }
 
 tr{
@@ -175,16 +74,29 @@ tr{
 
 .home_body_main_div{
     display: flex;
+    width: 100%;
+    margin: 0 auto;
+    margin-left: -20px;
+}
+
+#file_versions{
+    width: 20%;
+    height: 800px;
+    padding-left: 1%;
+    padding-top: 2%;
+}
+
+#file_versions label{
+    font-size: 90%;
 }
 
 #file_details{
-    width: 33%;
+    width: 25%;
     height: 800px;
-    border-left: 5px solid black;
-    visibility: hidden;
-    text-align: left;
-    padding-left: 3%;
-    display:block;
+    text-align: center;
+    padding-left: 2%;
+    padding-top: 2%;
+
 }
 
 #file_details #details_filename{
@@ -209,27 +121,20 @@ ul{
 
 }
 
-.details_history .details_desc{
-    text-align: left;
-    width: 65%;
-}
-
-.details_history .details_date{
-    text-align: right;
-}
-
-#file_details button{
+.file_actions button{
     text-align: center;
-    font-size: 22px;
+    font-size: 30px;
     margin-left: 20px;
     font-weight: bold;
     color: #005a8d;
     border-radius: 10px;
 }
 
-#file_status{
+#file_status, #file_status_delete, #file_status_rename, #file_status_rename_1, #file_status_update{
+    margin-top: 15%;
     width: 100%;
     text-align: center;
+    font-size: 85%;
 }
 
 .request_description{
@@ -237,77 +142,48 @@ ul{
     margin-top: 2%;
     visibility: hidden;
 }
-.request_description input{
-    margin-left: 10px;
-    font-size: 100%;
+
+input{
+    width: 70%;
+    border-radius: 7px;
 }
 
 #downloaduri{
     visibility: hidden;
 }
 
-iframe{
-    height: 400px;
-    width: 600px;
-    visibility: hidden;
-}
 
-.admin_action_buttons{
-    text-align: center;
-    font-size: 25px;
-    margin-left: 20px;
-    font-weight: bold;
-    color: #005a8d;
-    border-radius: 10px;
-}
 
-#admin_title{
-    margin-right: 25%;
-}
-
-.admin_div_view{
-    display: none;
+table{
+    width: 80%;
     margin: 0 auto;
 }
 
-.admin_div_view p{
-    font-size: 25px;
-}
-
-.admin_div_view #admin_view_title{
-    font-size: 30px;
-}
-
-
-.admin_div_view select{
-    margin-right: 3%;
-    font-weight: bold;
-}
-
-.admin_div_view table{
-    width: 80%;
-    margin-left: 10%;
-}
-.admin_div_view table p{
-    font-size: 20px;
-}
-
-.admin_div_view td, th {
-    border: 1px solid #1597bb;
+.Home thead td{
     text-align: center;
-    padding: 8px;
-  }
-
-  
-.admin_div_view button{
-    font-size: 30px;
-    color: #02475e;
-    font-weight: bold;
-    border: 5px solid #02475e;
-    border-radius: 15px;
-    margin-bottom: 1%;
+    border-bottom: 5px solid #007580;
 }
 
-.admin_div_view a{
-    font-weight: bold;
+.App #previews embed, iframe{
+    border-radius: 10px;
+    height: 650px;
+    margin-top: 3%;
+    margin-left: 2%;
+    margin-right: 1%;
+}
+
+.App #previews{
+    width: 50%;
+}
+
+.App embed, iframe{
+    width: 100%;
+}
+
+#p_filename{
+    width: 50%;
+}
+
+.action_div{
+    display: none;
 }

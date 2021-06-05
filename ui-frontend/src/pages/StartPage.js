@@ -82,8 +82,8 @@ class StartPage extends Component {
     }
 
     login = () => {
-        this.accountCredentials = {"email" : "stefanc.stratulat@gmail.com", "password" : "parola.dropbox123"}
-        //this.accountCredentials = {"email" : "dropbox.com@dpbox.com", "password" : "82467913"}
+        //this.accountCredentials = {"email" : "stefanc.stratulat@gmail.com", "password" : "parola.dropbox123"}
+        this.accountCredentials = {"email" : "dropbox.com@dpbox.com", "password" : "82467913"}
         console.log(this.accountCredentials)
         UsersHandlerService.login(this.accountCredentials).then(response => {
             if(response.code === 1){
@@ -93,6 +93,8 @@ class StartPage extends Component {
                 document.getElementById("logoutButton").style.visibility = "visible"
             }
             else{
+                document.getElementById("status_message").style.display = "block"
+                document.getElementById("status_message").style.color = "#810000";
                 document.getElementById("status_message").innerHTML = response.content
             }
         })
@@ -101,13 +103,16 @@ class StartPage extends Component {
     createAccount = () => {
         UsersHandlerService.register(this.accountCredentials).then(response => {
             console.log(response)
+            document.getElementById("status_message").style.display = "block"
             if(response.code === 1){
                 document.getElementById("status_message").innerHTML = response.content["success status"]
+                document.getElementById("status_message").style.color = "#206a5d";
                 this.setState({
                     accountSuccessfullyCreated : true
                 })
             }
             else{
+                document.getElementById("status_message").style.color = "#810000";
                 document.getElementById("status_message").innerHTML = response.content
             }
         })
@@ -138,7 +143,7 @@ class StartPage extends Component {
         if(StartPage.availableUserTypes !== null){
             StartPage.availableUserTypes.forEach(usertype => {
                 userypesoptions.push(
-                    <option value={usertype["user_type"]}>{usertype["user_type"]}</option>
+                    <option key={`option_${usertype["user_type"]}`} value={usertype["user_type"]}>{usertype["user_type"]}</option>
                 )
             })
         }
@@ -146,7 +151,11 @@ class StartPage extends Component {
 
       return (
         <div className="App">
-            <p id="title">Home</p>
+            <div className="title">
+                <img id="title_logo" src="images/logo.png" />
+                <label id="title_text">Safestorage</label>
+            </div>
+            <hr/>
             {this.state.isUserConnected === false ?
                 <div id="homediv">
                     <div id="homediv_left">
@@ -159,8 +168,6 @@ class StartPage extends Component {
                                 <br/>
                                 <br/>
                                 The ultimate app for storing and versioning your files in the safest way
-                                <br/>
-                                Inca ceva text aici, de umplutura, ca sa stim ce avem, eventual o lista!
                             </p>
                         </div>
                     </div>
@@ -168,61 +175,67 @@ class StartPage extends Component {
                         {this.state.accountAvailable === true ? 
                         <div>
                             <p className="login_header">Log into your account</p>
-
                             <p>Email</p>
                             <input 
                                 onChange={(event) => {this.credentialInput(event, "email")}} 
-                                type="email" />
-
+                                type="email" 
+                            />
                             <p>Password</p>
                             <input 
                                 onChange={(event) => {this.credentialInput(event, "password")}} 
-                                type="password" />
-                            
+                                type="password"
+                            />
                             <p><button className="redirector" onClick={this.login}>Autentificare</button></p>
-                            <p>Nu ai un cont? <button className="a_redirector" onClick={() => {
-                                this.setState({accountAvailable : false})
-                                this.accountCredentials = {name : "", email : "", password : "", type: `${StartPage.availableUserTypes[0]["user_type"]}`, country : ""}
-                                }}>Creaza un cont</button></p>
                         </div> : 
                         <div>
                             <p className="login_header">Create account</p>
-
                             <p>Name</p>
                             <input 
                                 onChange={(event) => {this.credentialInput(event, "name")}} 
                                 type="text" />
-                            
                             <p>Email</p>
                             <input 
                                 onChange={(event) => {this.credentialInput(event, "email")}} 
                                 type="email" />
-
                             <p>Password</p>
                             <input 
                                 onChange={(event) => {this.credentialInput(event, "password")}} 
                                 type="password" />
-
                             <p>User type</p>
                             <select onChange={(event) => {this.accountCredentials["type"] = event.target.value}}>
                                 {userypesoptions}
                             </select>
-
                             <p>Country</p>
                             <input 
                                 onChange={(event) => {this.credentialInput(event, "country")}} 
                                 type="text" />
-                        
-                            <p><button className="redirector" onClick={this.createAccount}>Create account</button></p>
-                        </div>
-                        }
-                        <p id="status_message"></p>
+                            <br/>
+                            <label><button className="redirector" onClick={this.createAccount}>Create account</button></label>
+                        </div>}
+                        <p id="status_message">gol</p>
                         {this.state.accountSuccessfullyCreated === true ? 
                             <p><button className="a_redirector" onClick={() => {
-                                this.setState({accountAvailable : true})
-                                this.accountCredentials = {email : "", password : ""}
-                                }}>Go to login.</button>
+                                    this.setState({accountAvailable : true})
+                                    this.accountCredentials = {email : "", password : ""}
+                                }}>
+                                Go to login.
+                                </button>
                             </p> : <p></p>
+                        }
+                        {this.state.accountAvailable === true ? 
+                            <p>No account ? <button className="a_redirector" onClick={() => {
+                                document.getElementById("status_message").style.color = "#02475e";
+                                document.getElementById("status_message").style.display = "none"
+                                this.setState({accountAvailable : false})
+                                this.accountCredentials = {name : "", email : "", password : "", type: `${StartPage.availableUserTypes[0]["user_type"]}`, country : ""}
+                                }}>Create an account</button></p> : 
+                            <p>Have account ? <button className="a_redirector" onClick={() => {
+                                document.getElementById("status_message").style.color = "#02475e";
+                                document.getElementById("status_message").style.display = "none"
+                                this.setState({accountAvailable : true})
+                                this.accountCredentials = {name : "", email : "", password : "", type: `${StartPage.availableUserTypes[0]["user_type"]}`, country : ""}
+                                }}>Sign in</button>
+                            </p>
                         }
                     </div>
                 </div> : <p></p>

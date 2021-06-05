@@ -51,4 +51,44 @@ export class GeneralPurposeService{
 
         return  `${year}-${month}-${day}%20${hours}:${minutes}`
     }
+
+    static getFileExtension = (filename) => {
+        let tokens = filename.split(".")
+        return tokens[tokens.length - 1];
+    }
+
+    static getFileType = (filename) => {
+        let extension = GeneralPurposeService.getFileExtension(filename)
+        let img = ["jpg", "jpeg", "png", "ico", "gif"]
+        let exe = ["msi", "exe"]
+        if(img.includes(extension)){
+            return "image"
+        }
+        if(exe.includes(extension)){
+            return "exe"
+        }
+        return "text"
+    }
+
+    static setHeaderLayout = (usertype) => {
+        let adminItems = [
+            "log_redirector", "content-table_redirector", 
+            "storage-table_redirector", "nodes-status_redirector", 
+            "replication-status_redirector", "connection-table_redirector"
+        ]
+        let userItems = ["upload_redirector", "home_redirector", "about_redirector"]
+        adminItems.concat(userItems).forEach(redirector => {
+            document.getElementById(redirector).style.display = "none"
+        })
+        if(usertype === "ADMIN"){
+            adminItems.forEach(redirector => {
+                document.getElementById(redirector).style.display = "block"
+            })
+        }
+        else{
+            userItems.forEach(redirector => {
+                document.getElementById(redirector).style.display = "block"
+            })
+        }
+    }
 }

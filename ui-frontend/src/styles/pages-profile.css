@@ -1,0 +1,71 @@
+.profile{
+    display: flex;
+    width: 95%;
+    padding-top: 2%;
+    margin: 0 auto;
+    height:650px
+}
+
+
+.profile .profile_left{
+    width: 40%;
+}
+
+.profile .profile_right{
+    width: 60%;
+    padding-top: 10.5%;
+}
+
+
+.profile .profile_left #log_data_profile{
+    max-width: 140px;
+    max-height: 140px;
+    padding-top: 15%;
+}
+
+
+.profile .accountData{
+    display: inline-block;
+    margin-top: 5%;
+    width: 90%;
+}
+
+.profile .accountData .accountDataField{
+    text-align: left;
+}
+
+.profile .accountData .accountDataValue{
+    float:right;
+}
+
+.profile .accountData .upgradeplan{
+    border: 5px solid #325288;
+    border-radius: 20px;
+    width: 50%;
+    margin: 0 auto;
+}
+
+
+ul {
+    margin: 0;
+    padding-bottom: 2%;
+    width: 90%;
+    text-align: left;
+}
+  
+
+li {
+    display: inline;
+    padding-right: 3%;
+    font-size: 120%;
+    font-weight: bold;
+}
+
+li a{
+    color: #344fa1;
+    padding-bottom: 1%;
+}
+
+li a:hover{
+    color:#3d84b8;
+}

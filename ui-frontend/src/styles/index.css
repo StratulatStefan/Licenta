@@ -17,7 +17,7 @@ body {
   -webkit-text-stroke-color: #126e82;
 
   height: 100%;
-  width: 20%;
+  width: 15%;
   position: fixed;
   top: 0;
   left: 0;
@@ -27,35 +27,33 @@ body {
 }
 
 .header #title{
-  font-size: 35px;
+  font-size: 30px;
   padding-left: 10%;
   padding-right: 10%;
 }
 
 .header #title_logo{
-  max-width: 150px;
-  max-height: 150px;
+  max-width: 110px;
+  max-height: 110px;
 }
 
 .header a{
   display: block;
   padding: 4%;
   color: white;
-  font-size: 35px;
+  font-size: 140%;
   transition: all 0.3s ease;
   text-decoration: none;
 }
 
 .header .menu-option:hover{
-  font-size: 45px;
+  font-size: 170%;
   color:#2978b5;
 }
 
 .header #page-name{
-
-  font-size: 40px;
-  
-  padding-top: 50px;
+  font-size: 32px;
+  padding-top: 20%;
   padding-left: 10%;
   padding-right: 10%;
 
@@ -63,25 +61,30 @@ body {
 
 #root{
   text-align: center;
-  background-color : #8ab6d6;
+  background-color : #dbe4eb;
   height: 100%;
   overflow : auto;
   overflow-x: hidden;
-  margin-left: 20%;
+  margin-left: 15%;
 
 }
 
 .log_data{
-  margin-top: 25%;
-  font-size: 25px;
+  position: fixed;
+  bottom: 3%;
+  width: 15%;
+  font-size: 20px;
 }
 
 .log_data #log_data_profile{
-  max-width: 100px;
-  max-height: 100px;
+  max-width: 75px;
+  max-height: 75px;
   visibility: hidden;
 }
 
-#logoutButton{
-  font-size: 25px;
+button{
+  font-size: 20px;
+  border-radius: 10px;
+  color : #0c4271;
+  font-weight: bold;
 }

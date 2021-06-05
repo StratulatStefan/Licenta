@@ -10,7 +10,6 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.io.IOException;
 import java.util.HashMap;
-
 @RestController
 public class WebSocketController {
     @Autowired
@@ -33,12 +32,12 @@ public class WebSocketController {
         }).start();
     }
 
-    @Scheduled(fixedRate = 4000)
+    @Scheduled(fixedRate = 5000)
     public void sendContent(){
-        //fetchContentAndSend(new GetContentTableRequest(), "content");
-        //fetchContentAndSend(new GetNodesStorageQuantityRequest(), "nodes");
-        //fetchContentAndSend(new GetStorageStatusRequest(), "storage");
-        //fetchContentAndSend(new GetReplicationStatusRequest(), "replication");
-        //fetchContentAndSend(new GetConnectionTableRequest(), "connection");
+        fetchContentAndSend(new GetContentTableRequest(), "content");
+        fetchContentAndSend(new GetNodesStorageQuantityRequest(), "nodes");
+        fetchContentAndSend(new GetStorageStatusRequest(), "storage");
+        fetchContentAndSend(new GetReplicationStatusRequest(), "replication");
+        fetchContentAndSend(new GetConnectionTableRequest(), "connection");
     }
 }

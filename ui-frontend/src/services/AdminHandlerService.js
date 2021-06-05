@@ -170,4 +170,32 @@ export class AdminHandlerService{
             })
         })
     } 
+
+    static getFileVersions = (userid, filename) => {
+        let url = `${Environment.frontend_proxy}/versions?filename=${filename}&userid=${userid}`
+
+        return new Promise((resolve) => {
+            fetch(url, {
+                method: 'GET',
+                mode : "cors",
+            }).then(response => {
+                if(response.ok){
+                    response.json().then(response => {
+                        resolve({
+                            "code" : 1,
+                            "content" : response
+                        })
+                    });
+                }
+                else{
+                    HTTPResponseHandler.handleErrorStatus(response).then(status => {
+                        resolve({
+                            "code" : status.code,
+                            "content" : status.message
+                        })
+                    });
+                }
+            })
+        })
+    }
 }

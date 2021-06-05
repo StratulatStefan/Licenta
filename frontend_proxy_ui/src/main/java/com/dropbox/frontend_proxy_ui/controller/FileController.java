@@ -106,6 +106,19 @@ public class FileController {
         }
     }
 
+    @RequestMapping(path = "/proxy/versions", method = RequestMethod.GET)
+    public ResponseEntity<List<HashMap<String, Object>>> getUserFileHistory(@RequestParam(name="filename", required = false, defaultValue = "") String filename,
+                                                                            @RequestParam(name="userid", required = false, defaultValue = "") int userId){
+        try {
+            return new ResponseEntity(fileService.getUserFileHistory(userId, filename).getResponse(), HttpStatus.OK);
+        }
+        catch (Exception exception){
+            Map<String, String> errorResponse = ResponseHandlerService.buildErrorStatus(exception.getMessage());
+            return new ResponseEntity(errorResponse, HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+
     @RequestMapping(path = "/proxy/{filename}", method = RequestMethod.DELETE)
     public ResponseEntity<String> deleteFile(@PathVariable String filename,
                                              @RequestBody HashMap<String, String> description,

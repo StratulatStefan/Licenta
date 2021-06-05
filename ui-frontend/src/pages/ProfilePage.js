@@ -3,9 +3,10 @@ import {UsersHandlerService} from '../services/UsersHandlerService';
 import { GeneralPurposeService } from '../services/GeneralPurposeService';
 
 import '../styles/pages-style.css';
+import '../styles/pages-profile.css';
 
 class ProfilePage extends Component {
-    static userDetailsCategories = ["general_info", "storage_status", "plan"]
+    static userDetailsCategories = ["storage_status", "plan"]
     static availableUserTypes = null
     
     constructor(props){
@@ -24,7 +25,7 @@ class ProfilePage extends Component {
     componentDidUpdate = () => {
         ProfilePage.userDetailsCategories.forEach(category => {
             document.getElementById(`selector_${category}`).style.borderBottom = 
-                (category === this.state.userDetailsCategory) ? "5px solid #23049d" : "none";
+                (category === this.state.userDetailsCategory) ? "3px solid #23049d" : "none";
         })
 
         if(this.state.userDetailsCategory === ProfilePage.userDetailsCategories[0] && this.state.additionalUserData === null){
@@ -115,30 +116,28 @@ class ProfilePage extends Component {
 
     render() {
         let userDetails = <div></div>
+        let generalData = <div></div>
         if(this.state.additionalUserData !== null){
+            generalData = 
+                <div className = "accountData">
+                    <p className="accountDataField" >
+                        Name
+                        <span className = "accountDataValue">{this.state.additionalUserData["name"]}</span>
+                    </p>
+                    <p className="accountDataField" >
+                        Email
+                        <span className = "accountDataValue">{this.state.additionalUserData["email"]}</span>
+                    </p>
+                    <p className="accountDataField" >
+                        Country
+                        <span className = "accountDataValue">{this.state.additionalUserData["country"]}</span>
+                    </p>
+                    <p className="accountDataField" >
+                        Account Plan
+                        <span className = "accountDataValue">{this.state.additionalUserData["type"]}</span>
+                    </p>
+                </div>
             switch(this.state.userDetailsCategory){
-                case "general_info" : {
-                    userDetails = 
-                        <div className = "accountData">
-                            <p className="accountDataField" >
-                                Name
-                                <span className = "accountDataValue">{this.state.additionalUserData["name"]}</span>
-                            </p>
-                            <p className="accountDataField" >
-                                Email
-                                <span className = "accountDataValue">{this.state.additionalUserData["email"]}</span>
-                            </p>
-                            <p className="accountDataField" >
-                                Country
-                                <span className = "accountDataValue">{this.state.additionalUserData["country"]}</span>
-                            </p>
-                            <p className="accountDataField" >
-                                Account Plan
-                                <span className = "accountDataValue">{this.state.additionalUserData["type"]}</span>
-                            </p>
-                        </div>
-                    break
-                }
                 case "storage_status" : {
                     let total_storage = ProfilePage.availableUserTypes[this.state.additionalUserData["type"]]["available_storage"]
                     let available_storage = this.state.additionalUserData["storage_quantity"]
@@ -209,25 +208,34 @@ class ProfilePage extends Component {
 
         return (
             <div className="App">
+                <div className="title">
+                    <img id="title_logo" src="images/logo.png" />
+                    <label id="title_text">Safestorage</label>
+                </div>
+                <hr/>
                 {this.state.isUserConnected === true ?
-                    <div>
-                        <img id="log_data_profile" src="images/user_logo.png" alt=""/>
-                        <p id="username">{this.userData.name}</p>
-                        <ul>
-                            <li><button className="a_redirector" id="selector_general_info" href="#" onClick={() => {
-                                this.setState({userDetailsCategory: ProfilePage.userDetailsCategories[0]})
-                            }}>General Info</button>
-                            </li>
-                            <li><button className="a_redirector" id="selector_storage_status"href="#" onClick={() => {
-                                this.setState({userDetailsCategory: ProfilePage.userDetailsCategories[1]})
-                                }}>Storage Status</button>
-                            </li>
-                            <li><button className="a_redirector" id="selector_plan" href="#" onClick={() => {
-                                this.setState({userDetailsCategory: ProfilePage.userDetailsCategories[2]})
-                                }}>Plan</button>
-                            </li>
-                        </ul>
-                        {userDetails}
+                    <div className="profile">
+                        <div className="profile_left">
+                            <img id="log_data_profile" src="images/user_logo.png" alt=""/>
+                            <p id="username">{this.userData.name}</p>
+                            <hr/>
+                            {generalData}
+                            
+                        </div>
+                        <div className="profile_right">
+                            <ul>
+                                <li><button className="a_redirector" id="selector_storage_status" href="#" onClick={() => {
+                                    this.setState({userDetailsCategory: ProfilePage.userDetailsCategories[0]})
+                                    }}>Storage Status</button>
+                                </li>
+                                <li><button className="a_redirector" id="selector_plan" href="#" onClick={() => {
+                                    this.setState({userDetailsCategory: ProfilePage.userDetailsCategories[1]})
+                                    }}>Plan</button>
+                                </li>
+                            </ul>
+                            <hr/>
+                            {userDetails}
+                        </div>
                     </div>: 
                     <p>Nu puteti accesa aceasta pagina daca utilizatorul nu este conectat</p>}
             </div>
