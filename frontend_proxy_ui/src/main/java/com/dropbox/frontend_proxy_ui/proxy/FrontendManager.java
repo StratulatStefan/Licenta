@@ -50,8 +50,11 @@ public class FrontendManager {
         else if(operation == GetReplicationStatusRequest.class){
             op = "[GET REPLICATION STATUS TABLE]";
         }
-        else if(operation == GetConnectionTableRequest.class){
+        else if(operation == GetConnectionTableRequest.class) {
             op = "[GET CONNECTION TABLE]";
+        }
+        else if(operation == DeleteFileFromNodeRequest.class){
+            op = "[DELETE FILE FROM INTERNAL NODE]";
         }
         else {
             String[] fname = clientRequest.getFilename().split("\\\\");

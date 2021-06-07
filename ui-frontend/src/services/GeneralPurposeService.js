@@ -74,7 +74,7 @@ export class GeneralPurposeService{
         let adminItems = [
             "log_redirector", "content-table_redirector", 
             "storage-table_redirector", "nodes-status_redirector", 
-            "replication-status_redirector", "connection-table_redirector"
+            "replication-status_redirector"
         ]
         let userItems = ["upload_redirector", "home_redirector", "about_redirector"]
         adminItems.concat(userItems).forEach(redirector => {

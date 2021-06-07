@@ -79,6 +79,15 @@ public class FileService {
         return (ManagerTextResponse) FrontendManager.managerOperationRequest(deleteFileRequest);
     }
 
+    public ManagerTextResponse deleteFileFromInternalNode(String userId, String filename, String address) throws IOException, ClassNotFoundException {
+        DeleteFileFromNodeRequest deleteFileFromNodeRequest = new DeleteFileFromNodeRequest();
+        deleteFileFromNodeRequest.setUserId(userId);
+        deleteFileFromNodeRequest.setFilename(filename);
+        deleteFileFromNodeRequest.setAddress(address);
+
+        return (ManagerTextResponse) FrontendManager.managerOperationRequest(deleteFileFromNodeRequest);
+    }
+
     public ManagerTextResponse renameFile(int userId, String filename, String newname, String description) throws IOException, ClassNotFoundException {
         RenameFileRequest renameFileRequest = new RenameFileRequest();
         renameFileRequest.setUserId(String.format("%d", userId));

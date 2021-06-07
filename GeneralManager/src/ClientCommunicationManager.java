@@ -49,7 +49,8 @@ public class ClientCommunicationManager {
         GET_NODES_STORAGE_QUANTITY,
         GET_STORAGE_STATUS,
         GET_REPLICATION_STATUS,
-        GET_CONNECTION_TABLE
+        GET_CONNECTION_TABLE,
+        DELETE_FILE_FROM_NODE
     }
     /**
      * Enum care va cuprinde statusul unui anumit fisier, raportat la tabela stocarii.
@@ -120,6 +121,9 @@ public class ClientCommunicationManager {
         }
         if(operation == GetConnectionTableRequest.class){
             return ClientRequest.GET_CONNECTION_TABLE;
+        }
+        if(operation == DeleteFileFromNodeRequest.class){
+            return ClientRequest.DELETE_FILE_FROM_NODE;
         }
         return null;
     }
@@ -409,6 +413,22 @@ public class ClientCommunicationManager {
                                         response = new ManagerTextResponse();
                                         ((ManagerTextResponse)response).setResponse("OK");
                                         GeneralManager.contentTable.updateFileStatus(userId, filename, "[VALID]");
+                                        break;
+                                    }
+                                }
+                                break;
+                            }
+                            case DELETE_FILE_FROM_NODE:{
+                                switch (fileStatus){
+                                    case FILE_NOT_FOUND: {
+                                        response.setException("FILE NOT FOUND");
+                                        break;
+                                    }
+                                    case FILE_EXISTS:{
+                                        String address = ((DeleteFileFromNodeRequest)clientManagerRequest).getAddress();
+                                        GeneralManager.fileSystemManager.deleteFile(userId, filename, Collections.singletonList(address));
+                                        response = new ManagerTextResponse();
+                                        ((ManagerTextResponse)response).setResponse("File successfully deleted from node.");
                                         break;
                                     }
                                 }

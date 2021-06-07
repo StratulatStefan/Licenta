@@ -198,4 +198,33 @@ export class AdminHandlerService{
             })
         })
     }
+
+    static deleteFileFromInternalNode = (file) => {
+        console.log(JSON.stringify(file))
+        let url = `${Environment.frontend_proxy}/internalnodefile?user=${file.user}&filename=${file.filename}&address=${file.address}`
+
+        return new Promise((resolve) => {
+            fetch(url, {
+                method: 'DELETE',
+                mode : "cors",
+            }).then(response => {
+                if(response.ok){
+                    response.json().then(response => {
+                        resolve({
+                            "code" : 1,
+                            "content" : response
+                        })
+                    });
+                }
+                else{
+                    HTTPResponseHandler.handleErrorStatus(response).then(status => {
+                        resolve({
+                            "code" : status.code,
+                            "content" : status.message
+                        })
+                    });
+                }
+            })
+        })
+    }
 }

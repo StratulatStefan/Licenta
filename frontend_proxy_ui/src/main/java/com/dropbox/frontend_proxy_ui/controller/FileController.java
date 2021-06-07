@@ -204,6 +204,20 @@ public class FileController {
         }
     }
 
+    @RequestMapping(path = "/proxy/internalnodefile", method = RequestMethod.DELETE)
+    public ResponseEntity<String> deleteFileFromInternalNode(@RequestParam(name="user", required = true, defaultValue = "") String userId,
+                                                             @RequestParam(name="filename", required = true, defaultValue = "") String filename,
+                                                             @RequestParam(name="address", required = true, defaultValue = "") String address){
+        try {
+            String status = fileService.deleteFileFromInternalNode(userId, filename, address).getResponse();
+            return new ResponseEntity(ResponseHandlerService.buildSuccessStatus(status), HttpStatus.OK);
+        }
+        catch (Exception exception){
+            Map<String, String> errorResponse = ResponseHandlerService.buildErrorStatus(exception.getMessage());
+            return new ResponseEntity(errorResponse, HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
 }
 
 

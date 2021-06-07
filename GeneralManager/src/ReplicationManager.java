@@ -50,10 +50,8 @@ public class ReplicationManager implements Runnable{
      * @param replication_factor Numarul de noduri necesare.
      * @param availableNodes Lista nodurilor care contin deja fisieru
      */
-    public List<String> searchCandidatesForReplication(int replication_factor, List<String> availableNodes){
-        List<String> openNodes = GeneralManager.connectionTable.getConnectionTable();
-        // criteriu de selectie a anumitor noduri, mai libere, ca sa stocheze noul fisier
-        // momentam selectam primele gasite
+    public List<String> searchCandidatesForReplication(int replication_factor, List<String> availableNodes, long filesize){
+        List<String> openNodes = GeneralManager.nodeStorageQuantityTable.getMostSuitableNodes(filesize).subList(0, replication_factor);
 
         try {
             return GeneralPurposeMethods.listDifferences(openNodes, availableNodes).subList(0, replication_factor - availableNodes.size());
@@ -124,7 +122,8 @@ public class ReplicationManager implements Runnable{
                             }
                         }
                         else if (replication_factor > availableNodesForFile.size() && !GeneralManager.contentTable.getFileStatusForUser(userId, userFile).contains("PENDING")) {
-                            this.replication(replication_factor, userId, userFile, availableNodesAddressesForFile);
+                            long filesize = GeneralManager.contentTable.getFileSizeOfUserFile(userId, userFile);
+                            this.replication(replication_factor, userId, userFile, availableNodesAddressesForFile, filesize);
                         }
                         else if(replication_factor < availableNodesForFile.size()){
                             List<String> candidates = searchCandidatesForDeletion(availableNodesForFile.size() - replication_factor, availableNodesAddressesForFile);
@@ -163,9 +162,9 @@ public class ReplicationManager implements Runnable{
         return null;
     }
 
-    private void replication(int replication_factor, String userId, String userFile, List<String> availableNodesAddressesForFile){
+    private void replication(int replication_factor, String userId, String userFile, List<String> availableNodesAddressesForFile, long filesize){
         LoggerService.registerWarning(GeneralManager.generalManagerIpAddress,"[NEED REPLICATION]. " + userFile + " of user " +  userId);
-        List<String> candidates = searchCandidatesForReplication(replication_factor, availableNodesAddressesForFile);
+        List<String> candidates = searchCandidatesForReplication(replication_factor, availableNodesAddressesForFile, filesize);
         if(replication_factor == 1 || candidates == null){
             LoggerService.registerWarning(GeneralManager.generalManagerIpAddress,"Nu se poate realiza replicarea pentru fisierul curent. " +
                     "Nu exista suficiente noduri pe care sa se faca replicarea.");
