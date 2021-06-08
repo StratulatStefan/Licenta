@@ -5,7 +5,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
-import log.ProfiPrinter;
+import logger.LoggerService;
 import model.FileAttributes;
 
 /**
@@ -192,7 +192,6 @@ public class ContentTable implements Serializable {
                 if(fileAttributes.getFilename().equals(filename)){
                     fileAttributes.setCrc(crc);
                     return;
-
                 }
             }
             throw new Exception("Register not found!");
@@ -218,7 +217,7 @@ public class ContentTable implements Serializable {
                         return;
                     }
                     catch (NumberFormatException exception){
-                        ProfiPrinter.PrintException("Exceptie de parsare la updateFileVersionNo");
+                        LoggerService.registerWarning("127.0.0.1", "Exceptie de parsare la updateFileVersionNo");
                     }
 
                 }
@@ -239,7 +238,7 @@ public class ContentTable implements Serializable {
                         return;
                     }
                     catch (NumberFormatException exception){
-                        ProfiPrinter.PrintException("Exceptie de parsare la updateFileSize");
+                        LoggerService.registerWarning("127.0.0.1", "Exceptie de parsare la updateFileSize");
                     }
 
                 }
@@ -335,7 +334,7 @@ public class ContentTable implements Serializable {
             }
         }
         catch (Exception exception){
-            ProfiPrinter.PrintException("User not found!");
+            System.out.println("User not found!");
         }
         return null;
     }
@@ -349,7 +348,7 @@ public class ContentTable implements Serializable {
             }
         }
         catch (Exception exception){
-            ProfiPrinter.PrintException("User not found!");
+            System.out.println("User not found!");
         }
         return -1;
     }
@@ -363,7 +362,7 @@ public class ContentTable implements Serializable {
             }
         }
         catch (Exception exception){
-            ProfiPrinter.PrintException("User not found!");
+            System.out.println("User not found!");
         }
         return null;
     }
@@ -377,7 +376,7 @@ public class ContentTable implements Serializable {
             }
         }
         catch (Exception exception){
-            ProfiPrinter.PrintException("User not found!");
+            System.out.println("User not found!");
         }
         return -1;
     }

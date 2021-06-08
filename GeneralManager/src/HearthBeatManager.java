@@ -2,7 +2,6 @@ import communication.Address;
 import communication.HearthBeatSocket;
 import communication.Serializer;
 import config.AppConfig;
-import log.ProfiPrinter;
 import logger.LoggerService;
 import model.PendingQueueRegister;
 import node_manager.Beat.NodeBeat;
@@ -82,8 +81,8 @@ public class HearthBeatManager implements Runnable{
                 while(true) {
                     System.out.println(Time.getCurrentTimeWithFormat() + " ");
                     try {
-                        ProfiPrinter.PrintException("Heartbeat Manager cleanup");
                         if(cleanUpIndex == cleanupFrequency){
+                            LoggerService.registerSuccess(GeneralManager.generalManagerIpAddress, "Heartbeat Manager cleanup");
                             checkForFileStatusChange();
                             disconnected = GeneralManager.connectionTable.checkDisconnection(frequency);
                             if(disconnected.size() != 0){
@@ -188,19 +187,9 @@ public class HearthBeatManager implements Runnable{
     }
 
     public void checkForFileStatusChange(){
-        long currentTimeStamp;
         for(int i = 0; i < 3; i++){
             try {
                 PendingQueueRegister updateRequest = GeneralManager.pendingQueue.popFromQueue();
-                currentTimeStamp = Time.getCurrentTimestamp();
-                //if(Math.abs(updateRequest.getTimestamp() - currentTimeStamp) < frequency){
-                    // asta apare mai ales atunci cand facem cerere de replicare;
-                    // la replicare, nu asteptam feedback de la user, ci adaugam instant in lista
-                    // ne asiguram ca modificarea statusului fisierului nu se inainte de a primi macar cu beat de la noduri
-                    // bagam inregistrarea inapoi in coada si mai asteptam inca o perioada de cleanup
-                    //GeneralManager.pendingQueue.addToQueue(updateRequest);
-                    //continue;
-                //}
                 GeneralManager.contentTable.updateFileStatus(updateRequest.getUserId(), updateRequest.getFilename(), "[VALID]");
             }
             catch (NullPointerException exception) {
@@ -247,7 +236,7 @@ public class HearthBeatManager implements Runnable{
             requestCRCThread.start();
         }
         catch (IOException exception){
-            ProfiPrinter.PrintException(exception.getMessage());
+            System.out.println(exception.getMessage());
         }
     }
 }

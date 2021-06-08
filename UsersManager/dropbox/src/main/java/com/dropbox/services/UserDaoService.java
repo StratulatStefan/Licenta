@@ -2,10 +2,10 @@ package com.dropbox.services;
 
 import com.dropbox.interfaces.UserDao;
 import com.dropbox.interfaces.UserTypeDao;
-import com.dropbox.jwt.AuthorizationService;
 import com.dropbox.model.User;
 import com.dropbox.model.UserType;
 import com.dropbox.sql_handler.MySQLManager;
+import jwt.AuthorizationService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import java.util.List;

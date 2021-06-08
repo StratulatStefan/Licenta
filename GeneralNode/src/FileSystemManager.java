@@ -1,9 +1,8 @@
 import client_node.FileHeader;
-import client_node.NewFileRequestFeedback;
 import communication.Address;
 import communication.Serializer;
 import config.AppConfig;
-import log.ProfiPrinter;
+import logger.LoggerService;
 import model.VersionData;
 import node_manager.*;
 import os.FileSystem;
@@ -94,13 +93,13 @@ public class FileSystemManager implements Runnable{
                     inputStream.close();
                     replicationOutputStream.close();
                     socket.close();
+                    LoggerService.registerSuccess(GeneralNode.ipAddress,"Replica fisierului " + filename + " a fost trimisa cu succes catre " + destionationAddress);
                 }
                 catch (IOException exception){
-                    ProfiPrinter.PrintException("Exceptie la sursa de replicare [sendReplication] : " + exception.getMessage());
+                    LoggerService.registerWarning(GeneralNode.ipAddress,"Exceptie la sursa de replicare [sendReplication] : " + exception.getMessage());
                 }
             }
         }).start();
-        System.out.println("Replica trimisa cu succes catre " + destionationAddress);
     }
 
     /**
@@ -129,7 +128,7 @@ public class FileSystemManager implements Runnable{
                             filename = fileSystemRequest.getFilename();
 
                             if(fileSystemRequest.getClass() == ReplicationRequest.class){
-                                System.out.println("Am primit comanda de replicare si trimit fisierul mai departe.");
+                                LoggerService.registerSuccess(GeneralNode.ipAddress,"Am primit comanda de replicare si trimit fisierul mai departe.");
                                 String metadataFilename = FileSystem.changeFileExtension(filename, ".metadata");
 
                                 for(String destionationAddress : ((ReplicationRequest)fileSystemRequest).getDestionationAddress()) {
@@ -138,17 +137,19 @@ public class FileSystemManager implements Runnable{
                                 }
                             }
                             else if(fileSystemRequest.getClass() == DeleteRequest.class){
-                                System.out.println("Am primit comanda de eliminare a fisierului.");
+                                LoggerService.registerSuccess(GeneralNode.ipAddress,"Am primit comanda de eliminare a fisierului.");
                                 String filepath = mainFilepath + address.getIpAddress() + "/" + userId + "/" + filename;
                                 int operation_status = FileSystem.deleteFile(filepath);
                                 FeedbackResponse feedbackResponse = new FeedbackTextResponse();
                                 switch (operation_status){
                                     case 0 : {
+                                        LoggerService.registerError(GeneralNode.ipAddress,"Fisierul " + filename + " nu poate fi eliminat!");
                                         ((FeedbackTextResponse)feedbackResponse).setStatus("Fisierul nu poate fi eliminat");
                                         feedbackResponse.setSuccess(false);
                                         break;
                                     }
                                     case 1 : {
+                                        LoggerService.registerSuccess(GeneralNode.ipAddress,"Fisierul " + filename + " a fost eliminat cu succes!");
                                         ((FeedbackTextResponse)feedbackResponse).setStatus("Fisierul a fost eliminat cu succes!");
                                         feedbackResponse.setSuccess(true);
 
@@ -160,7 +161,7 @@ public class FileSystemManager implements Runnable{
                                 sendFeedbackToGeneraManage(dataOutputStream, feedbackResponse);
                             }
                             else if(fileSystemRequest.getClass() == RenameRequest.class){
-                                System.out.println("Am primit comanda de redenumire. Dam drumu la treaba imediat");
+                                LoggerService.registerSuccess(GeneralNode.ipAddress,"Am primit comanda de redenumire.");
                                 String originalPath = mainFilepath + address.getIpAddress() + "/" + userId + "/" + filename;
                                 String newFilename = ((RenameRequest) fileSystemRequest).getNewName();
                                 String newPath = mainFilepath + address.getIpAddress() + "/" + userId + "/" + newFilename;
@@ -168,11 +169,13 @@ public class FileSystemManager implements Runnable{
                                 FeedbackResponse feedbackResponse = new FeedbackTextResponse();
                                 switch (operation_status){
                                     case 0 : {
+                                        LoggerService.registerError(GeneralNode.ipAddress,"Fisierul " + filename + " nu poate fi redenumit!");
                                         ((FeedbackTextResponse)feedbackResponse).setStatus("Eroare la redenumirea fisierului!");
                                         feedbackResponse.setSuccess(false);
                                         break;
                                     }
                                     case 1 : {
+                                        LoggerService.registerSuccess(GeneralNode.ipAddress,"Fisierul " + filename + " a fost redenumit cu succes!");
                                         ((FeedbackTextResponse)feedbackResponse).setStatus("Fisierul a fost redenumit cu succes!");
                                         feedbackResponse.setSuccess(true);
 
@@ -184,6 +187,7 @@ public class FileSystemManager implements Runnable{
                                         break;
                                     }
                                     case 2 : {
+                                        LoggerService.registerError(GeneralNode.ipAddress,"Nu se poate redenumi fisierul " + filename + "! Exista deja un fisier cu noul nume!");
                                         ((FeedbackTextResponse)feedbackResponse).setStatus("Nu se poate redenumi fisierul! Exista deja un fisier cu noul nume!");
                                         feedbackResponse.setSuccess(false);
                                         break;
@@ -192,7 +196,7 @@ public class FileSystemManager implements Runnable{
                                 sendFeedbackToGeneraManage(dataOutputStream, feedbackResponse);
                             }
                             else if(fileSystemRequest.getClass() == VersionsRequest.class){
-                                System.out.println("Am primit cerere pentru istoricul unui fisier al unui user.");
+                                LoggerService.registerSuccess(GeneralNode.ipAddress,"Am primit cerere pentru istoricul unui fisier al unui user.");
                                 List<VersionData> versionDataList = GeneralNode.versionControlManager.getVersionsForFile(userId, filename);
                                 FeedbackComplexeResponse feedbackComplexeResponse = new FeedbackComplexeResponse();
                                 feedbackComplexeResponse.setResponse(Collections.singletonList(versionDataList));
@@ -216,17 +220,17 @@ public class FileSystemManager implements Runnable{
                     dataInputStream.close();
                     dataOutputStream.close();
                     if(file_header_found) {
-                        System.out.println("Receiving replication done!");
+                        LoggerService.registerSuccess(GeneralNode.ipAddress,"Receiving replication done!");
                         fileOutputStream.close();
                     }
                     clientSocket.close();
 
                 }
                 catch (IOException exception){
-                    ProfiPrinter.PrintException("Filesystem manager loop exception IO : " + exception.getMessage() + " " + exception.getStackTrace().toString());
+                    LoggerService.registerError(GeneralNode.ipAddress,"Filesystem manager loop exception IO : " + exception.getMessage() + " " + exception.getStackTrace().toString());
                 }
                 catch (ClassNotFoundException exception){
-                    ProfiPrinter.PrintException("Filesystem manager loop exception ClassNotFound : " + exception.getMessage());
+                    LoggerService.registerError(GeneralNode.ipAddress,"Filesystem manager loop exception ClassNotFound : " + exception.getMessage());
                 }
             }
         };
@@ -239,7 +243,7 @@ public class FileSystemManager implements Runnable{
             dataOutputStream.write(Serializer.serialize(feedbackResponse));
         }
         catch (IOException exception){
-            ProfiPrinter.PrintException("Exceptie IO la sendFeedbackToGeneraManage : " + exception.getMessage());
+            LoggerService.registerError(GeneralNode.ipAddress,"Exceptie IO la sendFeedbackToGeneraManage : " + exception.getMessage());
         }
     }
 
@@ -257,6 +261,7 @@ public class FileSystemManager implements Runnable{
 
         inputStream.close();
         outputStream.close();
+        LoggerService.registerSuccess(GeneralNode.ipAddress,"Fisierul " + filename + " a fost trimis cu succes catre download");
     }
 
     /**
@@ -274,14 +279,14 @@ public class FileSystemManager implements Runnable{
             }
         }
         catch (IOException exception){
-            ProfiPrinter.PrintException("File System manager exception : " + exception.getMessage());
+            LoggerService.registerWarning(GeneralNode.ipAddress,"File System manager exception : " + exception.getMessage());
         }
         finally {
             try {
                 serverSocket.close();
             }
             catch (IOException exception1){
-                ProfiPrinter.PrintException("Exceptie la FileSystemManager : Nu putem inchide in siguranta ServerSocket-ul");
+                LoggerService.registerWarning(GeneralNode.ipAddress,"Exceptie la FileSystemManager : Nu putem inchide in siguranta ServerSocket-ul");
             }
         }
     }

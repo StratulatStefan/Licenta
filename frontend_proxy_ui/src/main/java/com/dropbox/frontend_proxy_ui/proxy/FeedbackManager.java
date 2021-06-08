@@ -2,7 +2,12 @@ package com.dropbox.frontend_proxy_ui.proxy;
 
 import client_node.NewFileRequestFeedback;
 import communication.Serializer;
-import log.ProfiPrinter;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 import java.io.DataInputStream;
 import java.net.InetSocketAddress;
@@ -12,8 +17,16 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class FeedbackManager implements Runnable{
+    @Value("${bufferSize}")
+    private int bufferSize;
+
+    @Value("${local.server.address}")
+    private String address;
+
+    @Value("${app.feedbackport}")
+    private int feedbackport;
+
     private final List<NewFileRequestFeedback> feedbackList;
-    private final static int bufferSize = 4096;
 
     public FeedbackManager(){
         this.feedbackList = new ArrayList<NewFileRequestFeedback>();
@@ -38,13 +51,11 @@ public class FeedbackManager implements Runnable{
                     frontendSocket.close();
                 }
                 catch (Exception exception){
-                    ProfiPrinter.PrintException("Exceptie la thread-ul de feedback : " + exception.getMessage());
+                    System.out.println("Exceptie la thread-ul de feedback : " + exception.getMessage());
                 }
             }
         };
     }
-
-    /* TODO adaugare functie care verifica daca feedback-ul nu exista deja.. */
 
     public NewFileRequestFeedback getFeedback(String userId, String filename){
         synchronized (this.feedbackList) {
@@ -64,15 +75,16 @@ public class FeedbackManager implements Runnable{
     public void run() {
         try {
             ServerSocket feedbackSocket = new ServerSocket();
-            feedbackSocket.bind(new InetSocketAddress("127.0.0.100", 8010));
+            System.out.println(feedbackport);
+            feedbackSocket.bind(new InetSocketAddress("address", 0));
             while(true) {
-                System.out.println("Feedback nou de la un nod!");
                 Socket socket = feedbackSocket.accept();
+                System.out.println("Feedback nou de la un nod!");
                 new Thread(feedbackThread(socket)).start();
             }
         }
         catch (Exception exception){
-            ProfiPrinter.PrintException("Exceptie la managerul de feedback :  " + exception.getMessage());
+            System.out.println("Exceptie la managerul de feedback :  " + exception.getMessage());
         }
     }
 

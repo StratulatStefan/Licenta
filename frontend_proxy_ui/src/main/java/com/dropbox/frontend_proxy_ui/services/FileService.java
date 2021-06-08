@@ -6,6 +6,7 @@ import client_manager.ManagerComplexeResponse;
 import com.dropbox.frontend_proxy_ui.proxy.FileSender;
 import com.dropbox.frontend_proxy_ui.proxy.FrontendManager;
 import node_manager.DeleteRequest;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import os.FileSystem;
@@ -18,7 +19,8 @@ import java.nio.file.StandardCopyOption;
 
 @Service
 public class FileService {
-    private String uploadDir = "D:\\Facultate\\Licenta\\Licenta\\frontend_proxy_ui\\files";
+    @Value("${uploadDir}")
+    private String uploadDir;
 
     public String persistFileToBuffer(MultipartFile file) throws Exception{
         try{
@@ -29,8 +31,7 @@ public class FileService {
             return uploadDir + "\\" + file.getOriginalFilename();
         }
         catch (Exception e){
-            throw new Exception("Could not store file " + file.getOriginalFilename()
-                    + ". Please try again!"
+            throw new Exception("Could not store file " + file.getOriginalFilename() + ". Please try again!"
             );
         }
     }

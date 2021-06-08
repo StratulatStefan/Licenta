@@ -5,8 +5,8 @@ import client_manager.ManagerResponse;
 import client_manager.ManagerTextResponse;
 import client_manager.data.*;
 import communication.Serializer;
-import log.ProfiPrinter;
 import model.FileAttributes;
+import org.springframework.beans.factory.annotation.Value;
 import os.FileSystem;
 
 import java.io.DataInputStream;
@@ -19,9 +19,14 @@ import java.util.HashMap;
 import java.util.List;
 
 public class FrontendManager {
-    private static final int bufferSize = 4096;
-    private static String generalManagerAddress = "127.0.0.1";
-    private static int generalManagerPort = 8081;
+    @Value("${bufferSize}")
+    private static int bufferSize;
+
+    @Value("${generalManagerAddress}")
+    private static String generalManagerAddress;
+
+    @Value("${generalManagerPort}")
+    private static int generalManagerPort;
 
     public static ManagerResponse managerOperationRequest(ClientManagerRequest clientRequest) throws NullPointerException, IOException, ClassNotFoundException {
         String op = "";
@@ -119,7 +124,7 @@ public class FrontendManager {
             if(exception.getClass() == NullPointerException.class){
                 throw exception;
             }
-            ProfiPrinter.PrintException("Eroare de IO la socketOutputStream : " + exception.getMessage());
+            System.out.println("Eroare de IO la socketOutputStream : " + exception.getMessage());
         }
         return null;
     }
@@ -152,11 +157,9 @@ public class FrontendManager {
                     }
                 }
                 catch (Exception exception){
-                    ProfiPrinter.PrintException("Exceptie : " + exception.getMessage());
+                    System.out.println("Exceptie : " + exception.getMessage());
                 }
             }
         }).start();
-
     }
-
 }

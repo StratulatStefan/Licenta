@@ -8,8 +8,25 @@
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
     <orderEntry type="library" exported="" name="src" level="project" />
-    <orderEntry type="module" module-name="Beans" exported="" />
     <orderEntry type="module" module-name="GeneralPurposeStructures" exported="" />
-    <orderEntry type="module" module-name="HTTPHandler" exported="" />
+    <orderEntry type="module" module-name="Beans" exported="" />
+    <orderEntry type="module-library" exported="">
+      <library>
+        <CLASSES>
+          <root url="jar://$MODULE_DIR$/../HTTPHandler/target/HTTPHandler-1.0-SNAPSHOT-jar-with-dependencies.jar!/" />
+        </CLASSES>
+        <JAVADOC />
+        <SOURCES />
+      </library>
+    </orderEntry>
+    <orderEntry type="module-library" exported="">
+      <library>
+        <CLASSES>
+          <root url="jar://$MODULE_DIR$/../HTTPHandler/target/HTTPHandler-1.0-SNAPSHOT.jar!/" />
+        </CLASSES>
+        <JAVADOC />
+        <SOURCES />
+      </library>
+    </orderEntry>
   </component>
 </module>

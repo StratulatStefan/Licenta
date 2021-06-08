@@ -1,21 +1,15 @@
 import client_manager.ManagerComplexeResponse;
 import client_manager.ManagerResponse;
 import client_manager.ManagerTextResponse;
+import client_manager.data.ClientManagerRequest;
 import client_manager.data.*;
 import client_node.NewFileRequestFeedback;
 import communication.Address;
 import communication.Serializer;
 import config.AppConfig;
-import data.Pair;
 import http.HttpConnectionService;
-import log.ProfiPrinter;
-import logger.LogMsgType;
 import logger.LoggerService;
-import model.FileAttributes;
-import node_manager.FeedbackResponse;
 import os.FileSystem;
-import tables.ContentTable;
-import tables.StorageStatusTable;
 
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
@@ -23,7 +17,6 @@ import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.net.SocketTimeoutException;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -59,7 +52,6 @@ public class ClientCommunicationManager {
         FILE_EXISTS,
         FILE_NOT_FOUND
     }
-
 
     /** -------- Atribute -------- **/
     /**
@@ -187,18 +179,18 @@ public class ClientCommunicationManager {
      * @return Lantul de noduri la care se va stoca fisierului
      */
     public String generateNewChain(long filesize, int replication_factor) throws Exception{
-        LoggerService.registerSuccess(GeneralManager.generalManagerIpAddress, "User uploaded a new file with size : " + filesize + " and replication factor : " + replication_factor);
         List<String> connectionAddresses = GeneralManager.connectionTable.getConnectionTable();
         if(connectionAddresses.size() <  replication_factor){
-            LoggerService.registerWarning(GeneralManager.generalManagerIpAddress, "Nu sunt suficiente noduri disponibile");
+            LoggerService.registerError(GeneralManager.generalManagerIpAddress, "Nu sunt suficiente noduri disponibile");
             return null;
         }
         System.out.println("Generam token-ul..");
         List<String> candidates = GeneralManager.nodeStorageQuantityTable.getMostSuitableNodes(filesize);
         if(candidates.size() == 0){
-            LoggerService.registerWarning(GeneralManager.generalManagerIpAddress, "Niciun nod nu are suficienta memorie pentru a stoca noul fisier.");
+            LoggerService.registerError(GeneralManager.generalManagerIpAddress, "Niciun nod nu are suficienta memorie pentru a stoca noul fisier.");
             return null;
         }
+        LoggerService.registerSuccess(GeneralManager.generalManagerIpAddress, "User uploaded a new file with size : " + filesize + " and replication factor : " + replication_factor);
         String token = String.join("-", candidates.subList(0, replication_factor));
         System.out.println("====================================");
         System.out.println(token);
@@ -272,7 +264,7 @@ public class ClientCommunicationManager {
             LoggerService.registerSuccess(GeneralManager.generalManagerIpAddress, registerResponse);
         }
         catch (IOException exception){
-            ProfiPrinter.PrintException("Eroare la inregistrarea noului fisier : "+ exception.getMessage());
+            LoggerService.registerError(GeneralManager.generalManagerIpAddress, "Eroare la inregistrarea noului fisier : "+ exception.getMessage());
         }
     }
 
@@ -288,8 +280,7 @@ public class ClientCommunicationManager {
             serverSocket.bind(new InetSocketAddress(address.getIpAddress(), address.getPort()));
             while(true){
                 Socket clientSocket = serverSocket.accept();
-                LoggerService.registerSuccess(GeneralManager.generalManagerIpAddress,
-                        String.format("Client nou conectat : [%s : %d]\n", clientSocket.getLocalAddress(), clientSocket.getLocalPort()));
+                System.out.println(String.format("Client nou conectat : [%s : %d]\n", clientSocket.getLocalAddress(), clientSocket.getLocalPort()));
                 new Thread(clientCommunicationThread(clientSocket)).start();
             }
         }
@@ -520,9 +511,9 @@ public class ClientCommunicationManager {
                         e.printStackTrace();
                     }
 
-                    ProfiPrinter.PrintException(exception.getMessage());
+                    System.out.println(exception.getMessage());
                     LoggerService.registerError(GeneralManager.generalManagerIpAddress,
-                        String.format("Could not properly close connection with my friend : [%s : %d]", clientSocket.getLocalAddress(), clientSocket.getLocalPort())
+                            String.format("Could not properly close connection with my friend : [%s : %d]", clientSocket.getLocalAddress(), clientSocket.getLocalPort())
                     );
                 }
             }

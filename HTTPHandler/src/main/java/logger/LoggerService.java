@@ -1,8 +1,6 @@
 package logger;
 
-import config.AppConfig;
 import http.HttpConnectionService;
-import log.ProfiPrinter;
 
 import java.io.IOException;
 import java.util.HashMap;
@@ -10,7 +8,7 @@ import java.util.Map;
 
 
 public class LoggerService {
-    private static String loggerServerPath = AppConfig.getParam("loggerHTTPAddress");
+    private static String loggerServerPath = "http://localhost:8085/api/log";
     private final static HttpConnectionService httpConnectionService = new HttpConnectionService();
 
     private static void log(String nodeAddress, String messageDescription, LogMsgType messageType){
@@ -23,7 +21,7 @@ public class LoggerService {
             String logResponse = httpConnectionService.postRequest(loggerServerPath, logData);
         }
         catch (IOException exception) {
-            ProfiPrinter.PrintException("Eroare la logging.");
+            System.out.println("Eroare la logging. : " + exception.getMessage());
         }
     }
 
@@ -33,12 +31,12 @@ public class LoggerService {
     }
 
     public static void registerWarning(String nodeAddress, String messageDescription){
-        ProfiPrinter.PrintException(messageDescription);
+        System.out.println(messageDescription);
         log(nodeAddress, messageDescription, LogMsgType.WARNING);
     }
 
     public static void registerError(String nodeAddress, String messageDescription){
-        ProfiPrinter.PrintException(messageDescription);
+        System.out.println(messageDescription);
         log(nodeAddress, messageDescription, LogMsgType.ERROR);
     }
 }

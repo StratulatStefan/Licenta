@@ -3,17 +3,21 @@ package com.dropbox.frontend_proxy_ui.controller;
 import client_manager.ManagerComplexeResponse;
 import client_manager.data.*;
 import com.dropbox.frontend_proxy_ui.proxy.FrontendManager;
+import org.assertj.core.util.Arrays;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.io.IOException;
 import java.util.HashMap;
+import java.util.List;
+
 @RestController
 public class WebSocketController {
     @Autowired
     private SimpMessagingTemplate template;
+
+    private final static List<Object> topics = Arrays.asList(new String[]{"content", "nodes", "storage", "replication", "connection"});
 
     void fetchContentAndSend(ClientManagerRequest requestObject, String topic){
         new Thread(new Runnable() {
@@ -34,10 +38,8 @@ public class WebSocketController {
 
     @Scheduled(fixedRate = 2000)
     public void sendContent(){
-        fetchContentAndSend(new GetContentTableRequest(), "content");
-        fetchContentAndSend(new GetNodesStorageQuantityRequest(), "nodes");
-        fetchContentAndSend(new GetStorageStatusRequest(), "storage");
-        fetchContentAndSend(new GetReplicationStatusRequest(), "replication");
-        fetchContentAndSend(new GetConnectionTableRequest(), "connection");
+        for(Object topic : topics){
+            fetchContentAndSend(new GetContentTableRequest(),(String)topic);
+        }
     }
 }

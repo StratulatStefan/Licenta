@@ -1,9 +1,9 @@
 package com.dropbox.controller;
 
 import com.dropbox.interfaces.UserDao;
-import com.dropbox.jwt.AuthorizationService;
 import com.dropbox.model.User;
 import com.dropbox.services.ResponseHandlerService;
+import jwt.AuthorizationService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;

@@ -6,7 +6,7 @@ import java.net.InetAddress;
 
 import communication.Serializer;
 import config.AppConfig;
-import log.ProfiPrinter;
+import logger.LoggerService;
 import node_manager.Beat.NodeBeat;
 import data.Time;
 import node_manager.Beat.RequestCRC;
@@ -80,10 +80,10 @@ public class HearthBeatManager implements Runnable{
                         Thread.sleep((int) (frequency * 1e3));
                     } catch (IOException exception) {
                         socket.close();
-                        ProfiPrinter.PrintException("IOException occured. : " + exception.getMessage());
+                        LoggerService.registerError(GeneralNode.ipAddress,"IOException occured. : " + exception.getMessage());
                     } catch (InterruptedException exception) {
                         socket.close();
-                        ProfiPrinter.PrintException("InterruptedException occured. : " + exception.getMessage());
+                        LoggerService.registerError(GeneralNode.ipAddress,"InterruptedException occured. : " + exception.getMessage());
                     }
                     System.out.println("\n");
                 }
@@ -106,7 +106,7 @@ public class HearthBeatManager implements Runnable{
                 while(true){
                     try{
                         message = (RequestCRC)socket.receiveMessage();
-                        System.out.println("Am primit cerere de includere a crc-ului in pachet!");
+                        LoggerService.registerSuccess(GeneralNode.ipAddress,"Am primit cerere de includere a crc-ului in pachet!");
                         new Thread(new Runnable() {
                             @Override
                             public void run() {
@@ -119,7 +119,7 @@ public class HearthBeatManager implements Runnable{
                         // nu avem ce face cu el; il ignoram!
                     }
                     catch (Exception exception){
-                        ProfiPrinter.PrintException(exception.getMessage());
+                        System.out.println(exception.getMessage());
                     }
                 }
             }
@@ -134,7 +134,7 @@ public class HearthBeatManager implements Runnable{
      */
     public void run(){
         try {
-            System.out.println(String.format("Node with address [%s] started...", nodeAddress));
+            LoggerService.registerSuccess(GeneralNode.ipAddress,String.format("Node with address [%s] started...", nodeAddress));
             InetAddress group = InetAddress.getByName(HearthBeatManager.multicastIPAddress);
             HearthBeatSocket socket = new HearthBeatSocket(nodeAddress, multicastPort);
             socket.setNetworkInterface(HearthBeatSocket.NetworkInterfacesTypes.LOCALHOST);
@@ -145,7 +145,7 @@ public class HearthBeatManager implements Runnable{
             receivingThread.start();
         }
         catch (IOException exception){
-            ProfiPrinter.PrintException(exception.getMessage());
+            System.out.println(exception.getMessage());
         }
     }
 }

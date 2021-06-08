@@ -19,11 +19,6 @@ public class UploadPendingQueue {
             this.pendingQueue.add(new Pair<String, String>(userId, filename));
         }
     }
-    public void addToQueue(Pair<String, String> pendingQueueRegister) throws Exception{
-        synchronized (this.pendingQueue){
-            this.pendingQueue.add(pendingQueueRegister);
-        }
-    }
 
     public Pair<String, String> popFromQueue(){
         synchronized (this.pendingQueue){

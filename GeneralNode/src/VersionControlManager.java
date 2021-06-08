@@ -1,12 +1,11 @@
 import data.Time;
-import log.ProfiPrinter;
+import logger.LoggerService;
 import model.VersionData;
 import os.FileSystem;
 
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import java.io.File;
 
 public class VersionControlManager {
     private static String baseFilepath;
@@ -14,16 +13,14 @@ public class VersionControlManager {
     // fisierul de config asta
     private final static String extension = ".metadata";
 
-
     public VersionControlManager(String address){
         baseFilepath = String.format("D:\\Facultate\\Licenta\\Storage\\%s\\", address);
     }
 
-
     public void registerFileVersion(String userId, String filename, long crc, String description){
         String filepath = baseFilepath + userId + "\\" + filename;
         if(!FileSystem.checkFileExistance(filepath)){
-            ProfiPrinter.PrintException("Fisierul " + filename + " nu a fost salvat inca; Nu putem scrie fisierul de metadate");
+            LoggerService.registerError(GeneralNode.ipAddress,"Fisierul " + filename + " nu a fost salvat inca; Nu putem scrie fisierul de metadate");
             return;
         }
         String metadataFilePath = filepath.substring(0, filepath.lastIndexOf(".")) + extension;
@@ -32,7 +29,7 @@ public class VersionControlManager {
             FileSystem.createFile(metadataFilePath);
             versionData.setVersionNumber(1);
             versionData.setHash(crc);
-            System.out.println("Inregistram prima versiune a fisierului " + filename);
+            LoggerService.registerSuccess(GeneralNode.ipAddress,"Inregistram prima versiune a fisierului " + filename);
         }
         else{
             VersionData lastVersionOfFile = getLastVersionOfFile(metadataFilePath);
@@ -43,13 +40,12 @@ public class VersionControlManager {
             else{
                 versionData.setHash(crc);
             }
-            System.out.println("Inregistram o noua versiune a fisierului " + filename);
+            LoggerService.registerSuccess(GeneralNode.ipAddress,"Inregistram o noua versiune a fisierului " + filename);
         }
         versionData.setTimestamp(Time.getCurrentTimeWithFormat());
         versionData.setDescription(description);
         FileSystem.appendToFile(metadataFilePath, versionData.toString() + "\n");
     }
-
 
     public VersionData getLastVersionOfFile(String metadataFilePath){
         try {
@@ -59,7 +55,7 @@ public class VersionControlManager {
 
         }
         catch (IOException exception){
-            ProfiPrinter.PrintException("Eroare la extragerea continutului fisierului de metadate " + metadataFilePath);
+            LoggerService.registerError(GeneralNode.ipAddress,"Eroare la extragerea continutului fisierului de metadate " + metadataFilePath);
             return null;
         }
     }

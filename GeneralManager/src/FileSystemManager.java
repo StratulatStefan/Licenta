@@ -1,7 +1,5 @@
-
 import communication.Serializer;
 import config.AppConfig;
-import log.ProfiPrinter;
 import logger.LoggerService;
 import model.VersionData;
 import node_manager.*;
@@ -12,7 +10,6 @@ import java.net.Socket;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-import java.util.stream.Collectors;
 
 /**
  * Clasa care se ocupa de interactiunea cu nodurile generale, in ceea ce priveste prelucrarea fisierelor;
@@ -77,6 +74,7 @@ public class FileSystemManager {
             }
             dataOutputStream.close();
             socket.close();
+            LoggerService.registerSuccess(GeneralManager.generalManagerIpAddress, "Cererea de " + request.getClass().getSimpleName() + " a fost trimisa cu succes!");
             return feedbackResponse;
         }
         catch (Exception exception){
@@ -200,7 +198,7 @@ public class FileSystemManager {
                     thread.join();
                 }
                 catch (InterruptedException exception){
-                    ProfiPrinter.PrintException("Interrupt exception la renameFile thread!");
+                    System.out.println("Interrupt exception la renameFile thread!");
                 }
             }
         }

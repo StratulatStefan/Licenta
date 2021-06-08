@@ -9,5 +9,18 @@
     <orderEntry type="sourceFolder" forTests="false" />
     <orderEntry type="module" module-name="Beans" exported="" />
     <orderEntry type="module" module-name="GeneralPurposeStructures" exported="" />
+    <orderEntry type="module-library" exported="">
+      <library>
+        <CLASSES>
+          <root url="jar://$MODULE_DIR$/../HTTPHandler/target/HTTPHandler-1.0-SNAPSHOT.jar!/" />
+          <root url="jar://$MODULE_DIR$/../HTTPHandler/target/HTTPHandler-1.0-SNAPSHOT-jar-with-dependencies.jar!/" />
+          <root url="file://$MODULE_DIR$" />
+        </CLASSES>
+        <JAVADOC />
+        <SOURCES>
+          <root url="file://$MODULE_DIR$/src" />
+        </SOURCES>
+      </library>
+    </orderEntry>
   </component>
 </module>

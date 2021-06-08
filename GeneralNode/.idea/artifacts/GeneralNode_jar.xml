@@ -2,10 +2,16 @@
   <artifact type="jar" build-on-make="true" name="GeneralNode:jar">
     <output-path>$PROJECT_DIR$/out/artifacts/GeneralNode_jar</output-path>
     <root id="archive" name="GeneralNode.jar">
-      <element id="module-output" name="GeneralNode" />
+      <element id="directory" name="META-INF">
+        <element id="file-copy" path="$PROJECT_DIR$/out/META-INF/MANIFEST.MF" />
+      </element>
       <element id="module-output" name="Beans" />
       <element id="module-output" name="GeneralPurposeStructures" />
-      <element id="module-output" name="HTTPHandler" />
+      <element id="module-output" name="GeneralNode" />
+      <element id="extracted-dir" path="$PROJECT_DIR$/../HTTPHandler/target/HTTPHandler-1.0-SNAPSHOT.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="$PROJECT_DIR$/../HTTPHandler/target/HTTPHandler-1.0-SNAPSHOT-jar-with-dependencies.jar" path-in-jar="/" />
+      <element id="file-copy" path="$PROJECT_DIR$/../HTTPHandler/target/HTTPHandler-1.0-SNAPSHOT-jar-with-dependencies.jar" />
+      <element id="file-copy" path="$PROJECT_DIR$/../HTTPHandler/target/HTTPHandler-1.0-SNAPSHOT.jar" />
     </root>
   </artifact>
 </component>

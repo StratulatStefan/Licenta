@@ -1,11 +1,10 @@
 import config.AppConfig;
 import generalstructures.PendingQueue;
 import logger.LoggerService;
-import storage_quantity.NodeStorageQuantityTable;
+import tables.NodeStorageQuantityTable;
 import tables.ConnectionTable;
 import tables.ContentTable;
 import tables.StorageStatusTable;
-import tables.UserDataTable;
 
 import java.lang.*;
 
@@ -47,11 +46,6 @@ public class GeneralManager{
      * Tabela ce contine informatii despre cantitatea de memorie disponibila pentru fiecare nod.
      */
     public static NodeStorageQuantityTable nodeStorageQuantityTable;
-
-    /**
-     * Tabela ce contine datele utilizatorilor (id si tip)
-     */
-    public static UserDataTable userDataTable;
 
     public static PendingQueue pendingQueue;
 
@@ -138,7 +132,6 @@ public class GeneralManager{
         try {
             LoggerService.registerSuccess(generalManagerIpAddress, "General manager successfully started");
             nodeStorageQuantityTable = new NodeStorageQuantityTable();
-            userDataTable = new UserDataTable();
 
             GeneralManager generalManager = new GeneralManager();
             generalManager.startActivity();

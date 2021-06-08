@@ -4,18 +4,15 @@ import communication.Address;
 import client_node.FileHeader;
 import communication.Serializer;
 import config.AppConfig;
-import log.ProfiPrinter;
+import logger.LoggerService;
 import os.FileSystem;
 
 import java.io.*;
 import java.net.InetSocketAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.sql.Struct;
-import java.time.Year;
 
 /**
  * Clasa care va incapsula toata interactiunea dintre nodul intern si client (frontend).
@@ -188,7 +185,7 @@ public class ClientCommunicationManager {
                                 FileSystemManager.downloadFile(clientSocket, downloadFileRequest.getUserId(), downloadFileRequest.getFilename());
                             }
                             catch (Exception exception) {
-                                ProfiPrinter.PrintException("Exceptie : " + exception.getMessage());
+                                LoggerService.registerError(GeneralNode.ipAddress, "Exceptie la comunicarea cu clientul : " + exception.getMessage());
                             }
                         }
                         else {
@@ -198,7 +195,7 @@ public class ClientCommunicationManager {
                             dataOutputStream.write(buffer, 0, read);
                         }
                     }
-                    System.out.println("File write done");
+                    LoggerService.registerSuccess(GeneralNode.ipAddress, "File write done");
                     // send feedback to frontend
                     dataInputStream.close();
                     fileOutputStream.close();
@@ -215,8 +212,8 @@ public class ClientCommunicationManager {
                 }
 
                 catch (Exception exception){
-                    ProfiPrinter.PrintException(exception.getMessage());
-                    ProfiPrinter.PrintException(String.format("Could not properly close connection with my friend : [%s : %d]",
+                    System.out.println(exception.getMessage());
+                    LoggerService.registerWarning(GeneralNode.ipAddress,String.format("Could not properly close connection with my friend : [%s : %d]",
                             clientSocket.getLocalAddress(),
                             clientSocket.getLocalPort()));
                 }
@@ -243,7 +240,7 @@ public class ClientCommunicationManager {
         }
         catch (Exception exception){
             serverSocket.close();
-            ProfiPrinter.PrintException(exception.getMessage());
+            System.out.println(exception.getMessage());
         }
     }
 
@@ -268,9 +265,10 @@ public class ClientCommunicationManager {
 
                     dataOutputStream.close();
                     frontendSocket.close();
+                    LoggerService.registerSuccess(GeneralNode.ipAddress,"Feedback-ul a fost trimis cu succes catre client");
                 }
                 catch (IOException exception){
-                    ProfiPrinter.PrintException("Exceptie IO la sendFeedBackToFrontend : " + exception.getMessage());
+                    LoggerService.registerWarning(GeneralNode.ipAddress,"Exceptie IO la sendFeedBackToFrontend : " + exception.getMessage());
                 }
                 finally {
                     try{
@@ -278,7 +276,7 @@ public class ClientCommunicationManager {
                         frontendSocket.close();
                     }
                     catch(IOException exception){
-                        ProfiPrinter.PrintException("sendFeedBackToFrontend exceptie la inchidere socket-uri");
+                        LoggerService.registerWarning(GeneralNode.ipAddress,"sendFeedBackToFrontend exceptie la inchidere socket-uri");
                     }
                 }
             }

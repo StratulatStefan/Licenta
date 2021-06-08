@@ -1,6 +1,6 @@
 import config.AppConfig;
 import generalstructures.PendingList;
-import log.ProfiPrinter;
+import logger.LoggerService;
 import tables.CRCTable;
 import model.NewFiles;
 import node_manager.Beat.FileAttribute;
@@ -94,7 +94,7 @@ public class GeneralNode{
                     public void run() {
                         long crc = FileSystem.calculateCRC(path + "\\" + userDir + "\\" + file);
                         crcTable.updateRegister(userDir, file, crc);
-                        System.out.println("Am modificat crc-ul pentru [" +userDir + ":" + file +"]");
+                        LoggerService.registerSuccess(GeneralNode.ipAddress,"Am modificat crc-ul pentru [" +userDir + ":" + file +"]");
                     }
                 }).start();
             }
@@ -162,7 +162,7 @@ public class GeneralNode{
                     fileAttributes.add(f);
                 }
                 else{
-                    System.out.println("File ignored because it is in pending : " + file);
+                    LoggerService.registerWarning(GeneralNode.ipAddress,"File ignored because it is in pending : " + file);
                 }
             }
             storageStatus.addUserFiles(userDir, fileAttributes);
@@ -200,7 +200,7 @@ public class GeneralNode{
         }
 
         catch (Exception exception){
-            ProfiPrinter.PrintException("Exceptie la GeneralNode main : " + exception.getMessage());
+            LoggerService.registerError(GeneralNode.ipAddress,"Exceptie la GeneralNode main : " + exception.getMessage());
         }
     }
 }

@@ -1,9 +1,6 @@
 package generalstructures;
 
-import data.Pair;
-import data.Time;
 import model.PendingQueueRegister;
-import os.FileSystem;
 
 import java.util.ArrayDeque;
 import java.util.Queue;
@@ -21,11 +18,6 @@ public class PendingQueue {
             if(this.containsRegister(userId, filename))
                 throw new Exception("Queue already contains file " + filename + " of user " + userId + "!");
             this.pendingQueue.add(new PendingQueueRegister(userId, filename));
-        }
-    }
-    public void addToQueue(PendingQueueRegister pendingQueueRegister) throws Exception{
-        synchronized (this.pendingQueue){
-            this.pendingQueue.add(pendingQueueRegister);
         }
     }
 

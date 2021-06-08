@@ -2,7 +2,6 @@ import client_manager.data.NewFileRequest;
 import client_node.NewFileRequestFeedback;
 import communication.Serializer;
 import config.AppConfig;
-import log.ProfiPrinter;
 import logger.LoggerService;
 
 import java.io.DataInputStream;
@@ -75,8 +74,8 @@ public class FeedbackManager implements Runnable{
             ServerSocket feedbackSocket = new ServerSocket();
             feedbackSocket.bind(new InetSocketAddress(generalManagerIpAddress, feedbackPort));
             while(true) {
-                System.out.println("Feedback nou de la frontend!");
                 Socket socket = feedbackSocket.accept();
+                System.out.println("Feedback nou de la frontend!");
                 new Thread(feedbackThread(socket)).start();
             }
         }

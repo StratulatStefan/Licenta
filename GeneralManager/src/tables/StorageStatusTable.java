@@ -2,13 +2,11 @@ package tables;
 
 import communication.Address;
 import data.Pair;
-import log.ProfiPrinter;
-import model.FileAttributes;
+import logger.LoggerService;
 import model.FileAttributesForStorage;
 import model.FileVersionData;
 import node_manager.Beat.FileAttribute;
 import node_manager.Beat.NodeBeat;
-import tables.ContentTable;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -68,7 +66,7 @@ public class StorageStatusTable {
                             data.addNode(nodeAddress, crc, versionNo);
                         }
                         catch (Exception exception){
-                            ProfiPrinter.PrintException("Node already contains address!");
+                            System.out.println("Node already contains address!");
                         }
                         this.statusTable.get(user).add(data);
                     }
@@ -93,16 +91,11 @@ public class StorageStatusTable {
                                     this.statusTable.get(user).get(candidate).setVersionNo(nodeAddress, versionNo);
                             }
                             catch (NullPointerException exception){
-                                ProfiPrinter.PrintException("File " + this.statusTable.get(user).get(candidate).getFilename() + " of user " + nodeAddress + " skipped! : " + exception.getMessage());
+                                LoggerService.registerWarning("127.0.0.1", "File " + this.statusTable.get(user).get(candidate).getFilename() + " of user " + nodeAddress + " skipped! : " + exception.getMessage());
                             }
                         }
                     }
                 }
-
-                // verificam daca sunt useri stersi complet de la un nod; in acest caz;
-                // eliminam adresa nodului de la care a fost sters, sau intregul user
-                /* TODO fix this sh*t */
-                //cleanUpOnDeletedUser(nodeAddress.getIpAddress(), storageEntry.getUsers());
 
                 // verificam daca sunt fisiere care au fost sterse, si le eliminam;
                 // eliminam adresa nodului de la care a fost sters, sau fisierul daca nu se afla pe niciun nod
@@ -121,7 +114,7 @@ public class StorageStatusTable {
                             this.statusTable.get(user).remove(index);
                     }
                     catch (NullPointerException exception){
-                        ProfiPrinter.PrintException(exception.getMessage());
+                        System.out.println(exception.getMessage());
                     }
                 }
 
@@ -156,38 +149,6 @@ public class StorageStatusTable {
             }
         }
     }
-
-    /**
-     * Functie de stergere a inregistrarilor, la eliminarea unui user de la un nod;
-     * !! are probleme !!
-     */
-    public void cleanUpOnDeletedUser(String userAddress, List<String> users){
-        boolean found;
-        synchronized (this.statusTable){
-            for(String availableUser : this.getUsers()){
-                found = false;
-                for(String existingUser : users){
-                    if(availableUser.equals(existingUser)){
-                        found = true;
-                        break;
-                    }
-                }
-                if(found){
-                    continue;
-                }
-                for(FileAttributesForStorage file : this.statusTable.get(availableUser)){
-                    file.removeNode(userAddress);
-                    if(file.getNodeListSize() == 0){
-                        this.statusTable.get(availableUser).remove(file);
-                    }
-                }
-                if(this.statusTable.get(availableUser).size() == 0){
-                    this.statusTable.remove(availableUser);
-                }
-            }
-        }
-    }
-
 
     /** -------- Functii de valiare -------- **/
     /**

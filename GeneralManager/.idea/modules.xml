@@ -5,7 +5,6 @@
       <module fileurl="file://$PROJECT_DIR$/../Beans/Beans.iml" filepath="$PROJECT_DIR$/../Beans/Beans.iml" />
       <module fileurl="file://$PROJECT_DIR$/GeneralManager.iml" filepath="$PROJECT_DIR$/GeneralManager.iml" />
       <module fileurl="file://$PROJECT_DIR$/../GeneralPurposeStructures/GeneralPurposeStructures.iml" filepath="$PROJECT_DIR$/../GeneralPurposeStructures/GeneralPurposeStructures.iml" />
-      <module fileurl="file://$PROJECT_DIR$/../HTTPHandler/HTTPHandler.iml" filepath="$PROJECT_DIR$/../HTTPHandler/HTTPHandler.iml" />
     </modules>
   </component>
 </project>

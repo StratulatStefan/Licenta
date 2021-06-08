@@ -1,6 +1,5 @@
 import config.AppConfig;
 import data.Pair;
-import log.ProfiPrinter;
 import logger.LoggerService;
 import model.FileVersionData;
 
@@ -52,7 +51,6 @@ public class ReplicationManager implements Runnable{
      */
     public List<String> searchCandidatesForReplication(int replication_factor, List<String> availableNodes, long filesize){
         List<String> openNodes = GeneralManager.nodeStorageQuantityTable.getMostSuitableNodes(filesize).subList(0, replication_factor);
-
         try {
             return GeneralPurposeMethods.listDifferences(openNodes, availableNodes).subList(0, replication_factor - availableNodes.size());
         }
@@ -117,17 +115,20 @@ public class ReplicationManager implements Runnable{
                                 List<String> candidatesForDeletion = new ArrayList<String>(){{
                                     add(corruptedFileAddress);
                                 }};
-                                this.deletion(replication_factor, userId, userFile, candidatesForDeletion);
+                                replicationStatus += this.deletion(replication_factor, userId, userFile, candidatesForDeletion);
+                                replicationStatusTable.add(replicationStatus);
                                 continue;
                             }
                         }
                         else if (replication_factor > availableNodesForFile.size() && !GeneralManager.contentTable.getFileStatusForUser(userId, userFile).contains("PENDING")) {
                             long filesize = GeneralManager.contentTable.getFileSizeOfUserFile(userId, userFile);
-                            this.replication(replication_factor, userId, userFile, availableNodesAddressesForFile, filesize);
+                            replicationStatus += this.replication(replication_factor, userId, userFile, availableNodesAddressesForFile, filesize);
+                            replicationStatusTable.add(replicationStatus);
                         }
                         else if(replication_factor < availableNodesForFile.size()){
                             List<String> candidates = searchCandidatesForDeletion(availableNodesForFile.size() - replication_factor, availableNodesAddressesForFile);
-                            this.deletion(replication_factor, userId, userFile, candidates);
+                            replicationStatus += this.deletion(replication_factor, userId, userFile, candidates);
+                            replicationStatusTable.add(replicationStatus);
                         }
                         else{
                             replicationStatus += "[UNKNOWN]\n";
@@ -135,16 +136,12 @@ public class ReplicationManager implements Runnable{
                             replicationStatusTable.add(replicationStatus);
                         }
                     }
-                    // verificam daca sunt fisiere care sunt in storage status table, dar nu sunt in tabela de content (situatie intalnita atunci cand un nod moare si, intre timp,
-                    // un fisier a fost redenumit); nodul care invie va declara fisierul, dar contenttable nu va sti de el
-                    // TODO aici.. cu redenumirea..
-
                 }
                 System.out.println("------------------------------------\n");
                 Thread.sleep((int) (replicationFrequency * 1e3));
             }
             catch (Exception exception){
-                ProfiPrinter.PrintException("Replication loop interrupted exception : " + exception.getMessage());
+                System.out.println("Replication loop interrupted exception : " + exception.getMessage());
             }
         }
     }
@@ -162,8 +159,9 @@ public class ReplicationManager implements Runnable{
         return null;
     }
 
-    private void replication(int replication_factor, String userId, String userFile, List<String> availableNodesAddressesForFile, long filesize){
-        LoggerService.registerWarning(GeneralManager.generalManagerIpAddress,"[NEED REPLICATION]. " + userFile + " of user " +  userId);
+    private String replication(int replication_factor, String userId, String userFile, List<String> availableNodesAddressesForFile, long filesize){
+        String status = "[NEED REPLICATION]. " + userFile + " of user " +  userId + "\n";
+        LoggerService.registerWarning(GeneralManager.generalManagerIpAddress, status);
         List<String> candidates = searchCandidatesForReplication(replication_factor, availableNodesAddressesForFile, filesize);
         if(replication_factor == 1 || candidates == null){
             LoggerService.registerWarning(GeneralManager.generalManagerIpAddress,"Nu se poate realiza replicarea pentru fisierul curent. " +
@@ -174,25 +172,30 @@ public class ReplicationManager implements Runnable{
                 GeneralManager.contentTable.updateFileStatus(userId, userFile, "[PENDING]");
             }
             catch (Exception exception){
-                ProfiPrinter.PrintException("Replication : updatefilestatus1 : " + exception.getMessage());
+                System.out.println("Replication : updatefilestatus1 : " + exception.getMessage());
             }
             // cautam un criteriu pe baza caruia selectam nodul de la care se face copierea
             String source = availableNodesAddressesForFile.get(0);
+            status += "\t\tFound source of replication : " + source + "\n\t\tFound candidates for replication : ";
             System.out.println("\t\tFound source of replication : " + source);
             System.out.print("\t\tFound candidates for replication : ");
             for (String candidate : candidates) {
+                status += "[" + candidate + "] ";
                 System.out.print("[" + candidate + "] ");
             }
             System.out.println();
             GeneralManager.fileSystemManager.replicateFile(userId, userFile, source, candidates);
         }
-
+        return status;
     }
 
-    public void deletion(int replication_factor, String userId, String userFile, List<String> candidates) throws Exception {
-        LoggerService.registerWarning(GeneralManager.generalManagerIpAddress,String.format("[NEED DELETION OF FILE %s]", userFile));
+    public String deletion(int replication_factor, String userId, String userFile, List<String> candidates) throws Exception {
+        String status = String.format("[NEED DELETION OF FILE %s]\n", userFile);
+        LoggerService.registerWarning(GeneralManager.generalManagerIpAddress,status);
+        status += "\t\tFound nodes to delete file : ";
         System.out.print("\t\tFound nodes to delete file : ");
         for (String candidate : candidates) {
+            status += "[" + candidate + "] ";
             System.out.print("[" + candidate + "] ");
         }
         System.out.println();
@@ -200,5 +203,6 @@ public class ReplicationManager implements Runnable{
         if(replication_factor == 0) {
             GeneralManager.contentTable.updateFileStatus(userId, userFile, "[DELETED]");
         }
+        return status;
     }
 }

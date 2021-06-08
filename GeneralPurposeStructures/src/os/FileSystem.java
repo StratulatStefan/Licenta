@@ -1,7 +1,6 @@
 package os;
 
 import data.Pair;
-import log.ProfiPrinter;
 
 import java.io.*;
 import java.nio.file.Files;
@@ -43,7 +42,7 @@ public class FileSystem {
             Files.createFile(Paths.get(path));
         }
         catch (IOException exception){
-            ProfiPrinter.PrintException("Nu se poate crea fisierul de metadate " + path);
+            System.out.println("Nu se poate crea fisierul de metadate " + path);
         }
     }
 
@@ -77,7 +76,7 @@ public class FileSystem {
      */
     public static int renameFile(String prevName, String newName){
         if(checkFileExistance(newName)){
-            ProfiPrinter.PrintException("Nu se poate redenumi fisierul! Exista deja un fisier cu noul nume!");
+            System.out.println("Nu se poate redenumi fisierul! Exista deja un fisier cu noul nume!");
            return 2;
         }
 
@@ -86,7 +85,7 @@ public class FileSystem {
             return 1;
         }
         catch (IOException e){
-            ProfiPrinter.PrintException("Exceptie la redenumirea fisierului");
+            System.out.println("Exceptie la redenumirea fisierului");
             return 0;
         }
     }
@@ -141,7 +140,7 @@ public class FileSystem {
             return crc.getValue();
         }
         catch (IOException exception){
-            ProfiPrinter.PrintException("IOException la calculateCRC : " + exception.getMessage());
+            System.out.println("IOException la calculateCRC : " + exception.getMessage());
         }
         return -1;
     }
@@ -161,7 +160,7 @@ public class FileSystem {
             return crc.getValue();
         }
         catch (IOException exception){
-            ProfiPrinter.PrintException("IOException la calculateCRC : " + exception.getMessage());
+            System.out.println("IOException la calculateCRC : " + exception.getMessage());
         }
         return -1;
     }
@@ -199,7 +198,7 @@ public class FileSystem {
             Files.write(path, content.getBytes(), StandardOpenOption.APPEND);
         }
         catch (IOException exception){
-            ProfiPrinter.PrintException("Nu se poate modifica fisierul de metadate " + filepath);
+            System.out.println("Nu se poate modifica fisierul de metadate " + filepath);
         }
     }
 

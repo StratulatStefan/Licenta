@@ -7,27 +7,33 @@ import client_node.NewFileRequestFeedback;
 import com.dropbox.frontend_proxy_ui.FrontendProxyUiApplication;
 import com.dropbox.frontend_proxy_ui.controller.FileController;
 import communication.Serializer;
-import log.ProfiPrinter;
-import org.springframework.web.multipart.MultipartFile;
-import os.FileSystem;
+import org.springframework.beans.factory.annotation.Value;
 
 import java.io.*;
-import java.net.InetSocketAddress;
-import java.net.ServerSocket;
 import java.net.Socket;
-import java.net.SocketTimeoutException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.function.Consumer;
 
 public class FileSender {
-    private static final String ipAddress = "127.0.0.100";
+    @Value("${myaddress}")
+    private String ipAddress;
 
-    private static final int bufferSize = 4096;
+    @Value("${bufferSize}")
+    private static int bufferSize;
 
-    private static int generalManagerPort = 8081;
+    @Value("${generalManagerPort}")
+    private static int generalManagerPort;
+
+    @Value("${generalManagerAddress}")
+    private static String generalManagerAddress;
+
+    @Value("${feedbackport}")
+    private static int feedbackPort;
+
+    @Value("${filedownloadpath}")
+    private static String downloadFilePath;
 
     private static boolean validateToken(String token) throws Exception{
         if(token.length() == 0)
@@ -73,7 +79,6 @@ public class FileSender {
             fileHeader.setUserId(clientManagerRequest.getUserId());
             fileHeader.setDescription(clientManagerRequest.getDescription());
 
-
             DataOutputStream outputStream = new DataOutputStream(socket.getOutputStream());
             BufferedInputStream inputStream = new BufferedInputStream(new FileInputStream(clientManagerRequest.getFilename()));
             outputStream.write(Serializer.serialize(fileHeader));
@@ -83,14 +88,12 @@ public class FileSender {
             while ((count = inputStream.read(binaryFile)) > 0) {
                 outputStream.write(binaryFile, 0, count);
             }
-
             inputStream.close();
             outputStream.close();
             socket.close();
-
         }
         catch (Exception exception){
-            ProfiPrinter.PrintException("Exceptie la trimiterea unui nou fisier: " + exception.getMessage());
+            System.out.println("Exceptie la trimiterea unui nou fisier: " + exception.getMessage());
         }
     }
 
@@ -121,12 +124,10 @@ public class FileSender {
                             if (fileName.equals(fname) && userID.equals(userId) && CRC == crc) {
                                 System.out.println(" >> [OK]");
                                 valid_nodes[0] += 1;
-                            } else {
-                                System.out.println(" >> [INVALID]");
-                            }
+                            } else System.out.println(" >> [INVALID]");
                         }
                         catch (Exception exception){
-                            ProfiPrinter.PrintException("Exceptie la primirea feedback-ului! : " + exception.getMessage());
+                            System.out.println("Exceptie la primirea feedback-ului! : " + exception.getMessage());
                         }
                     }
                 });
@@ -135,7 +136,7 @@ public class FileSender {
             }
         }
         catch (Exception exception){
-            ProfiPrinter.PrintException("Exceptie : " + exception.getMessage());
+            System.out.println("Exceptie : " + exception.getMessage());
             another_exception = true;
         }
         finally {
@@ -166,7 +167,7 @@ public class FileSender {
                 feedback.setUserId(userId);
                 feedback.setStatus(status);
                 try{
-                    Socket frontendSocket = new Socket("127.0.0.1", 8010);
+                    Socket frontendSocket = new Socket(generalManagerAddress, feedbackPort);
                     DataOutputStream dataOutputStream = new DataOutputStream(frontendSocket.getOutputStream());
 
                     dataOutputStream.write(Serializer.serialize(feedback));
@@ -175,7 +176,7 @@ public class FileSender {
                     frontendSocket.close();
                 }
                 catch (IOException exception){
-                    ProfiPrinter.PrintException("Exceptie IO la sendFeedBackToGM : " + exception.getMessage());
+                    System.out.println("Exceptie IO la sendFeedBackToGM : " + exception.getMessage());
                 }
             }
         }).start();
@@ -191,7 +192,7 @@ public class FileSender {
 
             DataOutputStream outputStream = new DataOutputStream(socket.getOutputStream());
             outputStream.write(Serializer.serialize(downloadFileRequest));
-            String filepath = "D:\\Facultate\\Licenta\\Licenta\\ui-frontend\\build\\buffer\\" + filename;
+            String filepath = downloadFilePath + filename;
             FileOutputStream fileOutputStream = new FileOutputStream(filepath);
 
             InputStream dataInputStream = new DataInputStream(socket.getInputStream());
@@ -209,7 +210,7 @@ public class FileSender {
             return "/buffer/" + filename;
         }
         catch (Exception exception){
-            ProfiPrinter.PrintException("Exceptie la trimiterea unui nou fisier: " + exception.getMessage());
+            System.out.println("Exceptie la trimiterea unui nou fisier: " + exception.getMessage());
             return null;
         }
     }

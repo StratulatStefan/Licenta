@@ -1,11 +1,9 @@
 package com.dropbox.frontend_proxy_ui.controller;
 
-import client_manager.ManagerComplexeResponse;
-import client_manager.ManagerTextResponse;
-import com.dropbox.frontend_proxy_ui.jwt.AuthorizationService;
 import com.dropbox.frontend_proxy_ui.model.UploadPendingQueue;
 import com.dropbox.frontend_proxy_ui.services.FileService;
 import com.dropbox.frontend_proxy_ui.services.ResponseHandlerService;
+import jwt.AuthorizationService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -29,15 +27,15 @@ public class FileController {
     FileService fileService;
 
     @RequestMapping(path = "/proxy/upload", method = RequestMethod.POST)
-    public ResponseEntity<Map<String, String>> uploadFIle(@RequestParam("file") MultipartFile file,
-                                           @RequestHeader("Authorization") String authorizationValue,
-                                           @RequestHeader("version_description") String descriptionValue,
-                                           @RequestHeader("available_storage") long availableStorage,
-                                           @RequestHeader("user_type") String userType){
+    public ResponseEntity<Map<String, String>> uploadFIle(@RequestParam("file")                 MultipartFile file,
+                                                          @RequestHeader("Authorization")       String authorizationValue,
+                                                          @RequestHeader("version_description") String descriptionValue,
+                                                          @RequestHeader("available_storage")   long availableStorage,
+                                                          @RequestHeader("user_type")           String userType){
 
         int userId = -1;
         try {
-            AuthorizationService.UserTypes allowedUserTypes[] = new AuthorizationService.UserTypes[]{AuthorizationService.UserTypes.ALL};
+            AuthorizationService.UserTypes[] allowedUserTypes = new AuthorizationService.UserTypes[]{AuthorizationService.UserTypes.ALL};
             Map<String, Object> userData = authorizationService.userAuthorization(authorizationValue, allowedUserTypes);
             userId = Integer.parseInt((String)userData.get("sub"));
         }
@@ -65,7 +63,7 @@ public class FileController {
     public ResponseEntity<List<HashMap<String, Object>>> getUserFiles(@RequestHeader("Authorization") String authorizationValue){
         int userId = -1;
         try {
-            AuthorizationService.UserTypes allowedUserTypes[] = new AuthorizationService.UserTypes[]{AuthorizationService.UserTypes.ALL};
+            AuthorizationService.UserTypes[] allowedUserTypes = new AuthorizationService.UserTypes[]{AuthorizationService.UserTypes.ALL};
             Map<String, Object> userData = authorizationService.userAuthorization(authorizationValue, allowedUserTypes);
             userId = Integer.parseInt((String)userData.get("sub"));
         }
@@ -85,10 +83,10 @@ public class FileController {
 
     @RequestMapping(path = "/proxy/history", method = RequestMethod.GET)
     public ResponseEntity<List<HashMap<String, Object>>> getUserFileHistory(@RequestParam(name="filename", required = false, defaultValue = "") String filename,
-                                                                            @RequestHeader("Authorization") String authorizationValue){
+                                                                            @RequestHeader("Authorization")                                     String authorizationValue){
         int userId = -1;
         try {
-            AuthorizationService.UserTypes allowedUserTypes[] = new AuthorizationService.UserTypes[]{AuthorizationService.UserTypes.ALL};
+            AuthorizationService.UserTypes[] allowedUserTypes = new AuthorizationService.UserTypes[]{AuthorizationService.UserTypes.ALL};
             Map<String, Object> userData = authorizationService.userAuthorization(authorizationValue, allowedUserTypes);
             userId = Integer.parseInt((String)userData.get("sub"));
         }
@@ -108,7 +106,7 @@ public class FileController {
 
     @RequestMapping(path = "/proxy/versions", method = RequestMethod.GET)
     public ResponseEntity<List<HashMap<String, Object>>> getUserFileHistory(@RequestParam(name="filename", required = false, defaultValue = "") String filename,
-                                                                            @RequestParam(name="userid", required = false, defaultValue = "") int userId){
+                                                                            @RequestParam(name="userid",   required = false, defaultValue = "") int userId){
         try {
             return new ResponseEntity(fileService.getUserFileHistory(userId, filename).getResponse(), HttpStatus.OK);
         }
@@ -120,12 +118,12 @@ public class FileController {
 
 
     @RequestMapping(path = "/proxy/{filename}", method = RequestMethod.DELETE)
-    public ResponseEntity<String> deleteFile(@PathVariable String filename,
-                                             @RequestBody HashMap<String, String> description,
-                                             @RequestHeader("Authorization") String authorizationValue){
+    public ResponseEntity<String> deleteFile(@PathVariable String                    filename,
+                                             @RequestBody  HashMap<String, String>   description,
+                                             @RequestHeader("Authorization") String  authorizationValue){
         int userId = -1;
         try {
-            AuthorizationService.UserTypes allowedUserTypes[] = new AuthorizationService.UserTypes[]{AuthorizationService.UserTypes.ALL};
+            AuthorizationService.UserTypes[] allowedUserTypes = new AuthorizationService.UserTypes[]{AuthorizationService.UserTypes.ALL};
             Map<String, Object> userData = authorizationService.userAuthorization(authorizationValue, allowedUserTypes);
             userId = Integer.parseInt((String)userData.get("sub"));
         }
@@ -145,12 +143,12 @@ public class FileController {
     }
 
     @RequestMapping(path = "/proxy/{filename}", method = RequestMethod.PUT)
-    public ResponseEntity<String> renameFile(@PathVariable String filename,
-                                             @RequestBody HashMap<String, String> data,
+    public ResponseEntity<String> renameFile(@PathVariable String                   filename,
+                                             @RequestBody  HashMap<String, String>  data,
                                              @RequestHeader("Authorization") String authorizationValue){
         int userId = -1;
         try {
-            AuthorizationService.UserTypes allowedUserTypes[] = new AuthorizationService.UserTypes[]{AuthorizationService.UserTypes.ALL};
+            AuthorizationService.UserTypes[] allowedUserTypes = new AuthorizationService.UserTypes[]{AuthorizationService.UserTypes.ALL};
             Map<String, Object> userData = authorizationService.userAuthorization(authorizationValue, allowedUserTypes);
             userId = Integer.parseInt((String)userData.get("sub"));
         }
@@ -170,11 +168,11 @@ public class FileController {
     }
 
     @RequestMapping(path = "/proxy/{filename}", method = RequestMethod.GET)
-    public ResponseEntity<String> downloadFile(@PathVariable String filename,
+    public ResponseEntity<String> downloadFile(@PathVariable                   String filename,
                                                @RequestHeader("Authorization") String authorizationValue){
         int userId = -1;
         try {
-            AuthorizationService.UserTypes allowedUserTypes[] = new AuthorizationService.UserTypes[]{AuthorizationService.UserTypes.ALL};
+            AuthorizationService.UserTypes[] allowedUserTypes = new AuthorizationService.UserTypes[]{AuthorizationService.UserTypes.ALL};
             Map<String, Object> userData = authorizationService.userAuthorization(authorizationValue, allowedUserTypes);
             userId = Integer.parseInt((String)userData.get("sub"));
         }
@@ -193,8 +191,8 @@ public class FileController {
     }
 
     @RequestMapping(path = "/proxy/nodesforfile", method = RequestMethod.GET)
-    public ResponseEntity<List<Object>> getNodesOfFile(@RequestParam(name="user", required = true, defaultValue = "1") String userId,
-                                                       @RequestParam(name="filename", required = true, defaultValue = "") String filename){
+    public ResponseEntity<List<Object>> getNodesOfFile(@RequestParam(name="user",     required = true, defaultValue = "1") String userId,
+                                                       @RequestParam(name="filename", required = true, defaultValue = "")  String filename){
         try {
             return new ResponseEntity(fileService.getNodesStoringUserFile(userId, filename).getResponse(), HttpStatus.OK);
         }
@@ -205,9 +203,9 @@ public class FileController {
     }
 
     @RequestMapping(path = "/proxy/internalnodefile", method = RequestMethod.DELETE)
-    public ResponseEntity<String> deleteFileFromInternalNode(@RequestParam(name="user", required = true, defaultValue = "") String userId,
+    public ResponseEntity<String> deleteFileFromInternalNode(@RequestParam(name="user",     required = true, defaultValue = "") String userId,
                                                              @RequestParam(name="filename", required = true, defaultValue = "") String filename,
-                                                             @RequestParam(name="address", required = true, defaultValue = "") String address){
+                                                             @RequestParam(name="address",  required = true, defaultValue = "") String address){
         try {
             String status = fileService.deleteFileFromInternalNode(userId, filename, address).getResponse();
             return new ResponseEntity(ResponseHandlerService.buildSuccessStatus(status), HttpStatus.OK);
