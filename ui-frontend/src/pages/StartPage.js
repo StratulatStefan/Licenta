@@ -1,5 +1,6 @@
-import React, { Component } from 'react';
-import {UsersHandlerService} from '../services/UsersHandlerService';
+import React, { Component }      from 'react';
+import { GeneralPurposeService } from '../services/GeneralPurposeService';
+import {UsersHandlerService}     from '../services/UsersHandlerService';
 
 import '../styles/pages-style.css';
 
@@ -8,18 +9,19 @@ class StartPage extends Component {
 
     constructor(props){
         super(props)
-        document.getElementById("page-name").innerHTML = "Home Page";
+        document.getElementById("page-name").innerHTML = "Login Page";
         this.userData = localStorage.getItem('user_data')
         this.accountCredentials = {email : "", password : ""}
         this.state = {
-            isUserConnected : false,
-            userType : "",
-            accountAvailable : true,
+            isUserConnected            : false,
+            userType                   : "",
+            accountAvailable           : true,
             accountSuccessfullyCreated : false
         }
     }
 
     componentDidMount = () => {
+        GeneralPurposeService.setHeaderLayout("START")
         this.fetchAvailableUserTypes()
         this.checkForConnectedUser()
         this.fetchUserType()
@@ -28,11 +30,8 @@ class StartPage extends Component {
     componentDidUpdate = () => {
         if(this.state.accountAvailable === true && this.state.accountSuccessfullyCreated === true){
             document.getElementById("status_message").innerHTML = ""
-            this.setState({
-                accountSuccessfullyCreated : false
-            })
+            this.setState({accountSuccessfullyCreated : false})
         }
-
         if(this.state.isUserConnected === true && this.state.userType !== ""){
             this.redirect(this.state.userType === "ADMIN" ? "/ahome" : "/uhome")
         }
@@ -41,9 +40,7 @@ class StartPage extends Component {
     checkForConnectedUser = () => {
         this.userData = localStorage.getItem('user_data')
         var status = (this.userData !== null && this.userData !== '')
-        this.setState({
-            isUserConnected : status,
-        });
+        this.setState({isUserConnected : status});
         if(status === true){
             this.userData = JSON.parse(this.userData)
             document.getElementById("log_data_uname").innerHTML = this.userData["name"];
@@ -59,10 +56,8 @@ class StartPage extends Component {
         UsersHandlerService.getAvailableUserTypes().then(response => {
             if(response.code === 1){
                 StartPage.availableUserTypes = response.content
-                console.log(response.content)
             }
             else{
-                console.log(response.content)
             }
         })
     }
@@ -71,7 +66,6 @@ class StartPage extends Component {
         if(this.userData !== null && this.userData !== ''){
             UsersHandlerService.getUserRole(this.userData["jwt"]).then(response => {
                 if(response.code === 1){
-                    console.log("role : " + response["content"])
                     this.setState({userType : response["content"]})
                 }
                 else if(response.code === 401){
@@ -82,9 +76,8 @@ class StartPage extends Component {
     }
 
     login = () => {
-        //this.accountCredentials = {"email" : "stefanc.stratulat@gmail.com", "password" : "parola.dropbox123"}
-        this.accountCredentials = {"email" : "dropbox.com@dpbox.com", "password" : "82467913"}
-        console.log(this.accountCredentials)
+        this.accountCredentials = {"email" : "stefanc.stratulat@gmail.com", "password" : "parola.dropbox123"}
+        //this.accountCredentials = {"email" : "dropbox.com@dpbox.com", "password" : "82467913"}
         UsersHandlerService.login(this.accountCredentials).then(response => {
             if(response.code === 1){
                 localStorage.setItem("user_data", JSON.stringify(response.content))
@@ -94,43 +87,32 @@ class StartPage extends Component {
             }
             else{
                 document.getElementById("status_message").style.display = "block"
-                document.getElementById("status_message").style.color = "#810000";
-                document.getElementById("status_message").innerHTML = response.content
+                document.getElementById("status_message").style.color   = "#810000";
+                document.getElementById("status_message").innerHTML     = response.content
             }
         })
     }
 
     createAccount = () => {
         UsersHandlerService.register(this.accountCredentials).then(response => {
-            console.log(response)
             document.getElementById("status_message").style.display = "block"
             if(response.code === 1){
-                document.getElementById("status_message").innerHTML = response.content["success status"]
+                document.getElementById("status_message").innerHTML   = response.content["success status"]
                 document.getElementById("status_message").style.color = "#206a5d";
-                this.setState({
-                    accountSuccessfullyCreated : true
-                })
+                this.setState({accountSuccessfullyCreated : true})
             }
             else{
                 document.getElementById("status_message").style.color = "#810000";
-                document.getElementById("status_message").innerHTML = response.content
+                document.getElementById("status_message").innerHTML   = response.content
             }
         })
-
     }
 
-    credentialInput = (event, type) => {
-        this.accountCredentials[type] = event.target.value
-    }
-    
     redirect = (destination) => {
         if(destination !== ""){
-            // refactor cand apare si alte destinations
             this.props.history.push({
                 "pathname" : destination,
-                "state" : {"detail" : {
-                    "user_type" : this.state.userType
-                }}
+                "state" : {"detail" : {"user_type" : this.state.userType}}
             })
         }
         else{
@@ -177,29 +159,27 @@ class StartPage extends Component {
                             <p className="login_header">Log into your account</p>
                             <p>Email</p>
                             <input 
-                                onChange={(event) => {this.credentialInput(event, "email")}} 
-                                type="email" 
-                            />
+                                onChange={(event) => {this.accountCredentials["email"] = event.target.value}} 
+                                type="email"/>
                             <p>Password</p>
                             <input 
-                                onChange={(event) => {this.credentialInput(event, "password")}} 
-                                type="password"
-                            />
+                                onChange={(event) => {this.accountCredentials["password"] = event.target.value}} 
+                                type="password"/>
                             <p><button className="redirector" onClick={this.login}>Autentificare</button></p>
                         </div> : 
                         <div>
                             <p className="login_header">Create account</p>
                             <p>Name</p>
                             <input 
-                                onChange={(event) => {this.credentialInput(event, "name")}} 
+                                onChange={(event) => {this.accountCredentials["name"] = event.target.value}} 
                                 type="text" />
                             <p>Email</p>
                             <input 
-                                onChange={(event) => {this.credentialInput(event, "email")}} 
+                                onChange={(event) => {this.accountCredentials["email"] = event.target.value}} 
                                 type="email" />
                             <p>Password</p>
                             <input 
-                                onChange={(event) => {this.credentialInput(event, "password")}} 
+                                onChange={(event) => {this.accountCredentials["password"] = event.target.value}} 
                                 type="password" />
                             <p>User type</p>
                             <select onChange={(event) => {this.accountCredentials["type"] = event.target.value}}>
@@ -207,7 +187,7 @@ class StartPage extends Component {
                             </select>
                             <p>Country</p>
                             <input 
-                                onChange={(event) => {this.credentialInput(event, "country")}} 
+                                onChange={(event) => {this.accountCredentials["country"] = event.target.value}} 
                                 type="text" />
                             <br/>
                             <label><button className="redirector" onClick={this.createAccount}>Create account</button></label>

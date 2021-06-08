@@ -1,12 +1,12 @@
-import React, { Component } from 'react';
+import React, { Component }  from 'react';
 import {UsersHandlerService} from '../services/UsersHandlerService';
+
+import { FileHandlerService }    from '../services/FileHandlerService';
+import { GeneralPurposeService } from '../services/GeneralPurposeService';
 
 import '../styles/pages-style.css';
 import '../styles/pages_usermain.css';
 import '../styles/pages-home-style.css';
-import { FileHandlerService } from '../services/FileHandlerService';
-import { GeneralPurposeService } from '../services/GeneralPurposeService';
-
 
 class FileDetailsPage extends Component {
     static userActions = ["download", "delete", "rename", "update", "no-selected"]
@@ -16,19 +16,19 @@ class FileDetailsPage extends Component {
         document.getElementById("page-name").innerHTML = "Home Page";
         this.userData = localStorage.getItem('user_data')
         this.description = null
-        this.newname = null
+        this.newname     = null
         this.fileSuccessfullyDownloaded = false
         this.state = {
-            isUserConnected : false,
-            userType : null,
-            accountAvailable : true,
+            isUserConnected            : false,
+            userType                   : null,
+            accountAvailable           : true,
             accountSuccessfullyCreated : false,
-            currentFileName : null,
-            availableNodes : null,
-            fileDetails : null,
-            userFile : null,
-            filePreview : <p>No preview avaialble!</p>,
-            currentSelectedAction : FileDetailsPage.userActions[4]
+            currentFileName            : null,
+            availableNodes             : null,
+            fileDetails                : null,
+            userFile                   : null,
+            filePreview                : <p>No preview avaialble!</p>,
+            currentSelectedAction      : FileDetailsPage.userActions[4]
         }
     }
 
@@ -53,8 +53,6 @@ class FileDetailsPage extends Component {
                 this.fileDetails(userFile)
                 this.setState({userFile : userFile})
             }
-            console.log(this.userFile)
-
         })
     }
 
@@ -76,7 +74,6 @@ class FileDetailsPage extends Component {
                 resolve(null)
             }
             catch(e){
-                // am ajuns pe aceasta pagina din alta parte, prin click pe meniu, prin scriere directa in link
                 UsersHandlerService.getUserRole(this.userData["jwt"]).then(response => {
                     if(response.code === 1){
                         console.log(`props fetch: ${response["content"]}`)
@@ -113,8 +110,6 @@ class FileDetailsPage extends Component {
     fileDetails = (file) => {
         FileHandlerService.getFileHistory(this.userData["jwt"], file.filename).then(response => {
             this.setState({fileDetails : response.content, currentFileName : file.filename}, () => {this.downloadFile()})
-            console.log(response.content)
-            console.log(file)
         })
     }
 
@@ -126,7 +121,6 @@ class FileDetailsPage extends Component {
         }
         else{
             FileHandlerService.downloadFile(this.userData["jwt"], this.state.currentFileName).then(response => {
-                console.log(response.content)
                 document.getElementById("downloaduri").href = response.content
                 let fileType = GeneralPurposeService.getFileType(this.state.currentFileName)
                 if(fileType === "image"){
@@ -174,15 +168,6 @@ class FileDetailsPage extends Component {
             })
         }
 
-    }
-
-    uploadNewVersionFile = () => {
-        this.resetFields()
-        document.getElementById("input_label").style.visibility = "visible"
-        document.getElementsByClassName("request_description")[0].style.visibility = "hidden"
-        document.getElementById("input_label").style.visibility = "visible"
-        document.getElementById("input_label").innerHTML = "Edit your file and upload it with the same name."
-        document.getElementsByClassName("request_description")[2].style.visibility = "visible"
     }
 
     updateAction = (actionIndex) => {
@@ -291,7 +276,6 @@ class FileDetailsPage extends Component {
                                     <button id="rename_file_button" style={{fontSize:"80%", padding : 0, paddingLeft:"5px", paddingRight:"5px", height:"40px"}} 
                                         onClick={() => this.redirect("/upload")}>Go to upload page
                                     </button>
-
                                 </div>
                                 <div className="request_description">
                                     <p id="input_label">New name : </p>

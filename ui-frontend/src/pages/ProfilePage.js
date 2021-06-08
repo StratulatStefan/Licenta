@@ -1,5 +1,6 @@
 import React, { Component } from 'react';
-import {UsersHandlerService} from '../services/UsersHandlerService';
+
+import {UsersHandlerService}     from '../services/UsersHandlerService';
 import { GeneralPurposeService } from '../services/GeneralPurposeService';
 
 import '../styles/pages-style.css';
@@ -14,10 +15,10 @@ class ProfilePage extends Component {
         document.getElementById("page-name").innerHTML = "Profile Page";
         this.userData = localStorage.getItem('user_data')
         this.state = {
-            isUserConnected : false,
-            userType : "",
-            userDetailsCategory: ProfilePage.userDetailsCategories[0],
-            additionalUserData : null
+            isUserConnected     : false,
+            userType            : "",
+            userDetailsCategory : ProfilePage.userDetailsCategories[0],
+            additionalUserData  : null
         }
 
     }
@@ -47,7 +48,6 @@ class ProfilePage extends Component {
                     delete usertype["user_type"]
                     ProfilePage.availableUserTypes[utype] = usertype
                 })
-                console.log(response.content)
             }
             else{
                 console.log(response.content)
@@ -70,11 +70,9 @@ class ProfilePage extends Component {
     }
 
     fetchAdditionalUserData = () => {
-        console.log("Fetching additional user data..")
         UsersHandlerService.getAdditionalUserData(this.userData["jwt"]).then(response => {
             if(response.code === 1){
                 this.setState({additionalUserData : response.content})
-                console.log(response.content)
                 localStorage.setItem("additional_user_data", JSON.stringify(response.content))
             }
             else{
@@ -105,7 +103,6 @@ class ProfilePage extends Component {
         UsersHandlerService.updatePlan(this.userData["jwt"], newplan).then(response => {
             if(response.code === 1){
                 document.getElementById("updatePlanStatus").innerHTML = `Plan successfully changed to ${newplan}.`
-                console.log(response.content)
                 this.fetchAdditionalUserData()
             }
             else{

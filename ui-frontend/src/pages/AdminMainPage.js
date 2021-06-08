@@ -1,13 +1,14 @@
-import React, { Component } from 'react';
+import React, { Component }  from 'react';
 import {UsersHandlerService} from '../services/UsersHandlerService';
+
+import { GeneralPurposeService } from '../services/GeneralPurposeService';
+import { AdminHandlerService }   from '../services/AdminHandlerService';
+import { Environment }           from '../environment';
+import { PieChart }              from 'react-minimal-pie-chart';
 
 import '../styles/pages-style.css';
 import '../styles/pages-home-style.css';
 import '../styles/pages-admin-style.css';
-import { GeneralPurposeService } from '../services/GeneralPurposeService';
-import { AdminHandlerService } from '../services/AdminHandlerService';
-import { Environment } from '../environment';
-import { PieChart } from 'react-minimal-pie-chart';
 
 class AdminMainPage extends Component {
     constructor(props){
@@ -16,27 +17,23 @@ class AdminMainPage extends Component {
         this.userData = localStorage.getItem('user_data')
         this.menu_selection = null
         this.state = {
-            isUserConnected : false,
-            userType : null,
-            accountAvailable : true,
-            availableNodes : null,
-            log : null,
-            websocket : {"connected" : false, "subscriptions" : null},
-            content : null,
+            isUserConnected    : false,
+            userType           : null,
+            accountAvailable   : true,
+            availableNodes     : null,
+            log                : null,
+            replication_status : null,
+            content            : null,
             content_nodes_data : null,
-            file_versions : null,
-            storagestatus : null,
-            current_address : null,
-            connectionTable : {"addresses" : null, "status" : null, "current_address" : null},
-            replication_status : null
+            file_versions      : null,
+            storagestatus      : null,
+            current_address    : null,
+            connectionTable    : {"addresses" : null, "status" : null, "current_address" : null},
+            websocket          : {"connected" : false, "subscriptions" : null},
         }
         this.logCriteria = {message_type : "ALL", node_address : "ALL", date1 : GeneralPurposeService.getCurrentTimestampForLogging("1 year")}
         this.webSocketConnection = null;
-        this.selectedFile = null
-        this.setHeaderLayout()
-    }
-
-    setHeaderLayout = () => {
+        this.selectedFile        = null
         GeneralPurposeService.setHeaderLayout("ADMIN")
         document.getElementById("log_redirector").onclick = () => this.adminAction("log")
         document.getElementById("content-table_redirector").onclick = () => this.adminAction("content")
@@ -74,7 +71,6 @@ class AdminMainPage extends Component {
                 resolve(null)
             }
             catch(e){
-                // am ajuns pe aceasta pagina din alta parte, prin click pe meniu, prin scriere directa in link
                 UsersHandlerService.getUserRole(this.userData["jwt"]).then(response => {
                     if(response.code === 1){
                         this.setState({userType : response["content"]})
@@ -288,18 +284,10 @@ class AdminMainPage extends Component {
                 this.state.log.forEach(log_register => {
                     logData.push(
                         <tr key={`log_${log_register.registerId}`}>
-                            <td>
-                                <p>{log_register.node_address}</p>
-                            </td>
-                            <td>
-                                <p>{log_register.message_type}</p>
-                            </td>
-                            <td>
-                                <p>{log_register.description}</p>
-                            </td>
-                            <td>
-                                <p>{log_register.register_date}</p>
-                            </td>
+                            <td><p>{log_register.node_address}</p></td>
+                            <td><p>{log_register.message_type}</p></td>
+                            <td><p>{log_register.description}</p></td>
+                            <td><p>{log_register.register_date}</p></td>
                         </tr>
                     )
                 })

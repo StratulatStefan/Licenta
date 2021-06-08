@@ -1,11 +1,11 @@
 import React, { Component } from 'react';
 
+import { FileHandlerService }    from '../services/FileHandlerService';
+import { GeneralPurposeService } from '../services/GeneralPurposeService';
+
 import '../styles/pages-style.css';
 import '../styles/pages-home-style.css';
 import '../styles/pages-upload.css';
-import { FileHandlerService } from '../services/FileHandlerService';
-import {UsersHandlerService} from '../services/UsersHandlerService';
-import { GeneralPurposeService } from '../services/GeneralPurposeService';
 
 class UploadPage extends Component {
     constructor(props){
@@ -15,32 +15,17 @@ class UploadPage extends Component {
         this.descriptionData = null;
         this.state = {
             currentFile : null,
-            userType : "STANDARD",
-            preview : <p id="upload_data_preview">No preview available</p>
+            userType    : "STANDARD",
+            preview     : <p id="upload_data_preview">No preview available</p>
         }
     }
 
     componentDidMount = () => {
+        GeneralPurposeService.setHeaderLayout("USER")
         this.dragDropStyle("uploader")
-        //this.fetchUserType()
-    }
-
-    fetchUserType = () => {
-        if(this.userData !== null && this.userData !== ''){
-            UsersHandlerService.getUserRole(this.userData["jwt"]).then(response => {
-                if(response.code === 1){
-                    console.log("role : " + response["content"])
-                    this.setState({userType : response["content"]})
-                }
-                else if(response.code === 401){
-                    localStorage.setItem("user_data", '')
-                }
-            })
-        }
     }
 
     dragDropStyle = (div_name) => {
-        console.log("Aiiiiic")
         let dropArea = document.getElementById(div_name);
 
         ["dragover", "drop"].forEach(event => {
@@ -83,10 +68,7 @@ class UploadPage extends Component {
             this.setState({preview : <p id="upload_data_preview">No preview avaialble!</p>})
         }
 
-        console.log(file)
-        this.setState({
-            currentFile : file
-        })
+        this.setState({currentFile : file})
     }
 
     uploadFile = () => {
@@ -94,7 +76,6 @@ class UploadPage extends Component {
         FileHandlerService.uploadFile(this.state.currentFile, this.userData["jwt"], this.descriptionData, this.state.userType).then(response => {
             if(response.code === 1){
                 document.getElementById("dropmessage_1").innerHTML = response.content
-                console.log(response.content)
             }
             else if(response.code === 401){
                 document.getElementById("dropmessage_1").innerHTML = response

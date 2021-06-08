@@ -1,13 +1,13 @@
-import React, { Component } from 'react';
+import React, { Component }  from 'react';
 import {UsersHandlerService} from '../services/UsersHandlerService';
+
+import { FileHandlerService }    from '../services/FileHandlerService';
+import { Environment }           from '../environment';
+import { GeneralPurposeService } from '../services/GeneralPurposeService';
 
 import '../styles/pages-style.css';
 import '../styles/pages_usermain.css';
 import '../styles/pages-home-style.css';
-import { FileHandlerService } from '../services/FileHandlerService';
-import { Environment } from '../environment';
-import { GeneralPurposeService } from '../services/GeneralPurposeService';
-
 
 class MainUserPage extends Component {
     constructor(props){
@@ -15,20 +15,21 @@ class MainUserPage extends Component {
         document.getElementById("page-name").innerHTML = "Home Page";
         this.userData = localStorage.getItem('user_data')
         this.description = null
-        this.newname = null
+        this.newname     = null
         this.state = {
-            isUserConnected : false,
-            userType : null,
-            accountAvailable : true,
+            isUserConnected            : false,
+            userType                   : null,
+            accountAvailable           : true,
             accountSuccessfullyCreated : false,
-            userFiles : null,
-            currentFileName : null,
-            availableNodes : null,
-            fileDetails : null
+            userFiles                  : null,
+            currentFileName            : null,
+            availableNodes             : null,
+            fileDetails                : null
         }
     }
 
     componentDidMount = () => {
+        GeneralPurposeService.setHeaderLayout("USER")
         this.checkForConnectedUser()
         this.fetchUserType().then(_ => {
             this.fetchUserFiles()
@@ -42,10 +43,8 @@ class MainUserPage extends Component {
                 resolve(null)
             }
             catch(e){
-                // am ajuns pe aceasta pagina din alta parte, prin click pe meniu, prin scriere directa in link
                 UsersHandlerService.getUserRole(this.userData["jwt"]).then(response => {
                     if(response.code === 1){
-                        console.log(`props fetch: ${response["content"]}`)
                         this.setState({userType : response["content"]})
                     }
                     else if(response.code === 401){
@@ -60,12 +59,7 @@ class MainUserPage extends Component {
     fetchUserFiles = () =>{
         document.getElementById("number_of_file").innerHTML = ""
         FileHandlerService.getUserFiles(this.userData["jwt"]).then(response => {
-            console.log("========== user files ==========")
-            response.content.forEach(console.log)
-            console.log("================================")
-            this.setState({
-                userFiles : response.content
-            })
+            this.setState({userFiles : response.content})
             document.getElementById("number_of_file").innerHTML = `Found ${response.content.length} files`;
         })
     }
@@ -82,12 +76,9 @@ class MainUserPage extends Component {
 
     redirect = (destination, param) => {
         if(destination !== ""){
-            // refactor cand apare si alte destinations
             this.props.history.push({
                 "pathname" : destination,
-                "state" : {"detail" : {
-                    "user_file" : param
-                }}
+                "state" : {"detail" : {"user_file" : param}}
             })
         }
         else{
@@ -106,24 +97,18 @@ class MainUserPage extends Component {
                     }
                     userFiles.push(
                         <tr key={`div_${userFile.filename}`}>
-                            <td>
-                                <img alt="logo" src={logosrc}></img>
-                            </td>
+                            <td><img alt="logo" src={logosrc}></img></td>
                             <td className = "table_fname">
                                 <p><button className="a_redirector"
-                                    style={{fontSize:"120%", textDecoration:"underline"}} 
+                                    style={{fontSize:"90%", textDecoration:"underline"}} 
                                     onClick={() => this.redirect("/details", userFile)} 
                                     >{`${userFile.filename + ""}`}</button>
                                 </p><br/>
                                 <span>{`Version : ${userFile.version}`}</span><br/>
                                 <span>{`Size : ${GeneralPurposeService.getFileSizeUnit(userFile.filesize)}`}</span>
                             </td>
-                            <td className = "table_version">
-                                <p>{`${userFile.version_description}`}</p>
-                            </td>
-                            <td className = "table_version">
-                                <p>{`${userFile.hash.toString(16)}`}</p>
-                            </td>
+                            <td className = "table_version"><p>{`${userFile.version_description}`}</p></td>
+                            <td className = "table_version"><p>{`${userFile.hash.toString(16)}`}</p></td>
                         </tr>
                     )
                 })
@@ -142,10 +127,12 @@ class MainUserPage extends Component {
                         <div className = "home_body_main_div">
                             <table>
                                 <thead>
-                                    <td>Logo</td>
-                                    <td>File name</td>
-                                    <td>Version Description</td>
-                                    <td>Hash</td>
+                                    <tr>
+                                        <td>Logo</td>
+                                        <td>File name</td>
+                                        <td>Version Description</td>
+                                        <td>Hash</td>
+                                    </tr>
                                 </thead>
                                 <tbody>
                                     {userFiles}
