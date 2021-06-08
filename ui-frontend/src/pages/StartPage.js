@@ -152,7 +152,7 @@ class StartPage extends Component {
       return (
         <div className="App">
             <div className="title">
-                <img id="title_logo" src="images/logo.png" />
+                <img id="title_logo" src="images/logo.png" alt="Logo not found"/>
                 <label id="title_text">Safestorage</label>
             </div>
             <hr/>

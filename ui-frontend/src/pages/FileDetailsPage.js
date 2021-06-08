@@ -5,7 +5,6 @@ import '../styles/pages-style.css';
 import '../styles/pages_usermain.css';
 import '../styles/pages-home-style.css';
 import { FileHandlerService } from '../services/FileHandlerService';
-import { Environment } from '../environment';
 import { GeneralPurposeService } from '../services/GeneralPurposeService';
 
 
@@ -134,7 +133,7 @@ class FileDetailsPage extends Component {
                     this.setState({filePreview : <embed type="image/jpg" src={response.content}/>})
                 }
                 else if(fileType === "text"){
-                    this.setState({filePreview : <iframe src={response.content} alt="No preview available"></iframe>})
+                    this.setState({filePreview : <iframe title={this.state.currentFileName} src={response.content} alt="No preview available"></iframe>})
                 }
                 else{
                     this.setState({filePreview : <p>No preview avaialble!</p>})
@@ -213,11 +212,6 @@ class FileDetailsPage extends Component {
         }
         return(
             <div className="App">
-                {/*<div className="title">
-                    <img id="title_logo" src="images/logo.png" />
-                    <label id="title_text">Safestorage</label>
-                <hr/>
-                </div>*/}
                 <div className="Home">
                     <div>
                         <div className="home_header" id="home_header_details">
@@ -258,7 +252,7 @@ class FileDetailsPage extends Component {
                                 <button className="a_redirector" id="selector_delete"  style={{fontSize:"90%"}} onClick={() => this.updateAction(1)}>Delete</button>
                                 <button className="a_redirector" id="selector_rename"  style={{fontSize:"90%"}} onClick={() => this.updateAction(2)}>Rename</button>
                                 <button className="a_redirector" id="selector_update"  style={{fontSize:"90%"}} onClick={() => this.updateAction(3)}>Update</button>
-                                <a id="downloaduri" href="/" download></a><br/>
+                                <a id="downloaduri" href="/" download>&nbsp;</a><br/>
                                 <div className="action_div" id="download_action">
                                     <p id="file_status"></p>
                                 </div>

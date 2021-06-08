@@ -77,7 +77,7 @@ class UploadPage extends Component {
             this.setState({preview : <embed id="upload_data_preview" type="image/jpg" src={URL.createObjectURL(file)}/>})
         }
         else if(fileType === "text"){
-            this.setState({preview : <iframe id="upload_data_preview" src={URL.createObjectURL(file)} alt="No preview available"></iframe>})
+            this.setState({preview : <iframe title={file.name} id="upload_data_preview" src={URL.createObjectURL(file)} alt="No preview available"></iframe>})
         }
         else{
             this.setState({preview : <p id="upload_data_preview">No preview avaialble!</p>})

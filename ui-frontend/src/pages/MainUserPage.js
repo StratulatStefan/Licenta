@@ -110,7 +110,11 @@ class MainUserPage extends Component {
                                 <img alt="logo" src={logosrc}></img>
                             </td>
                             <td className = "table_fname">
-                                <p><a href="#" onClick={() => this.redirect("/details", userFile)}>{`${userFile.filename + ""}`}</a></p><br/>
+                                <p><button className="a_redirector"
+                                    style={{fontSize:"120%", textDecoration:"underline"}} 
+                                    onClick={() => this.redirect("/details", userFile)} 
+                                    >{`${userFile.filename + ""}`}</button>
+                                </p><br/>
                                 <span>{`Version : ${userFile.version}`}</span><br/>
                                 <span>{`Size : ${GeneralPurposeService.getFileSizeUnit(userFile.filesize)}`}</span>
                             </td>

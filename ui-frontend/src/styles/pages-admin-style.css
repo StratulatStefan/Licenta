@@ -93,3 +93,10 @@
     border-radius: 10px;
     margin-left: 1%;
 }
+
+.node_status{
+    border: 5px solid;
+    border-radius: 15px;
+    margin: 0 auto;
+    width: 50%;
+}

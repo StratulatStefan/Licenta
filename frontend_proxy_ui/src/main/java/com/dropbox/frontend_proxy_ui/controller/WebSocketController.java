@@ -32,7 +32,7 @@ public class WebSocketController {
         }).start();
     }
 
-    @Scheduled(fixedRate = 5000)
+    @Scheduled(fixedRate = 2000)
     public void sendContent(){
         fetchContentAndSend(new GetContentTableRequest(), "content");
         fetchContentAndSend(new GetNodesStorageQuantityRequest(), "nodes");
