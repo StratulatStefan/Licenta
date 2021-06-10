@@ -21,11 +21,11 @@ public class HearthBeatManager implements Runnable{
     /**
      * Adresa de multicast
      */
-    private static String multicastIPAddress;
+    private static String multicastIPAddress = AppConfig.getParam("multicastIPAddress");
     /**
      * Portul de multicast
      */
-    private static int multicastPort;
+    private static int multicastPort = Integer.parseInt(AppConfig.getParam("multicastPort"));
     /**
      * Adresa pe care o va avea nodul curent.
      */
@@ -34,25 +34,16 @@ public class HearthBeatManager implements Runnable{
      * Frecventa heartbeat-urilor
      * Exprimat in secunde.
      */
-    private static double frequency;
+    private static double frequency = Double.parseDouble(AppConfig.getParam("hearthBeatFrequency"));
 
 
     /** -------- Constructor & Configurare -------- **/
-    /**
-     * Functie care citeste si initializeaza parametrii de configurare
-     */
-    public void readConfigParams(){
-        multicastPort = Integer.parseInt(AppConfig.getParam("multicastPort"));
-        multicastIPAddress = AppConfig.getParam("multicastIPAddress");
-        frequency = Double.parseDouble(AppConfig.getParam("hearthBeatFrequency"));
-    }
 
     /**
      * Constructorul managerului de heartbeat-uri pentru nodul curent.
      * @param address Adresa nodului curent
      */
     public HearthBeatManager(String address) throws Exception{
-        readConfigParams();
         this.nodeAddress = new Address(address, multicastPort);
     }
 

@@ -28,7 +28,7 @@ public class GeneralNode{
     /**
      * Calea de baza la care se vor stoca fisierele
      */
-    private  static String storagePath;
+    private  static String storagePath = AppConfig.getParam("storagePath");
     /**
      * Obiectul care va fi trimis la nodul general sub forma de heartbeat
      * **/
@@ -63,12 +63,6 @@ public class GeneralNode{
 
 
     /** -------- Constructor & Configurare -------- **/
-    /**
-     * Functie care citeste si initializeaza parametrii de configurare
-     */
-    public static void readConfigParams(){
-        storagePath = AppConfig.getParam("storagePath");
-    }
 
     /**
      * Constructorul clasei
@@ -191,7 +185,6 @@ public class GeneralNode{
      */
     public static void main(String[] args) {
         AppConfig.readConfig();
-        readConfigParams();
         try {
             ipAddress = args[0];
 

@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
+import config.AppConfig;
 import logger.LoggerService;
 import model.FileAttributes;
 
@@ -13,6 +14,8 @@ import model.FileAttributes;
  * impreuna cu utilizatorul caruia ii apartin si factorul de replicare.
  */
 public class ContentTable implements Serializable {
+    private static String generalManagerIpAddress = AppConfig.getParam("generalManagerIpAddress");
+
     /** -------- Atribute -------- **/
     /**
      * Flag care sugereaza daca tabela necesita initializare;
@@ -217,7 +220,7 @@ public class ContentTable implements Serializable {
                         return;
                     }
                     catch (NumberFormatException exception){
-                        LoggerService.registerWarning("127.0.0.1", "Exceptie de parsare la updateFileVersionNo");
+                        LoggerService.registerWarning(generalManagerIpAddress, "Exceptie de parsare la updateFileVersionNo");
                     }
 
                 }
@@ -238,7 +241,7 @@ public class ContentTable implements Serializable {
                         return;
                     }
                     catch (NumberFormatException exception){
-                        LoggerService.registerWarning("127.0.0.1", "Exceptie de parsare la updateFileSize");
+                        LoggerService.registerWarning(generalManagerIpAddress, "Exceptie de parsare la updateFileSize");
                     }
 
                 }

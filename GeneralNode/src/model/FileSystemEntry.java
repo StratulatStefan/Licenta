@@ -1,8 +1,5 @@
 package model;
 
-import java.util.ArrayList;
-import java.util.List;
-
 public class FileSystemEntry{
     private String userId;
     private String filename;

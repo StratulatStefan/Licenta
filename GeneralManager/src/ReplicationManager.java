@@ -13,31 +13,24 @@ public class ReplicationManager implements Runnable{
     /**
      * Frecventa de executare a buclei de replicare
      */
-    private static int replicationFrequency;
+    private static int replicationFrequency = Integer.parseInt(AppConfig.getParam("replicationFrequency"));
 
     private static List<String> replicationStatusTable = new ArrayList<>();
 
     /**
      * Portul pe care este deschis socket-ul de pe nodul intern
      */
-    private int replicationPort;
+    private int replicationPort = Integer.parseInt(AppConfig.getParam("replicationPort"));
 
 
     /** -------- Constructor & Configurare -------- **/
-    /**
-     * Functie care citeste si initializeaza parametrii de configurare
-     */
-    public void readConfigParams(){
-        replicationPort = Integer.parseInt(AppConfig.getParam("replicationPort"));
-        replicationFrequency = Integer.parseInt(AppConfig.getParam("replicationFrequency"));
-    }
 
     /**
      * Constructorul clasei;
      * Citeste si instantiaza parametrii de configurare
      */
     public ReplicationManager(){
-        readConfigParams();
+
     }
 
 

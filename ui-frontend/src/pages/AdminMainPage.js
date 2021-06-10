@@ -43,6 +43,10 @@ class AdminMainPage extends Component {
     }
 
     componentDidMount = () => {
+        this.checkForConnectedUser()
+        this.fetchUserType().then(_ => {
+            this.fetchAvailableNodes()
+        })
         this.adminAction('log')
         Environment.getWebSocket().then(response => {
             this.webSocketConnection = response
@@ -52,14 +56,10 @@ class AdminMainPage extends Component {
                 }
             })
         })
-        this.checkForConnectedUser()
-        this.fetchUserType().then(_ => {
-            this.fetchAvailableNodes()
-        })
     }
 
     fetchAvailableNodes = () => {
-        AdminHandlerService.fetchAvailableNodesFromAPI().then(response => {
+        AdminHandlerService.fetchAvailableNodesFromAPI(this.userData["jwt"]).then(response => {
             this.setState({availableNodes : response.content})
         })
     }
@@ -92,6 +92,7 @@ class AdminMainPage extends Component {
         else{
             this.userData = JSON.parse(this.userData)
         }
+        console.log(this.userData)
     }
 
     handleContentTable = (message) => {
@@ -106,7 +107,7 @@ class AdminMainPage extends Component {
     }
 
     fetchFileVersions = (userid, filename) => {
-        AdminHandlerService.getFileVersions(userid, filename).then(response => {
+        AdminHandlerService.getFileVersions(this.userData["jwt"], userid, filename).then(response => {
             this.setState({file_versions : response.content})
             document.getElementById("replication_nodes_div").style.display = "none"
             document.getElementById("versions_nodes_div").style.display = "block"
@@ -220,7 +221,7 @@ class AdminMainPage extends Component {
         if(criteria !== null && updatevalue !== null){
             this.logCriteria[criteria] = updatevalue
         }
-        AdminHandlerService.fetchLog(this.logCriteria).then(response => {
+        AdminHandlerService.fetchLog(this.userData["jwt"], this.logCriteria).then(response => {
             if(response.code === 1){
                 this.setState({log : response.content})
             }
@@ -231,7 +232,7 @@ class AdminMainPage extends Component {
     }
 
     cleanLog = () =>{
-        AdminHandlerService.cleanLog(this.logCriteria).then(response => {
+        AdminHandlerService.cleanLog(this.userData["jwt"], this.logCriteria).then(response => {
             if(response.code === 1){
                 this.fetchLogByCriteriaUpdate(null, null)
             }
@@ -240,12 +241,12 @@ class AdminMainPage extends Component {
 
     fetchReplicationNodesForFile = (userId, filename) => {
         this.setState({content_nodes_data : []})
-        AdminHandlerService.fetchNodesStoringFile(userId, filename).then(response => {
+        AdminHandlerService.fetchNodesStoringFile(this.userData["jwt"], userId, filename).then(response => {
             document.getElementById("replication_nodes_div").style.display = "block"
             document.getElementById("versions_nodes_div").style.display = "none"
             if(response.code === 1){
                 response.content.forEach(address => {
-                    AdminHandlerService.fetchNodeData(address).then(response => {
+                    AdminHandlerService.fetchNodeData(this.userData["jwt"], address).then(response => {
                         if(response.code === 1){
                             let content_nodes = this.state.content_nodes_data
                             content_nodes.push(response.content)
@@ -258,7 +259,7 @@ class AdminMainPage extends Component {
     }
 
     deleteFileFromInternalNode = () => {
-        AdminHandlerService.deleteFileFromInternalNode(this.selectedFile).then(response => {
+        AdminHandlerService.deleteFileFromInternalNode(this.userData["jwt"], this.selectedFile).then(response => {
             if(response.code === 1){
                 document.getElementById("storagestatus_delete_status").style.visibility = "visible"
             }

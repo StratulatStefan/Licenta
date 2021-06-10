@@ -9,6 +9,7 @@ import java.util.Map;
 
 public class LoggerService {
     private static String loggerServerPath = "http://localhost:8085/api/log";
+
     private final static HttpConnectionService httpConnectionService = new HttpConnectionService();
 
     private static void log(String nodeAddress, String messageDescription, LogMsgType messageType){

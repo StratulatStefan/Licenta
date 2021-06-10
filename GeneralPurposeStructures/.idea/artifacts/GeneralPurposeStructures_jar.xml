@@ -1,0 +1,8 @@
+<component name="ArtifactManager">
+  <artifact type="jar" build-on-make="true" name="GeneralPurposeStructures:jar">
+    <output-path>$PROJECT_DIR$/out/artifacts/GeneralPurposeStructures_jar</output-path>
+    <root id="archive" name="GeneralPurposeStructures.jar">
+      <element id="module-output" name="GeneralPurposeStructures" />
+    </root>
+  </artifact>
+</component>

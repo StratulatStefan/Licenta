@@ -25,41 +25,30 @@ public class ClientCommunicationManager {
      */
     private Address nodeAddress;
 
-    private static int feedbackPort;
+    private static int feedbackPort = Integer.parseInt(AppConfig.getParam("feedbackPort"));
 
-    private static String frontendIpAddress;
+    private static String frontendIpAddress = AppConfig.getParam("frontendAddress");
     /**
      * Dimensiunea bufferului in care vor fi citite datele de la un nod adiacent
      */
-    private static int bufferSize;
+    private static int bufferSize = Integer.parseInt(AppConfig.getParam("buffersize"));
     /**
      * Calea de baza la care se vor stoca fisierele
      */
-    private static String storagePath;
+    private static String storagePath = AppConfig.getParam("storagePath");
     /**
      * Portul pe care este mapat socket-ul de transmitere a datelor
      */
-    private static int dataTransmissionPort;
+    private static int dataTransmissionPort = Integer.parseInt(AppConfig.getParam("dataTransmissionPort"));
 
 
     /** -------- Constructor & Configurare -------- **/
-    /**
-     * Functie care citeste si initializeaza parametrii de configurare
-     */
-    public void readConfigParams(){
-        bufferSize = Integer.parseInt(AppConfig.getParam("buffersize"));
-        dataTransmissionPort = Integer.parseInt(AppConfig.getParam("dataTransmissionPort"));
-        storagePath = AppConfig.getParam("storagePath");
-        frontendIpAddress = AppConfig.getParam("frontendAddress");
-        feedbackPort = Integer.parseInt(AppConfig.getParam("feedbackPort"));
-    }
 
     /**
      * Constructorul clasei;
      * Citeste si instantiaza parametrii de configurare
      */
     public ClientCommunicationManager(String address) throws Exception{
-        readConfigParams();
         this.nodeAddress = new Address(address, dataTransmissionPort);
     }
 

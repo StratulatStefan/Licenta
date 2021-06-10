@@ -20,11 +20,11 @@ public class HearthBeatManager implements Runnable{
     /**
      * Adresa de multicast
      */
-    private static String multicastIPAddress;
+    private static String multicastIPAddress = AppConfig.getParam("multicastIPAddress");
     /**
      * Portul de multicast
      */
-    private static int multicastPort;
+    private static int multicastPort = Integer.parseInt(AppConfig.getParam("multicastPort"));
     /**
      * Adresa pe care o va avea nodul curent.
      */
@@ -33,33 +33,21 @@ public class HearthBeatManager implements Runnable{
      * Frecventa heartbeat-urilor
      * Exprimat in secunde.
      */
-    private double frequency;
+    private double frequency = Integer.parseInt(AppConfig.getParam("hearthBeatFrequency"));
     /**
      * Numarul de heart-beat-uri la care se face clean-up-ul tabelei de conexiuni
      */
-    private static int cleanupFrequency;
+    private static int cleanupFrequency = Integer.parseInt(AppConfig.getParam("cleanupFrequency"));
 
-    private static int checkStorageHealthFrequency;
+    private static int checkStorageHealthFrequency = Integer.parseInt(AppConfig.getParam("checkStorageHealthFrequency"));
 
 
     /** -------- Constructor & Configurare -------- **/
-    /**
-     * Functie care citeste si initializeaza parametrii de configurare
-     */
-    public void readConfigParams(){
-        multicastIPAddress = AppConfig.getParam("multicastIPAddress");
-        multicastPort = Integer.parseInt(AppConfig.getParam("multicastPort"));
-        frequency = Integer.parseInt(AppConfig.getParam("hearthBeatFrequency"));
-        cleanupFrequency = Integer.parseInt(AppConfig.getParam("cleanupFrequency"));
-        checkStorageHealthFrequency = Integer.parseInt(AppConfig.getParam("checkStorageHealthFrequency"));
-    }
-
     /**
      * Constructorul managerului de heartbeat-uri pentru nodul curent.
      * @param address Adresa nodului curent
      */
     public HearthBeatManager(String address) throws Exception{
-        readConfigParams();
         this.nodeAddress = new Address(address, multicastPort);
     }
 

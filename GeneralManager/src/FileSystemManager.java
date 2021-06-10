@@ -20,19 +20,11 @@ public class FileSystemManager {
     /**
      * Portul pe care nodul general asculta pentru aceste prelucrari.
      */
-    private static int replicationPort;
-
-    private static int buffersize;
+    private static int replicationPort = Integer.parseInt(AppConfig.getParam("replicationPort"));
+    private static int buffersize = Integer.parseInt(AppConfig.getParam("buffersize"));
 
 
     /** -------- Constructor & Configurare -------- **/
-    /**
-     * Functie care citeste si initializeaza parametrii de configurare
-     */
-    public static void readConfigParams(){
-        buffersize = Integer.parseInt(AppConfig.getParam("buffersize"));
-        replicationPort = Integer.parseInt(AppConfig.getParam("replicationPort"));
-    }
 
     /**
      * Constructorul clasei;
@@ -63,7 +55,6 @@ public class FileSystemManager {
                 while(dataInputStream.read(buffer, 0, buffersize) > 0){
                     if(request.getClass() == VersionsRequest.class){
                         feedbackResponse = (FeedbackComplexeResponse)Serializer.deserialize(buffer);
-                        int x = 0;
                     }
                     else {
                         feedbackResponse = (FeedbackResponse) Serializer.deserialize(buffer);

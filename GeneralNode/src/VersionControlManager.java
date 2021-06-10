@@ -1,3 +1,4 @@
+import config.AppConfig;
 import data.Time;
 import logger.LoggerService;
 import model.VersionData;
@@ -10,11 +11,11 @@ import java.util.List;
 public class VersionControlManager {
     private static String baseFilepath;
 
-    // fisierul de config asta
-    private final static String extension = ".metadata";
+    private final static String extension = AppConfig.getParam("metadataExtension");
+    private static String storagePath = AppConfig.getParam("storagePath");
 
     public VersionControlManager(String address){
-        baseFilepath = String.format("D:\\Facultate\\Licenta\\Storage\\%s\\", address);
+        baseFilepath = storagePath + address + "\\";
     }
 
     public void registerFileVersion(String userId, String filename, long crc, String description){

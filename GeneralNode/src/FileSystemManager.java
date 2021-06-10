@@ -28,34 +28,25 @@ public class FileSystemManager implements Runnable{
     /**
      * Dimensiunea bufferului de receptie a datelor.
      */
-    private static int bufferSize;
+    private static int bufferSize = Integer.parseInt(AppConfig.getParam("buffersize"));
     /**
      * Portul pe care este mapata comunicarea cu nodul general.
      */
-    private static int fileSystemMngrPort;
+    private static int fileSystemMngrPort = Integer.parseInt(AppConfig.getParam("replicationPort"));
     /**
      * Calea de baza la care se vor stoca fisierele
      */
-    private static String mainFilepath;
+    private static String mainFilepath = AppConfig.getParam("storagePath");
 
 
     /** -------- Constructor & Configurare -------- **/
     /**
      * Functie care citeste si initializeaza parametrii de configurare
-     */
-    public void readConfigParams(){
-        fileSystemMngrPort = Integer.parseInt(AppConfig.getParam("replicationPort"));
-        bufferSize = Integer.parseInt(AppConfig.getParam("buffersize"));
-        mainFilepath = AppConfig.getParam("storagePath");
-
-    }
-
     /**
      * Constructorul clasei;
      * Citeste si instantiaza parametrii de configurare
      */
     public FileSystemManager(String address) throws Exception{
-        readConfigParams();
         this.address = new Address(address, fileSystemMngrPort);
     }
 

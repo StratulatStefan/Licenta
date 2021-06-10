@@ -8,8 +8,6 @@
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
     <orderEntry type="library" exported="" name="src" level="project" />
-    <orderEntry type="module" module-name="GeneralPurposeStructures" exported="" />
-    <orderEntry type="module" module-name="Beans" exported="" />
     <orderEntry type="module-library" exported="">
       <library>
         <CLASSES>
@@ -28,5 +26,7 @@
         <SOURCES />
       </library>
     </orderEntry>
+    <orderEntry type="module" module-name="Beans" exported="" />
+    <orderEntry type="module" module-name="GeneralPurposeStructures" exported="" />
   </component>
 </module>

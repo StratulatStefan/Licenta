@@ -31,7 +31,7 @@ public class AppConfig {
     public static void readConfig(){
         BufferedReader reader;
         try{
-            reader = new BufferedReader(new FileReader("D:\\Facultate\\Licenta\\Licenta\\dropbox.config"));
+            reader = new BufferedReader(new FileReader("safestorage.config"));
             String line;
             while((line = reader.readLine()) != null){
                 if(!line.equals("")){
@@ -42,7 +42,7 @@ public class AppConfig {
             reader.close();
         }
         catch (IOException exception){
-            System.out.println("Eroare la citirea fisierului de config");
+            System.out.println("Eroare la citirea fisierului de config : " + exception.getMessage());
         }
     }
 
@@ -54,6 +54,8 @@ public class AppConfig {
      * @return Valoarea parametrului cautat
      */
     public static String getParam(String paramName){
+        if(!appConfigData.containsKey(paramName))
+            readConfig();
         return appConfigData.get(paramName);
     }
 }

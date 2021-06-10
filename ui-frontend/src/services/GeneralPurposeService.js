@@ -94,4 +94,22 @@ export class GeneralPurposeService{
             })
         }
     }
+
+    static prepareURLQuery = (logCriteria) => {
+        let options = []
+        if(logCriteria.node_address !== null && logCriteria.node_address !== "ALL"){
+            options.push(`node_address=${logCriteria.node_address}`)
+        }
+        if(logCriteria.message_type !== null && logCriteria.message_type !== "ALL"){
+            options.push(`message_type=${logCriteria.message_type}`)
+        }
+        if(options.length > 0){
+            return "?" + options.join("&")
+        }
+        return ""
+    }
+
+    static sanitizeURL = (content) => {
+        return content.replace(".", "%2E").replace("_", "%5F");
+    }
 }

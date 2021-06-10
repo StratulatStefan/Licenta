@@ -3,10 +3,10 @@ package jwt;
 import java.util.Map;
 
 public class AuthorizationService {
-    public enum UserTypes {ALL};
+    public enum UserTypes {ALL, USER, ADMIN};
 
     private static final String authorizationModel = "BEARER";
-    private static final long sessionTime          = 3600 * 1000;
+    private static final long sessionTime          = 1000 * 3600;
 
     public static String generateUserIdentity(int id, String username, String userRole){
         return new JWT(id, username, userRole, sessionTime).getJWT();

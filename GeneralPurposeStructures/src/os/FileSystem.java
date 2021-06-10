@@ -1,7 +1,5 @@
 package os;
 
-import data.Pair;
-
 import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -15,6 +13,7 @@ import java.util.zip.CRC32;
  * Clasa care adreseaza unele functionalitati disponibile la nivelul sistemului de operare.
  */
 public class FileSystem {
+    private static int bufferSize = 1024;
     /**
      * Functie care verifica daca un fisier/director exista.
      * @param path Calea catre fisierul cautat.
@@ -133,7 +132,7 @@ public class FileSystem {
             InputStream inputStream = new BufferedInputStream(new FileInputStream(filename));
             CRC32 crc = new CRC32();
             int count;
-            byte[] buffer = new byte[1024 * 8];
+            byte[] buffer = new byte[bufferSize * 8];
             while ((count = inputStream.read(buffer)) != -1)
                 crc.update(buffer, 0, count);
             inputStream.close();
@@ -153,7 +152,7 @@ public class FileSystem {
             InputStream inputStream = new BufferedInputStream(fileInputStream);
             CRC32 crc = new CRC32();
             int count;
-            byte[] buffer = new byte[1024 * 8];
+            byte[] buffer = new byte[bufferSize * 8];
             while ((count = inputStream.read(buffer)) != -1)
                 crc.update(buffer, 0, count);
             inputStream.close();

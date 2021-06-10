@@ -13,7 +13,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class JWT {
-    private static final String SECRET_KEY = "DropboxSecretKey";
+    private static final String SECRET_KEY = "SafeStorageSecretKey";
     private static final SignatureAlgorithm signatureAlgorithm = SignatureAlgorithm.HS512;
 
     private String jwt;

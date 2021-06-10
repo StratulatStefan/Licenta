@@ -1,6 +1,7 @@
 package tables;
 
 import communication.Address;
+import config.AppConfig;
 import data.Pair;
 import logger.LoggerService;
 import model.FileAttributesForStorage;
@@ -27,6 +28,7 @@ public class StorageStatusTable {
      */
     private final HashMap<String, List<FileAttributesForStorage>> statusTable;
 
+    private static String generalManagerIpAddress = AppConfig.getParam("generalManagerIpAddress");
 
     /** -------- Constructori -------- **/
     /**
@@ -91,7 +93,7 @@ public class StorageStatusTable {
                                     this.statusTable.get(user).get(candidate).setVersionNo(nodeAddress, versionNo);
                             }
                             catch (NullPointerException exception){
-                                LoggerService.registerWarning("127.0.0.1", "File " + this.statusTable.get(user).get(candidate).getFilename() + " of user " + nodeAddress + " skipped! : " + exception.getMessage());
+                                LoggerService.registerWarning(generalManagerIpAddress, "File " + this.statusTable.get(user).get(candidate).getFilename() + " of user " + nodeAddress + " skipped! : " + exception.getMessage());
                             }
                         }
                     }

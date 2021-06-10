@@ -19,11 +19,11 @@ public class GeneralManager{
     /**
      * Adresa IP la care va fi mapat managerul general
      */
-    public static String generalManagerIpAddress;
+    public static String generalManagerIpAddress = AppConfig.getParam("generalManagerIpAddress");
     /**
      * Calea de baza la care se vor stoca fisierele
      */
-    public static String storagePath;
+    public static String storagePath = AppConfig.getParam("storagePath");
 
 
     /** -------- Tabele -------- **/
@@ -75,13 +75,6 @@ public class GeneralManager{
 
 
     /** -------- Functii de initializare -------- **/
-    /**
-     * Functie care citeste si initializeaza parametrii de configurare
-     */
-    public static void readConfigParams(){
-        generalManagerIpAddress = AppConfig.getParam("generalManagerIpAddress");
-        storagePath = AppConfig.getParam("storagePath");
-    }
 
     /**
      * Constructorul clasei
@@ -91,9 +84,6 @@ public class GeneralManager{
         this.hearthBeatManager = new HearthBeatManager(generalManagerIpAddress);
         this.clientCommunicationManager = new ClientCommunicationManager();
         this.replicationManager = new ReplicationManager();
-
-        GeneralManager.fileSystemManager.readConfigParams();
-
     }
 
     public static void attachRuntimeExitHook(){
@@ -111,7 +101,6 @@ public class GeneralManager{
      */
     public void startActivity() throws Exception {
         GeneralManager.pendingQueue = new PendingQueue();
-        // Pornim thread-ul pe care va fi rulat mecanismul de heartbeats
         new Thread(hearthBeatManager).start();
 
         new Thread(replicationManager).start();
@@ -127,7 +116,6 @@ public class GeneralManager{
     public static void main(String[] args){
         attachRuntimeExitHook();
         AppConfig.readConfig();
-        readConfigParams();
 
         try {
             LoggerService.registerSuccess(generalManagerIpAddress, "General manager successfully started");

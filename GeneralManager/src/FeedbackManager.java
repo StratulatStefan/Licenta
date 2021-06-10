@@ -13,19 +13,12 @@ import java.util.List;
 
 public class FeedbackManager implements Runnable{
     private final List<NewFileRequestFeedback> feedbackList;
-    private static int bufferSize;
-    private static String generalManagerIpAddress;
-    private static int feedbackPort;
+    private static int bufferSize = Integer.parseInt(AppConfig.getParam("buffersize"));
+    private static String generalManagerIpAddress = AppConfig.getParam("generalManagerIpAddress");
+    private static int feedbackPort = Integer.parseInt(AppConfig.getParam("feedbackPort"));
 
     public FeedbackManager(){
         this.feedbackList = new ArrayList<NewFileRequestFeedback>();
-        readConfigParams();
-    }
-
-    public void readConfigParams(){
-        bufferSize = Integer.parseInt(AppConfig.getParam("buffersize"));
-        generalManagerIpAddress = AppConfig.getParam("generalManagerIpAddress");
-        feedbackPort = Integer.parseInt(AppConfig.getParam("feedbackPort"));
     }
 
     public Runnable feedbackThread(Socket frontendSocket){
