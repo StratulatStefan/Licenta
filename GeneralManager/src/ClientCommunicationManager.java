@@ -62,6 +62,7 @@ public class ClientCommunicationManager {
      * Port-ul de transmisie a datelor (client - nod general)
      */
     private static int dataTransmissionPort = Integer.parseInt(AppConfig.getParam("dataTransmissionPort"));
+    private static String usersRestApi = AppConfig.getParam("usersRestApi");
 
     /** -------- Constructor & Configurare -------- **/
     /**
@@ -245,7 +246,7 @@ public class ClientCommunicationManager {
 
     public void registerUserMemoryConsumption(String user, long size, boolean consumption){
         HttpConnectionService httpConnectionService = new HttpConnectionService();
-        String apiPath = AppConfig.getParam("usersHTTPAddress") + "/" + user + "/storage";
+        String apiPath = usersRestApi + "/" + user + "/storage";
         Map<String, Object> consumptionData = new HashMap<String, Object>(){{
             put(consumption? "storage_quantity_consumption" : "storage_quantity_release", size);
         }};

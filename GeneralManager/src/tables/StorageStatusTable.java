@@ -47,7 +47,7 @@ public class StorageStatusTable {
      * @param storageEntry Heartbeat de la nodul intern; Va contine adresa nodului, impreuna
      *                     cu toti utilizatorii existenti si fisierele acestora
      */
-    public void updateTable(NodeBeat storageEntry, ContentTable contentTable) throws Exception {
+    public void updateTable(NodeBeat storageEntry) throws Exception {
         String nodeAddress = Address.parseAddress(storageEntry.getNodeAddress()).getIpAddress();
         synchronized (this.statusTable){
             for(String user : storageEntry.getUsers()){
@@ -61,11 +61,12 @@ public class StorageStatusTable {
                     String filename = userFile.getFilename();
                     long crc = userFile.getCrc();
                     String versionNo = userFile.getVersionNo();
+                    long filesize = userFile.getFilesize();
                     if(!this.checkFileForUser(user, filename)){
                         FileAttributesForStorage data = new FileAttributesForStorage();
                         data.setFilename(filename);
                         try{
-                            data.addNode(nodeAddress, crc, versionNo);
+                            data.addNode(nodeAddress, crc, versionNo, filesize);
                         }
                         catch (Exception exception){
                             System.out.println("Node already contains address!");
@@ -78,7 +79,7 @@ public class StorageStatusTable {
                             // adaugam adresa nodului
                             int candidate = this.getUserFile(user, filename);
                             if(candidate != -1){
-                                this.statusTable.get(user).get(candidate).addNode(nodeAddress, crc, versionNo);
+                                this.statusTable.get(user).get(candidate).addNode(nodeAddress, crc, versionNo,filesize);
                             }
                         }
                         else{
@@ -87,8 +88,11 @@ public class StorageStatusTable {
                                 this.statusTable.get(user).get(candidate).setVersionNo(nodeAddress, versionNo);
                                 long statusTableCRC = this.statusTable.get(user).get(candidate).getCrc(nodeAddress);
                                 String statusTableVersioNo = this.statusTable.get(user).get(candidate).getVersionNo(nodeAddress);
+                                long statusTableFilesize = this.statusTable.get(user).get(candidate).getFileSize(nodeAddress);
                                 if (crc != -1 && statusTableCRC != crc)
                                     this.statusTable.get(user).get(candidate).setCrc(nodeAddress, crc);
+                                if (statusTableFilesize != filesize)
+                                    this.statusTable.get(user).get(candidate).setFileSize(nodeAddress, filesize);
                                 if(!statusTableVersioNo.equals(versionNo))
                                     this.statusTable.get(user).get(candidate).setVersionNo(nodeAddress, versionNo);
                             }
@@ -278,6 +282,20 @@ public class StorageStatusTable {
                 if(candidate == -1)
                     return null;
                 return this.statusTable.get(user).get(candidate).getNodesCRCs().get(0);
+            }
+            catch (NullPointerException exception){
+                return null;
+            }
+        }
+    }
+
+    public Long getFileSize(String user, String file, String address){
+        synchronized (this.statusTable){
+            try {
+                int candidate = this.getUserFile(user, file);
+                if(candidate == -1)
+                    return null;
+                return this.statusTable.get(user).get(candidate).getFileSize(address);
             }
             catch (NullPointerException exception){
                 return null;

@@ -153,6 +153,7 @@ public class GeneralNode{
                     }
                     String versionName = versionControlManager.getLastVersionOfFile(userDir, file).getVersionName();
                     f.setVersionNo(versionName);
+                    f.setFilesize(FileSystem.getFileSize(path + "\\" + userDir + "\\" + file));
                     fileAttributes.add(f);
                 }
                 else{
@@ -184,7 +185,6 @@ public class GeneralNode{
      * @param args Argumentele furnizate la linia de comanda
      */
     public static void main(String[] args) {
-        AppConfig.readConfig();
         try {
             ipAddress = args[0];
 

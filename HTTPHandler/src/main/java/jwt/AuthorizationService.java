@@ -3,7 +3,7 @@ package jwt;
 import java.util.Map;
 
 public class AuthorizationService {
-    public enum UserTypes {ALL, USER, ADMIN};
+    public enum UserTypes {ALL, STANDARD, PREMIUM, ADMIN};
 
     private static final String authorizationModel = "BEARER";
     private static final long sessionTime          = 1000 * 3600;

@@ -26,14 +26,14 @@ public class FileAttributes implements Serializable {
     private FileVersionData fileVersionData;
 
     /** -------- Constructor -------- **/
-    public FileAttributes(String filename, int replication_factor, String status, long crc, long filesize, String versionNo, String versionDesc){
+    public FileAttributes(String filename, int replication_factor, String status, long crc, long filesize, String versionNo, String versionDesc) {
         this.filename = filename;
         this.replication_factor = replication_factor;
         this.status = status;
-        this.fileVersionData = new FileVersionData(crc, versionNo, versionDesc);
         this.fileSize = filesize;
+        this.fileVersionData = new FileVersionData(crc, versionNo, versionDesc, filesize);
     }
-
+    
     /** -------- Gettere & Settere -------- **/
     /**
      * Getter pentru numele fisierului

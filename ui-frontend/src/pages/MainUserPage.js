@@ -60,6 +60,7 @@ class MainUserPage extends Component {
         document.getElementById("number_of_file").innerHTML = ""
         FileHandlerService.getUserFiles(this.userData["jwt"]).then(response => {
             this.setState({userFiles : response.content})
+            console.log(response.content)
             document.getElementById("number_of_file").innerHTML = `Found ${response.content.length} files`;
         })
     }

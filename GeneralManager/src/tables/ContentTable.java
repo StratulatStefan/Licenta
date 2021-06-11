@@ -47,17 +47,24 @@ public class ContentTable implements Serializable {
      */
     public void initialize(StorageStatusTable storageStatusTable){
         synchronized (this.contentTable) {
+            this.contentTable.clear();
             long crc;
             String versionNo;
             int nodesCount;
+            long filesize;
+            needInit = false;
             for (String user : storageStatusTable.getUsers()) {
                 HashMap<String, Integer> userFilesNodesCount = storageStatusTable.getUserFilesNodesCountForFile(user);
                 for (String filename : new ArrayList<>(userFilesNodesCount.keySet())) {
                     try {
                         crc = storageStatusTable.getCRCsForFile(user, filename);
+                        if(crc == -1){
+                            needInit = true;
+                        }
                         versionNo = storageStatusTable.getLastVersionOfFile(user, filename);
                         nodesCount = userFilesNodesCount.get(filename);
-                        this.addRegister(user, filename, nodesCount, crc, "[VALID]", -1, versionNo, "");
+                        filesize = storageStatusTable.getFileSize(user, filename, storageStatusTable.getAvailableNodesForFile(user, filename).get(0).getFirst());
+                        this.addRegister(user, filename, nodesCount, crc, "[VALID]", filesize, versionNo, "");
                     }
                     catch (Exception exception){
                         // nu prea avem cum sa ajunge aici la init intrucat exceptia se genereaza doar daca inregistrarea exista deja
@@ -65,7 +72,6 @@ public class ContentTable implements Serializable {
                 }
             }
         }
-        needInit = false;
     }
 
 

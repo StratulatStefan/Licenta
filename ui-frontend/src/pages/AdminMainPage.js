@@ -124,6 +124,7 @@ class AdminMainPage extends Component {
 
     handleContentTable = (message) => {
         if (message.body) {
+            console.log(message.body)
             if(message.body.length > 0){
                 this.setState({content : JSON.parse(message.body)})
             }

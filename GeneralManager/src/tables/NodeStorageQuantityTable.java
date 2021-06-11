@@ -15,7 +15,7 @@ public class NodeStorageQuantityTable{
     /**
      * Cantitatea de memorie disponibila pentru un nod intern
      */
-    private long internalNodeTotalStorageQuantity = Integer.parseInt(AppConfig.getParam("internalNodeStorageQuantity")) * (1 << 30);
+    private long internalNodeTotalStorageQuantity = Integer.parseInt(AppConfig.getParam("internalNodeStorageQuantity"));// * (1 << 30);
     /**
      * Tabela de status a memoriei;
      */
@@ -55,7 +55,7 @@ public class NodeStorageQuantityTable{
                 throw new Exception("Inregistrarea pentru " + nodeAddress + " exista deja!");
             }
             StorageQuantity memory = new StorageQuantity();
-            memory.setTotalStorage(internalNodeTotalStorageQuantity);
+            memory.setTotalStorage(internalNodeTotalStorageQuantity * (1 << 30));
             memory.updateUsedStorage(consumedMemory);
             this.storageStatus.put(nodeAddress, memory);
         }

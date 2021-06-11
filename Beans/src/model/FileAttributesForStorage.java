@@ -93,6 +93,24 @@ public class FileAttributesForStorage implements Serializable {
         throw new NullPointerException("setVersionNo : Node not found!");
     }
 
+    public Long getFileSize(String nodeAddress) throws NumberFormatException{
+        for(Pair<String, FileVersionData> node : nodes){
+            if(node.getFirst().equals(nodeAddress)){
+                return node.getSecond().getSize();
+            }
+        }
+        throw new NullPointerException("getFileSize : Node not found!");
+    }
+    public void setFileSize(String nodeAddress, Long filesize) throws NumberFormatException{
+        for(Pair<String, FileVersionData> node : nodes){
+            if(node.getFirst().equals(nodeAddress)){
+                node.getSecond().setSize(filesize);
+                return;
+            }
+        }
+        throw new NullPointerException("setFileSize : Node not found!");
+    }
+
     /**
      * Getter pentru lista nodurilor
      */
@@ -149,9 +167,9 @@ public class FileAttributesForStorage implements Serializable {
      * Functie de adaugare a unui nou nod in lista
      * @param nodeAddress Adresa nodului
      */
-    public void addNode(String nodeAddress, long crc, String versionNo) throws Exception{
+    public void addNode(String nodeAddress, long crc, String versionNo, long filesize) throws Exception{
         if(!this.containsAddress(nodeAddress))
-            this.nodes.add(new Pair<String, FileVersionData>(nodeAddress, new FileVersionData(crc, versionNo, "")));
+            this.nodes.add(new Pair<String, FileVersionData>(nodeAddress, new FileVersionData(crc, versionNo, "", filesize)));
         else
             throw new Exception("Node already exists!");
     }

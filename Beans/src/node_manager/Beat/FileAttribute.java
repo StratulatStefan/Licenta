@@ -21,6 +21,7 @@ public class FileAttribute implements Serializable {
      * Numarul versiunii fisierului.
      */
     private String versionNo;
+    private long filesize;
 
     /** -------- Gettere & Settere -------- **/
     /**
@@ -60,5 +61,12 @@ public class FileAttribute implements Serializable {
      */
     public void setVersionNo(String versionNo) {
         this.versionNo = versionNo;
+    }
+
+    public long getFilesize() {
+        return filesize;
+    }
+    public void setFilesize(long filesize) {
+        this.filesize = filesize;
     }
 }

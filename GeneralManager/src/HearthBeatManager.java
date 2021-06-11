@@ -132,7 +132,7 @@ public class HearthBeatManager implements Runnable{
                         else {
                             GeneralManager.connectionTable.confirmAvailability(receivedAddress);
                         }
-                        GeneralManager.statusTable.updateTable(message, GeneralManager.contentTable);
+                        GeneralManager.statusTable.updateTable(message);
                         registerNodeStorageQuantity(receivedAddress.getIpAddress(), message.getMemoryQuantity());
                     }
                     catch (ClassCastException exception){

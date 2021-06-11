@@ -35,7 +35,7 @@ public class FileController {
 
         int userId = -1;
         try {
-            AuthorizationService.UserTypes[] allowedUserTypes = new AuthorizationService.UserTypes[]{AuthorizationService.UserTypes.USER};
+            AuthorizationService.UserTypes[] allowedUserTypes = new AuthorizationService.UserTypes[]{AuthorizationService.UserTypes.STANDARD, AuthorizationService.UserTypes.PREMIUM};
             Map<String, Object> userData = authorizationService.userAuthorization(authorizationValue, allowedUserTypes);
             userId = Integer.parseInt((String)userData.get("sub"));
         }

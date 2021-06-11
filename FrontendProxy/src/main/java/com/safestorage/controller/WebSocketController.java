@@ -42,7 +42,7 @@ public class WebSocketController {
         }).start();
     }
 
-    @Scheduled(fixedRate = 2000)
+    @Scheduled(fixedRate = 4000)
     public void sendContent(){
         for(Object topic : topics){
             try {
