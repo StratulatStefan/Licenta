@@ -30,6 +30,7 @@ class AdminMainPage extends Component {
             current_address    : null,
             connectionTable    : {"addresses" : null, "status" : null, "current_address" : null},
             websocket          : {"connected" : false, "subscriptions" : null},
+            error_status       : {code : -1, message : ""}
         }
         this.logCriteria = {message_type : "ALL", node_address : "ALL", date1 : GeneralPurposeService.getCurrentTimestampForLogging("1 year")}
         this.webSocketConnection = null;
@@ -44,23 +45,44 @@ class AdminMainPage extends Component {
 
     componentDidMount = () => {
         this.checkForConnectedUser()
-        this.fetchUserType().then(_ => {
-            this.fetchAvailableNodes()
-        })
-        this.adminAction('log')
-        Environment.getWebSocket().then(response => {
-            this.webSocketConnection = response
-            this.setState({websocket : {"connected" : true}}, () => {
-                if(this.menu_selection !== null){
-                    this.adminAction(this.menu_selection)
-                }
-            })
+        this.fetchUserType().then(usertype_result => {
+            if(usertype_result !== undefined){
+                this.fetchAvailableNodes().then(response => {
+                    if(response !== undefined){
+                        if(this.state.error_status.code === -1){
+                            this.adminAction('log')
+                            Environment.getWebSocket().then(response => {
+                                this.webSocketConnection = response
+                                this.setState({websocket : {"connected" : true}}, () => {
+                                    if(this.menu_selection !== null){
+                                        this.adminAction(this.menu_selection)
+                                    }
+                                })
+                            })
+                        }
+                    }
+                })
+            }
         })
     }
 
     fetchAvailableNodes = () => {
-        AdminHandlerService.fetchAvailableNodesFromAPI(this.userData["jwt"]).then(response => {
-            this.setState({availableNodes : response.content})
+        return new Promise(resolve => {
+            AdminHandlerService.fetchAvailableNodesFromAPI(this.userData["jwt"]).then(response => {
+                if(response.code === 1){
+                    this.setState({availableNodes : response.content})
+                    resolve(null)
+                }
+                else{
+                    this.setState({error_status : {code : response.code, message : response.content}})
+                    if(response.code === 401 || response.code === 402){
+                        resolve(undefined)
+                    }
+                    else{
+                        resolve(null)
+                    }
+                }
+            })
         })
     }
 
@@ -74,11 +96,17 @@ class AdminMainPage extends Component {
                 UsersHandlerService.getUserRole(this.userData["jwt"]).then(response => {
                     if(response.code === 1){
                         this.setState({userType : response["content"]})
+                        resolve(null)
                     }
-                    else if(response.code === 401){
-                        localStorage.setItem("user_data", '')
+                    else{
+                        this.setState({error_status : {code : response.code, message : response.content}})
+                        if(response.code === 401 || response.code === 402){
+                            resolve(undefined)
+                        }
+                        else{
+                            resolve(null)
+                        }
                     }
-                    resolve(null)
                 })
             }
         })
@@ -92,7 +120,6 @@ class AdminMainPage extends Component {
         else{
             this.userData = JSON.parse(this.userData)
         }
-        console.log(this.userData)
     }
 
     handleContentTable = (message) => {
@@ -108,9 +135,14 @@ class AdminMainPage extends Component {
 
     fetchFileVersions = (userid, filename) => {
         AdminHandlerService.getFileVersions(this.userData["jwt"], userid, filename).then(response => {
-            this.setState({file_versions : response.content})
-            document.getElementById("replication_nodes_div").style.display = "none"
-            document.getElementById("versions_nodes_div").style.display = "block"
+            if(response.code === 1){
+                this.setState({file_versions : response.content})
+                document.getElementById("replication_nodes_div").style.display = "none"
+                document.getElementById("versions_nodes_div").style.display = "block"
+            }
+            else{
+                this.setState({error_status : {code : response.code, message : response.content}})
+            }
         })
     }
 
@@ -156,15 +188,16 @@ class AdminMainPage extends Component {
     }
 
     adminAction = (actionName) => {
-        this.menu_selection = actionName
-        document.getElementById("admin_log_view").style.display               = "none"
-        document.getElementById("admin_content_view").style.display           = "none"
-        document.getElementById("admin_nodes_view").style.display             = "none"
-        document.getElementById("admin_replication_view").style.display       = "none"
-        document.getElementById("admin_storagestatus_view").style.display     = "none"
-        if(this.state.websocket.connected === true && this.state.websocket.subscriptions !== undefined){
-            this.state.websocket.subscriptions.forEach(_ => _.unsubscribe())
-        }
+        if(this.state.error_status.code !== 401 && this.state.error_status.code !== 402){
+            this.menu_selection = actionName
+            document.getElementById("admin_log_view").style.display               = "none"
+            document.getElementById("admin_content_view").style.display           = "none"
+            document.getElementById("admin_nodes_view").style.display             = "none"
+            document.getElementById("admin_replication_view").style.display       = "none"
+            document.getElementById("admin_storagestatus_view").style.display     = "none"
+            if(this.state.websocket.connected === true && this.state.websocket.subscriptions !== undefined){
+                this.state.websocket.subscriptions.forEach(_ => _.unsubscribe())
+            }
 
         let current_topic = []
         let handleFunction = []
@@ -216,6 +249,7 @@ class AdminMainPage extends Component {
             this.setState({websocket : {"connected" : true, "subscriptions" : subscriptions}})
         }
     }
+    }
 
     fetchLogByCriteriaUpdate = (criteria, updatevalue) => {
         if(criteria !== null && updatevalue !== null){
@@ -236,15 +270,18 @@ class AdminMainPage extends Component {
             if(response.code === 1){
                 this.fetchLogByCriteriaUpdate(null, null)
             }
+            else{
+                this.setState({error_status : {code : response.code, message : response.content}})
+            }
         })
     }
 
     fetchReplicationNodesForFile = (userId, filename) => {
         this.setState({content_nodes_data : []})
         AdminHandlerService.fetchNodesStoringFile(this.userData["jwt"], userId, filename).then(response => {
-            document.getElementById("replication_nodes_div").style.display = "block"
-            document.getElementById("versions_nodes_div").style.display = "none"
             if(response.code === 1){
+                document.getElementById("replication_nodes_div").style.display = "block"
+                document.getElementById("versions_nodes_div").style.display = "none"
                 response.content.forEach(address => {
                     AdminHandlerService.fetchNodeData(this.userData["jwt"], address).then(response => {
                         if(response.code === 1){
@@ -252,8 +289,14 @@ class AdminMainPage extends Component {
                             content_nodes.push(response.content)
                             this.setState({content_nodes_data : content_nodes})
                         }
+                        else{
+                            this.setState({error_status : {code : response.code, message : response.content}})
+                        }
                     })
                 })
+            }
+            else{
+                this.setState({error_status : {code : response.code, message : response.content}})
             }
         })
     }
@@ -263,7 +306,19 @@ class AdminMainPage extends Component {
             if(response.code === 1){
                 document.getElementById("storagestatus_delete_status").style.visibility = "visible"
             }
+            else{
+                this.setState({error_status : {code : response.code, message : response.content}})
+            }
         })
+    }
+
+    redirect = (destination) => {
+        if(destination !== ""){
+            this.props.history.push(destination)
+        }
+        else{
+            this.props.history.push("/")
+        }
     }
 
     render(){
@@ -275,7 +330,7 @@ class AdminMainPage extends Component {
         var storagestatus_nodes = {addresses : [], files : [], additional_data : []}
         var nodes_status = {addresses : [], status : []}
         var replication_status = []
-        if(this.state.userType !== null){
+        if(this.state.userType !== null && this.state.code !== 402){
             if(this.state.availableNodes != null){
                 this.state.availableNodes.forEach(node => {
                     availableNodesSelect.push(<option key={`optionkey_${node["ip_address"]}`} value={node["ip_address"]}>{node["ip_address"]}</option>)
@@ -513,84 +568,62 @@ class AdminMainPage extends Component {
                         <hr style={{width:"90%"}}/>
                         <br/>
                     </div>
-                        <div id="admin_log_view" className="admin_div_view">
-                            <p className="admin_view_title">Message type</p>
-                            <select onChange={(event) => {this.fetchLogByCriteriaUpdate("message_type",event.target.value)}}>
-                                <option value="ALL">ALL</option>
-                                <option value="SUCCESS">SUCCESS</option>
-                                <option value="WARNING">WARNING</option>
-                                <option value="ERROR">ERROR</option>
-                            </select>
-                            <p className="admin_view_title">Source node</p>
-                            <select onChange={(event) => {this.fetchLogByCriteriaUpdate("node_address",event.target.value)}}>
-                                <option value="ALL">ALL</option>
-                                {availableNodesSelect}
-                            </select>
-                            <button onClick={() => this.fetchLogByCriteriaUpdate(null, null)}>&#x27F3;</button><br/><br/>
-                            <button style={{marginTop:"-1%", marginBottom:"2%"}}onClick={() => this.cleanLog()}>Clean log with given criteria</button>
-                            <br/>
-                            {this.state.log === null ? <p className="admin_view_title">Fetching log data...</p> : 
-                                this.state.log.length === 0 ? 
-                                    <p className="admin_view_title">No log register found!</p> : 
-                                    <div>
-                                        <p className="admin_view_title" id="log_registers_count">Found {this.state.log.length} log registers.</p>
-                                        <table>
-                                            <thead>
-                                                <tr>
-                                                    <td>Address</td>
-                                                    <td>Message type</td>
-                                                    <td>Message</td>
-                                                    <td>Timestamp</td>
-                                                </tr>
-                                            </thead>
-                                            <tbody>
-                                                {logData}
-                                            </tbody>
-                                        </table>
-                                    </div>
-                            }
-                        </div>
-                        <div id="admin_content_view" className="admin_div_view">
-                            {this.state.websocket.connected === false ? <p className="admin_view_title">Initializing the connection ...<br/><br/></p> : 
-                            <p id="admin_view_title_0" className="admin_view_title">Fetching content...<br/><br/></p>}
-                            <br/>
-                            {this.state.content === null ? <p></p> : this.state.content === undefined ? 
-                                <p className="admin_view_title">No log register found!</p> : 
-                                <div id="content_div">
-                                    <table id="content_table">
-                                        <thead>
-                                            <tr>
-                                                <th>User ID</th>
-                                                <th>Filename</th>
-                                                <th>Version No</th>
-                                                <th>Hash</th>
-                                                <th>Filesize</th>
-                                                <th>Replicas</th>
-                                                <th>Status</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-                                            {content}
-                                        </tbody>
-                                    </table>
-                                    <div id="content_table_additional_data">
-                                        <p className="admin_view_title">Content Status Table</p>
-                                        <p id="admin_view_title_1" className="admin_view_title">&nbsp;</p>
-                                        <div id="replication_nodes_div">{replicationNodesForFile}</div>
-                                        <div id="versions_nodes_div">{versionForFile}</div>
-                                    </div>
-                                </div>
-                            }
-                        </div>
-                        <div id="admin_storagestatus_view" className="admin_div_view">
-                            {this.state.websocket.connected === false ? <p className="admin_view_title">Initializing the connection ...<br/><br/></p> : 
-                                this.state.storagestatus === null ? 
-                                    <p id="admin_view_title_01">Fetching internal nodes storage status...</p> : 
-                                    this.state.storagestatus === undefined ? 
-                                    <p className="admin_view_title">No storage status registers found!</p> :
-                                    <div>
-                                        {storagestatus_nodes.addresses}
-                                        <br/><br/>
+                    {this.state.error_status.code === 401 || this.state.error_status.code === 402 ?
+                        <div>
+                            <p className="admin_view_title" style={{fontSize:"100%"}}>{this.state.error_status.message}</p>
+                            <br/><br/>
+                            <button style={{marginTop:"-1%", marginBottom:"2%", fontSize:"80%"}} onClick={() => {
+                                localStorage.setItem("user_data", '')
+                                this.redirect("/")
+                            }}>Go to login page</button>
+                        </div>:
+                        <div>
+                            <div id="admin_log_view" className="admin_div_view">
+                                <p className="admin_view_title">Message type</p>
+                                <select onChange={(event) => {this.fetchLogByCriteriaUpdate("message_type",event.target.value)}}>
+                                    <option value="ALL">ALL</option>
+                                    <option value="SUCCESS">SUCCESS</option>
+                                    <option value="WARNING">WARNING</option>
+                                    <option value="ERROR">ERROR</option>
+                                </select>
+                                <p className="admin_view_title">Source node</p>
+                                <select onChange={(event) => {this.fetchLogByCriteriaUpdate("node_address",event.target.value)}}>
+                                    <option value="ALL">ALL</option>
+                                    {availableNodesSelect}
+                                </select>
+                                <button onClick={() => this.fetchLogByCriteriaUpdate(null, null)}>&#x27F3;</button><br/><br/>
+                                <button style={{marginTop:"-1%", marginBottom:"2%"}}onClick={() => this.cleanLog()}>Clean log with given criteria</button>
+                                <br/>
+                                {this.state.log === null ? <p className="admin_view_title">Fetching log data...</p> : 
+                                    this.state.log.length === 0 ? 
+                                        <p className="admin_view_title">No log register found!</p> : 
+                                        <div>
+                                            <p className="admin_view_title" id="log_registers_count">Found {this.state.log.length} log registers.</p>
+                                            <table>
+                                                <thead>
+                                                    <tr>
+                                                        <td>Address</td>
+                                                        <td>Message type</td>
+                                                        <td>Message</td>
+                                                        <td>Timestamp</td>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    {logData}
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                }
+                            </div>
+                            <div id="admin_content_view" className="admin_div_view">
+                                {this.state.websocket.connected === false ? 
+                                <p className="admin_view_title">Initializing the connection ...<br/><br/></p> : 
+                                <p id="admin_view_title_0" className="admin_view_title">Fetching content...<br/><br/></p>}
+                                <br/>
+                                {this.state.content === null ? <p></p> : 
+                                    this.state.content === undefined ? 
+                                        this.state.error_status.code === 0 ? <p className="admin_view_title">{this.state.error_status.message}</p> :
+                                        <p className="admin_view_title">No log register found!</p> : 
                                         <div id="content_div">
                                             <table id="content_table">
                                                 <thead>
@@ -599,67 +632,107 @@ class AdminMainPage extends Component {
                                                         <th>Filename</th>
                                                         <th>Version No</th>
                                                         <th>Hash</th>
-                                                        <th>Another nodes</th>
+                                                        <th>Filesize</th>
+                                                        <th>Replicas</th>
+                                                        <th>Status</th>
                                                     </tr>
                                                 </thead>
                                                 <tbody>
-                                                    {storagestatus_nodes.files}
+                                                    {content}
                                                 </tbody>
                                             </table>
                                             <div id="content_table_additional_data">
-                                                <p className="admin_view_title">Storage Status Table</p>
-                                                <p id="admin_view_title_11" className="admin_view_title">&nbsp;</p>
+                                                <p className="admin_view_title">Content Status Table</p>
+                                                <p id="admin_view_title_1" className="admin_view_title">&nbsp;</p>
                                                 <div id="replication_nodes_div">{replicationNodesForFile}</div>
                                                 <div id="versions_nodes_div">{versionForFile}</div>
-                                                <br/>
-                                                <div id="storage_additional_data" style={{visibility:"hidden"}}>
-                                                    {this.selectedFile !== null ? 
-                                                        <p style={{fontSize : "80%"}}>{this.selectedFile.filename}</p> : 
-                                                        []
-                                                    }
-                                                    <p className="admin_view_title">Delete this file from this node.<br/>This will trigger a replication to another node.</p>
-                                                    <button className="redirector" onClick={this.deleteFileFromInternalNode}>Delete</button>
-                                                    <p className="admin_view_title" id="storagestatus_delete_status" style={{visibility : "hidden"}}>
-                                                        File successfully deleted from node.<br/>
-                                                        The change will be visible at the next update from General Manager<br/>
-                                                        You can also check the Replication Manager to see the workaround.
-                                                    </p>
+                                            </div>
+                                        </div>
+                                }
+                            </div>
+                            <div id="admin_storagestatus_view" className="admin_div_view">
+                                {this.state.websocket.connected === false ? <p className="admin_view_title">Initializing the connection ...<br/><br/></p> : 
+                                    this.state.storagestatus === null ? 
+                                        <p className="admin_view_title">Fetching internal nodes storage status...</p> : 
+                                        this.state.storagestatus === undefined ? 
+                                            this.state.error_status.code === 0 ? <p className="admin_view_title">{this.state.error_status.message}</p> :
+                                            <p className="admin_view_title">No storage status registers found!</p> :
+                                        <div>
+                                            {storagestatus_nodes.addresses}
+                                            <br/><br/>
+                                            <div id="content_div">
+                                                <table id="content_table">
+                                                    <thead>
+                                                        <tr>
+                                                            <th>User ID</th>
+                                                            <th>Filename</th>
+                                                            <th>Version No</th>
+                                                            <th>Hash</th>
+                                                            <th>Another nodes</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                        {storagestatus_nodes.files}
+                                                    </tbody>
+                                                </table>
+                                                <div id="content_table_additional_data">
+                                                    <p className="admin_view_title">Storage Status Table</p>
+                                                    <p id="admin_view_title_11" className="admin_view_title">&nbsp;</p>
+                                                    <div id="replication_nodes_div">{replicationNodesForFile}</div>
+                                                    <div id="versions_nodes_div">{versionForFile}</div>
+                                                    <br/>
+                                                    <div id="storage_additional_data" style={{visibility:"hidden"}}>
+                                                        {this.selectedFile !== null ? 
+                                                            <p style={{fontSize : "80%"}}>{this.selectedFile.filename}</p> : 
+                                                            []
+                                                        }
+                                                        <p className="admin_view_title">Delete this file from this node.<br/>This will trigger a replication to another node.</p>
+                                                        <button className="redirector" onClick={this.deleteFileFromInternalNode}>Delete</button>
+                                                        <p className="admin_view_title" id="storagestatus_delete_status" style={{visibility : "hidden"}}>
+                                                            File successfully deleted from node.<br/>
+                                                            The change will be visible at the next update from General Manager<br/>
+                                                            You can also check the Replication Manager to see the workaround.
+                                                        </p>
+                                                    </div>
                                                 </div>
                                             </div>
                                         </div>
-                                    </div>
+                                }
+                            </div>
+                            <div id="admin_nodes_view" className="admin_div_view">
+                            {this.state.websocket.connected === false ? <p className="admin_view_title">Initializing the connection ...<br/><br/></p> : 
+                                this.state.connectionTable.addresses === null ? 
+                                    <p className="admin_view_title">Fetching internal nodes status...</p> : 
+                                    this.state.connectionTable.addresses === undefined && this.state.error_status.code === 0? 
+                                        <p className="admin_view_title">{this.state.error_status.message}</p> :
+                                            this.state.connectionTable.addresses === [] ? 
+                                                <p className="admin_view_title">No internal node found!</p> :
+                                                <div>
+                                                    {nodes_status.addresses}
+                                                    <br/><br/>
+                                                    <div className="node_status">
+                                                        {nodes_status.status}
+                                                     </div>
+                                                </div>
                             }
-                        </div>
-                        <div id="admin_nodes_view" className="admin_div_view">
-                        {this.state.websocket.connected === false ? <p className="admin_view_title">Initializing the connection ...<br/><br/></p> : 
-                            this.state.connectionTable.addresses === null ? 
-                                <p id="admin_view_title_01">Fetching internal nodes status...</p> : 
-                                this.state.connectionTable.addresses === [] ? 
-                                <p className="admin_view_title">No internal node found!</p> :
-                                <div>
-                                    {nodes_status.addresses}
-                                    <br/><br/>
-                                    <div className="node_status">
-                                        {nodes_status.status}
+                            </div>
+                            <div id="admin_replication_view" className="admin_div_view">
+                            {this.state.websocket.connected === false ? <p className="admin_view_title">Initializing the connection ...<br/><br/></p> : 
+                                this.state.replication_status === null ? 
+                                    <p className="admin_view_title">Fetching replication manager status...</p> : 
+                                    this.state.replication_status === undefined ? 
+                                        this.state.error_status.code === 0 ? <p className="admin_view_title">{this.state.error_status.message}</p> :
+                                        <p className="admin_view_title">No replication status register found!</p> :
+                                    <div>
+                                        <div className="node_status">
+                                            <p className="admin_view_title">Replication Manager Status</p>
+                                            <br/><br/>
+                                            {replication_status}
+                                        </div>
                                     </div>
-                                </div>
-                        }
-                        </div>
-                        <div id="admin_replication_view" className="admin_div_view">
-                        {this.state.websocket.connected === false ? <p className="admin_view_title">Initializing the connection ...<br/><br/></p> : 
-                            this.state.connectionTable.replication_status === null ? 
-                                <p className="admin_view_title">Fetching replication manager status...</p> : 
-                                this.state.connectionTable.replication_statu === [] ? 
-                                <p className="admin_view_title">No replication status register found!</p> :
-                                <div>
-                                    <div className="node_status">
-                                        <p className="admin_view_title">Replication Manager Status</p>
-                                        <br/><br/>
-                                        {replication_status}
-                                    </div>
-                                </div>
-                            }
-                        </div>
+                                }
+                            </div>
+                        </div>}
                 </div>
             </div>
         );

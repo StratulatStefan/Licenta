@@ -73,7 +73,6 @@ export class AdminHandlerService{
         let url = `${Environment.rest_api}/log`
         
         url += GeneralPurposeService.prepareURLQuery(logCriteria)
-        console.log(url)
 
         return new Promise((resolve) => {
             fetch(url, {
@@ -106,7 +105,6 @@ export class AdminHandlerService{
 
     static fetchNodesStoringFile = (jwt, userId, filename) => {
         let url = `${Environment.frontend_proxy}/nodesforfile?user=${userId}&filename=${GeneralPurposeService.sanitizeURL(filename)}`
-        console.log(url)
         return new Promise((resolve) => {
             fetch(url, {
                 method: 'GET',
@@ -198,7 +196,6 @@ export class AdminHandlerService{
     }
 
     static deleteFileFromInternalNode = (jwt, file) => {
-        console.log(JSON.stringify(file))
         let url = `${Environment.frontend_proxy}/internalnodefile?user=${file.user}&filename=${file.filename}&address=${file.address}`
 
         return new Promise((resolve) => {

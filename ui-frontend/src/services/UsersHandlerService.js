@@ -107,7 +107,6 @@ export class UsersHandlerService{
             }).then(response => {
                 if(response.ok){
                     response.json().then(response => {
-                        console.log(response)
                         resolve({
                             "code" : 1,
                             "content" : response
@@ -223,7 +222,6 @@ export class UsersHandlerService{
                 },
                 body : JSON.stringify({"type" : newplan})
             }).then(response => {
-                console.log(response)
                 if(response.ok){
                     response.json().then(response => {
                         resolve({

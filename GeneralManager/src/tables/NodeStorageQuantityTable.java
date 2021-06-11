@@ -15,7 +15,7 @@ public class NodeStorageQuantityTable{
     /**
      * Cantitatea de memorie disponibila pentru un nod intern
      */
-    private long internalNodeTotalStorageQuantity;
+    private long internalNodeTotalStorageQuantity = Integer.parseInt(AppConfig.getParam("internalNodeStorageQuantity")) * (1 << 30);
     /**
      * Tabela de status a memoriei;
      */
@@ -32,19 +32,11 @@ public class NodeStorageQuantityTable{
 
     /** -------- Constructor & Configurare -------- **/
     /**
-     * Functie care citeste si initializeaza parametrii de configurare
-     */
-    public void readConfigParams(){
-        internalNodeTotalStorageQuantity = Integer.parseInt(AppConfig.getParam("internalNodeStorageQuantity")) * (1 << 30);
-    }
-
-    /**
      * Constructorul clasei;
      * Citeste si instantiaza parametrii de configurare
      */
     public NodeStorageQuantityTable(){
         this.storageStatus = new HashMap<>();
-        readConfigParams();
     }
 
 

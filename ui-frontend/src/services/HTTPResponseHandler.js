@@ -6,12 +6,12 @@ export class HTTPResponseHandler{
             response.json().then(response => {
                 if(response_status === 401){
                     status_code = 401
-                    console.log(response)
                     if(response["error status"] !== null && response["error status"].includes("expired")){
-                        alert("Sesiunea a expirat! Incercati sa va reautentificati!")
+                        response['error status'] = "You session expired. Please try to reauthenticate."
+                        status_code = 402
                     }
                     else{
-                        alert("S-a produs o eroare interna! Verificati serverele..")
+                        response['error status'] = "Internal error. We are sorry."
                     }
                 }
                 resolve({

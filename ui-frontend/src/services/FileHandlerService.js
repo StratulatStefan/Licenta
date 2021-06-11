@@ -35,7 +35,6 @@ export class FileHandlerService{
             }).then(response => {
                 if(response.ok){
                     response.json().then(response => {
-                        console.log(response)
                         resolve({
                             "code" : 1,
                             "content" : response["success status"]
@@ -129,7 +128,6 @@ export class FileHandlerService{
                 },
                 body : JSON.stringify({"description" : description})
             }).then(response => {
-                console.log(response)
                 if(response.ok){
                     response.json().then(response => {
                         resolve({
@@ -163,7 +161,6 @@ export class FileHandlerService{
                 },
                 body : JSON.stringify({"description" : description, "newname" : newname})
             }).then(response => {
-                console.log(response)
                 if(response.ok){
                     response.json().then(response => {
                         resolve({

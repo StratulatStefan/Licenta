@@ -115,11 +115,11 @@ public class GeneralManager{
      */
     public static void main(String[] args){
         attachRuntimeExitHook();
-        AppConfig.readConfig();
 
         try {
             LoggerService.registerSuccess(generalManagerIpAddress, "General manager successfully started");
             nodeStorageQuantityTable = new NodeStorageQuantityTable();
+            System.out.println("pulamea");
 
             GeneralManager generalManager = new GeneralManager();
             generalManager.startActivity();
