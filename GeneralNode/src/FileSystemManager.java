@@ -227,8 +227,6 @@ public class FileSystemManager implements Runnable{
         };
     }
 
-
-
     public void sendFeedbackToGeneraManage(DataOutputStream dataOutputStream, FeedbackResponse feedbackResponse){
         try{
             dataOutputStream.write(Serializer.serialize(feedbackResponse));

@@ -10,7 +10,7 @@ import java.util.stream.Collectors;
 
 @Service
 public class LogDaoService implements LogDao {
-    MySQLManager<Log> mySQLManager = new MySQLManager<Log>();
+    private MySQLManager<Log> mySQLManager = new MySQLManager<Log>();
     /**
      * ============== CREATE ==============
      */
@@ -19,7 +19,6 @@ public class LogDaoService implements LogDao {
         mySQLManager.insert(log);
         return log.getRegisterId();
     }
-
 
     /**
      * ============== RETRIEVE ==============

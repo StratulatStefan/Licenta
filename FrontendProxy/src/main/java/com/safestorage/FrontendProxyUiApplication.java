@@ -18,5 +18,4 @@ public class FrontendProxyUiApplication {
 		new Thread(feedbackManager).start();
 		SpringApplication.run(FrontendProxyUiApplication.class, args);
 	}
-
 }

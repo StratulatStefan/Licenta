@@ -3,18 +3,20 @@
 |  * REST API SCHEMA FOR USER *																						|
 |  ****************************																						|
 ---------------------------------------------------------------------------------------------------------------------
-|- GET /api/user/{<id>}             -> extragerea unui utilizator (complet) pe baza id-ului                         |
-|- GET /api/user?email=<email>      -> extragerea unui utilizator (complet) pe baza email-ului                      |
-|- GET /api/user/{<id>}/{<field>}   -> extragerea unui camp al datelor unui utilizator pe baza id-ului;             |
+|- GET /api/user/search                -> extragerea unui utilizator (complet) pe baza id-ului                      |
+|- GET /api/user/search?email=<email>  -> extragerea unui utilizator (complet) pe baza email-ului                   |
+|- GET /api/user/{<field>}             -> extragerea unui camp al datelor unui utilizator pe baza id-ului;          |
 |								      field : [country|replication_factor|storage_quantity]							|
 |																													|
 |																													|
-|- POST /api/user                   -> adaugarea unui utilizator													|
-|																													|
-|- PUT /api/user/{<id>}             -> editarea unui utilizator pe baza id-ului										|
-|									  [country|password|storage_quantity_release|storage_quantity_consumption]		|
-|																													|
-|- DELETE /api/user/{<id>}          -> stergerea unui utilizator pe baza id-ului									|
+|- POST /api/user/login                -> logarea unui utilizator   												|
+|- POST /api/user                      -> adaugarea unui utilizator													|
+|									   																				|
+|- PUT /api/user                       -> editarea unui utilizator pe baza id-ului									|
+|									     [country|password|storage_quantity_release|storage_quantity_consumption]	|
+|- PUT /api/user/{id}/storage          -> editarea capacitatii de storace disponibile pentru un utilizator      	|
+|									   																				|
+|- DELETE /api/user/{<id>}             -> stergerea unui utilizator pe baza id-ului									|
 ---------------------------------------------------------------------------------------------------------------------
 
 

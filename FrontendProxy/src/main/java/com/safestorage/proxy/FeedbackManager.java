@@ -22,7 +22,7 @@ public class FeedbackManager implements Runnable{
         this.feedbackList = new ArrayList<NewFileRequestFeedback>();
     }
 
-    public Runnable feedbackThread(Socket frontendSocket){
+    private Runnable feedbackThread(Socket frontendSocket){
         return new Runnable() {
             @Override
             public void run() {

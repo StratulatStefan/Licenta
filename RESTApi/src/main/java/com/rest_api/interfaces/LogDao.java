@@ -21,11 +21,6 @@ public interface LogDao {
 
 
     /**
-     * ============== UPDATE ==============
-     */
-    // -
-
-    /**
      * ============== DELETE ==============
      */
     void deleteLogRegister(int registerId) throws Exception;

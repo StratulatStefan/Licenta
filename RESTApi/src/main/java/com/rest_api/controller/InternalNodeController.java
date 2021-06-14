@@ -55,7 +55,7 @@ public class InternalNodeController {
      * ============== RETRIEVE ==============
      */
     @RequestMapping(value = "/all", method = RequestMethod.GET)
-    ResponseEntity<List<InternalNode>> getAllUserTypes(@RequestHeader("Authorization") String authorizationValue){
+    ResponseEntity<List<InternalNode>> getAllInternalNodes(@RequestHeader("Authorization") String authorizationValue){
         try {
             AuthorizationService.UserTypes[] allowedUserTypes = new AuthorizationService.UserTypes[]{AuthorizationService.UserTypes.ADMIN};
             Map<String, Object> userData = authorizationService.userAuthorization(authorizationValue, allowedUserTypes);
@@ -156,7 +156,7 @@ public class InternalNodeController {
      * ============== DELETE ==============
      */
     @RequestMapping(value = "/{ipaddress}", method = RequestMethod.DELETE)
-    ResponseEntity<Map<String, String>> deleteUserType(@PathVariable String ipaddress,
+    ResponseEntity<Map<String, String>> deleteInternalNode(@PathVariable String ipaddress,
                                                        @RequestHeader("Authorization") String authorizationValue){
         try {
             AuthorizationService.UserTypes[] allowedUserTypes = new AuthorizationService.UserTypes[]{AuthorizationService.UserTypes.ADMIN};

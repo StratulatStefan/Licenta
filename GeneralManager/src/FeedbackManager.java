@@ -14,14 +14,13 @@ import java.util.List;
 public class FeedbackManager implements Runnable{
     private final List<NewFileRequestFeedback> feedbackList;
     private static int bufferSize = Integer.parseInt(AppConfig.getParam("buffersize"));
-    private static String generalManagerIpAddress = AppConfig.getParam("generalManagerIpAddress");
     private static int feedbackPort = Integer.parseInt(AppConfig.getParam("feedbackPort"));
 
     public FeedbackManager(){
         this.feedbackList = new ArrayList<NewFileRequestFeedback>();
     }
 
-    public Runnable feedbackThread(Socket frontendSocket){
+    private Runnable feedbackThread(Socket frontendSocket){
         return new Runnable() {
             @Override
             public void run() {
@@ -45,8 +44,6 @@ public class FeedbackManager implements Runnable{
         };
     }
 
-    /* TODO adaugare functie care verifica daca feedback-ul nu exista deja.. */
-
     public NewFileRequestFeedback getFeedback(String userId, String filename){
         synchronized (this.feedbackList) {
             if(feedbackList.size() == 0)
@@ -65,7 +62,7 @@ public class FeedbackManager implements Runnable{
     public void run() {
         try {
             ServerSocket feedbackSocket = new ServerSocket();
-            feedbackSocket.bind(new InetSocketAddress(generalManagerIpAddress, feedbackPort));
+            feedbackSocket.bind(new InetSocketAddress(GeneralManager.generalManagerIpAddress, feedbackPort));
             while(true) {
                 Socket socket = feedbackSocket.accept();
                 System.out.println("Feedback nou de la frontend!");

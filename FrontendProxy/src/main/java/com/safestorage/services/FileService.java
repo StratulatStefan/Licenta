@@ -21,7 +21,7 @@ import java.nio.file.StandardCopyOption;
 public class FileService {
     private String uploadDir = AppConfig.getParam("uploadDir");
 
-    public String persistFileToBuffer(MultipartFile file) throws Exception{
+    private String persistFileToBuffer(MultipartFile file) throws Exception{
         try{
             Path copyLocation = Paths.get(
                 uploadDir + File.separator + file.getOriginalFilename()
@@ -55,21 +55,6 @@ public class FileService {
         return filePath;
     }
 
-    public ManagerComplexeResponse getUserFiles(int userId) throws IOException, ClassNotFoundException {
-        GetUserFiles getUserFilesRequest = new GetUserFiles();
-        getUserFilesRequest.setUserId(String.format("%d", userId));
-
-        return (ManagerComplexeResponse) FrontendManager.managerOperationRequest(getUserFilesRequest);
-    }
-
-    public ManagerComplexeResponse getUserFileHistory(int userId, String filename) throws IOException, ClassNotFoundException {
-        GetUserFileHistory getUserFileHistoryRequest = new GetUserFileHistory();
-        getUserFileHistoryRequest.setUserId(String.format("%d", userId));
-        getUserFileHistoryRequest.setFilename(filename);
-
-        return (ManagerComplexeResponse) FrontendManager.managerOperationRequest(getUserFileHistoryRequest);
-    }
-
     public ManagerTextResponse deleteFile(int userId, String filename, String description) throws IOException, ClassNotFoundException {
         DeleteFileRequest deleteFileRequest = new DeleteFileRequest();
         deleteFileRequest.setUserId(String.format("%d", userId));
@@ -96,6 +81,21 @@ public class FileService {
         renameFileRequest.setDescription(description);
 
         return (ManagerTextResponse) FrontendManager.managerOperationRequest(renameFileRequest);
+    }
+
+    public ManagerComplexeResponse getUserFiles(int userId) throws IOException, ClassNotFoundException {
+        GetUserFiles getUserFilesRequest = new GetUserFiles();
+        getUserFilesRequest.setUserId(String.format("%d", userId));
+
+        return (ManagerComplexeResponse) FrontendManager.managerOperationRequest(getUserFilesRequest);
+    }
+
+    public ManagerComplexeResponse getUserFileHistory(int userId, String filename) throws IOException, ClassNotFoundException {
+        GetUserFileHistory getUserFileHistoryRequest = new GetUserFileHistory();
+        getUserFileHistoryRequest.setUserId(String.format("%d", userId));
+        getUserFileHistoryRequest.setFilename(filename);
+
+        return (ManagerComplexeResponse) FrontendManager.managerOperationRequest(getUserFileHistoryRequest);
     }
 
     private ManagerTextResponse getNodeCandidateForFile(int userId, String filename) throws IOException, ClassNotFoundException {

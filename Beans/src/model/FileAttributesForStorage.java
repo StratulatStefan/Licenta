@@ -43,6 +43,13 @@ public class FileAttributesForStorage implements Serializable {
         this.filename = filename;
     }
 
+    public String getUserId() {
+        return userId;
+    }
+    public void setUserId(String userId) {
+        this.userId = userId;
+    }
+
     /**
      * Getter pentru CRC
      */
@@ -79,7 +86,6 @@ public class FileAttributesForStorage implements Serializable {
         }
         throw new NullPointerException("getVersionNo : Node not found!");
     }
-
     /**
      * Setter pentru numarul versiunii
      */
@@ -199,14 +205,6 @@ public class FileAttributesForStorage implements Serializable {
             }
         }
         return false;
-    }
-
-    public String getUserId() {
-        return userId;
-    }
-
-    public void setUserId(String userId) {
-        this.userId = userId;
     }
 
     /** -------- Functii de baza, supraincarcate -------- **/

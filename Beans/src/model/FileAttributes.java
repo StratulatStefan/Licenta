@@ -22,7 +22,6 @@ public class FileAttributes implements Serializable {
     private String status;
     private long fileSize;
 
-
     private FileVersionData fileVersionData;
 
     /** -------- Constructor -------- **/
@@ -33,7 +32,7 @@ public class FileAttributes implements Serializable {
         this.fileSize = filesize;
         this.fileVersionData = new FileVersionData(crc, versionNo, versionDesc, filesize);
     }
-    
+
     /** -------- Gettere & Settere -------- **/
     /**
      * Getter pentru numele fisierului

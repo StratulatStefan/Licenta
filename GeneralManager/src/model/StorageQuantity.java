@@ -27,7 +27,6 @@ public class StorageQuantity implements Serializable {
     public long getUsedStorage() {
         return usedStorage;
     }
-
     /**
      * Setter pentru cantitatea ramasa de memorie
      * @param consumedStorage Cantitatea de memorie consumata.

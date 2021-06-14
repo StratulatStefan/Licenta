@@ -25,7 +25,7 @@ public class WebSocketController {
             GetReplicationStatusRequest.class, GetConnectionTableRequest.class
     });
 
-    void fetchContentAndSend(ClientManagerRequest requestObject, String topic){
+    private void fetchContentAndSend(ClientManagerRequest requestObject, String topic){
         new Thread(new Runnable() {
             @Override
             public void run() {
@@ -53,10 +53,5 @@ public class WebSocketController {
                 System.out.println("Cannot instantiate class : " + exception.getMessage());
             }
         }
-        /*fetchContentAndSend(new GetContentTableRequest(),"content");
-        fetchContentAndSend(new GetNodesStorageQuantityRequest(),"nodes");
-        fetchContentAndSend(new GetStorageStatusRequest(),"storage");
-        fetchContentAndSend(new GetReplicationStatusRequest(),"replication");
-        fetchContentAndSend(new GetConnectionTableRequest(),"connection");*/
     }
 }

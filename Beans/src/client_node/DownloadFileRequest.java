@@ -11,7 +11,6 @@ public class DownloadFileRequest implements Serializable {
     public String getUserId() {
         return userId;
     }
-
     public void setUserId(String userId) {
         this.userId = userId;
     }
@@ -19,7 +18,6 @@ public class DownloadFileRequest implements Serializable {
     public String getFilename() {
         return filename;
     }
-
     public void setFilename(String filename) {
         this.filename = filename;
     }

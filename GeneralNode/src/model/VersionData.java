@@ -4,12 +4,10 @@ import java.io.Serializable;
 
 public class VersionData implements Serializable {
     private String timestamp;
-
     private String versionName;
-
     private long hash;
-
     private String description;
+
 
     public VersionData(String timestamp, String versionName, long hash, String description){
         this.timestamp = timestamp;
@@ -17,9 +15,7 @@ public class VersionData implements Serializable {
         this.hash = hash;
         this.description = description;
     }
-
     public VersionData(){}
-
     public VersionData(String metadataFileRegister){
         String[] fields = metadataFileRegister.split(" ");
         this.timestamp = fields[0];
@@ -35,7 +31,6 @@ public class VersionData implements Serializable {
     public long getHash() {
         return hash;
     }
-
     public void setHash(long hash) {
         this.hash = hash;
     }
@@ -43,7 +38,6 @@ public class VersionData implements Serializable {
     public String getTimestamp() {
         return timestamp;
     }
-
     public void setTimestamp(String timestamp) {
         this.timestamp = timestamp;
     }
@@ -51,7 +45,6 @@ public class VersionData implements Serializable {
     public String getVersionName() {
         return versionName;
     }
-
     public int getVersionNumber(){
         return Integer.parseInt(versionName.substring(1));
     }
@@ -59,7 +52,6 @@ public class VersionData implements Serializable {
     public void setVersionName(String versionName) {
         this.versionName = versionName;
     }
-
     public void setVersionNumber(int versionNumber){
         this.versionName = "v" + versionNumber;
     }
@@ -67,7 +59,6 @@ public class VersionData implements Serializable {
     public String getDescription() {
         return description;
     }
-
     public void setDescription(String description) {
         this.description = description;
     }

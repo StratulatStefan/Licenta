@@ -86,14 +86,6 @@ public class GeneralManager{
         this.replicationManager = new ReplicationManager();
     }
 
-    public static void attachRuntimeExitHook(){
-        Runtime.getRuntime().addShutdownHook(new Thread() {
-            public void run() {
-                LoggerService.registerError(generalManagerIpAddress, "General manager closed.");
-            }
-        });
-
-    }
     /** -------- Main -------- **/
     /**
      * Functia care porneste toate activitatile managerilor;
@@ -114,8 +106,6 @@ public class GeneralManager{
      * @param args Argumentele furnizate la linia de comanda
      */
     public static void main(String[] args){
-        attachRuntimeExitHook();
-
         try {
             LoggerService.registerSuccess(generalManagerIpAddress, "General manager successfully started");
             nodeStorageQuantityTable = new NodeStorageQuantityTable();

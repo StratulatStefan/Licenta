@@ -14,14 +14,7 @@ public class ReplicationManager implements Runnable{
      * Frecventa de executare a buclei de replicare
      */
     private static int replicationFrequency = Integer.parseInt(AppConfig.getParam("replicationFrequency"));
-
     private static List<String> replicationStatusTable = new ArrayList<>();
-
-    /**
-     * Portul pe care este deschis socket-ul de pe nodul intern
-     */
-    private int replicationPort = Integer.parseInt(AppConfig.getParam("replicationPort"));
-
 
     /** -------- Constructor & Configurare -------- **/
 
@@ -42,7 +35,7 @@ public class ReplicationManager implements Runnable{
      * @param replication_factor Numarul de noduri necesare.
      * @param availableNodes Lista nodurilor care contin deja fisieru
      */
-    public List<String> searchCandidatesForReplication(int replication_factor, List<String> availableNodes, long filesize){
+    private List<String> searchCandidatesForReplication(int replication_factor, List<String> availableNodes, long filesize){
         List<String> openNodes = GeneralManager.nodeStorageQuantityTable.getMostSuitableNodes(filesize).subList(0, replication_factor);
         try {
             return GeneralPurposeMethods.listDifferences(openNodes, availableNodes).subList(0, replication_factor - availableNodes.size());
@@ -59,7 +52,7 @@ public class ReplicationManager implements Runnable{
      * @param count Numarul de noduri care trebuie sa elimine fisierul.
      * @param availableNodes Lista tuturor nodurilor disponibile care contin fisierul.
      */
-    public List<String> searchCandidatesForDeletion(int count, List<String> availableNodes){
+    private List<String> searchCandidatesForDeletion(int count, List<String> availableNodes){
         return availableNodes.subList(0, count);
     }
 
@@ -182,7 +175,7 @@ public class ReplicationManager implements Runnable{
         return status;
     }
 
-    public String deletion(int replication_factor, String userId, String userFile, List<String> candidates) throws Exception {
+    private String deletion(int replication_factor, String userId, String userFile, List<String> candidates) throws Exception {
         String status = String.format("[NEED DELETION OF FILE %s]\n", userFile);
         LoggerService.registerWarning(GeneralManager.generalManagerIpAddress,status);
         status += "\t\tFound nodes to delete file : ";

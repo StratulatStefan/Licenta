@@ -98,31 +98,6 @@ public class ContentTable implements Serializable {
     }
 
     /**
-     * Functie de eliminare a unei inregistrari din tabela (un fisier sau chiar si userul daca nu mai are alte fisiere).
-     * @param userId Id-ul utilizatorului pentru care se doreste adaugarea inregistrarii;
-     * @param filename Numele fisierului;
-     * @throws Exception Daca inregistrarea nu exista
-     */
-    public void deleteRegister(String userId, String filename) throws Exception{
-        synchronized (this.contentTable){
-            if(!this.containsUser(userId)){
-                throw new Exception("Register not found!");
-            }
-            for(FileAttributes fileAttributes : this.contentTable.get(userId)){
-                if(fileAttributes.getFilename().equals(filename)){
-                    this.contentTable.get(userId).remove(fileAttributes);
-
-                    if(this.contentTable.get(userId).size() == 0){
-                        this.contentTable.remove(userId);
-                    }
-                    return;
-                }
-            }
-            throw new Exception("Register not found!");
-        }
-    }
-
-    /**
      * Functie de modificare a factorului de replicare al unui fisier.
      * @param filename Numele fisierului care se doreste a fi modificat.
      * @param replication_factor Noul factor de replicare.
@@ -264,7 +239,7 @@ public class ContentTable implements Serializable {
      * Functie care verifica daca un utilizator exista.
      * @param userId Id-ul utilizatorului cautat;
      */
-    boolean containsUser(String userId){
+    public boolean containsUser(String userId){
         synchronized (this.contentTable){
             for(String user : this.getUsers()){
                 if(user.equals(userId)){

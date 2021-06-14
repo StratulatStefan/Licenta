@@ -41,13 +41,7 @@ public class JWT {
         this.jwt = jwtBuilder.compact();
     }
 
-    public String getHeader(){
-        return this.jwt.split("\\.")[0];
-    }
     public String getJWT(){return this.jwt;}
-    public String getPayload(){
-        return this.jwt.split("\\.")[1];
-    }
     public String getUserId(){
         return this.decodeJWT().get("sub").toString();
     }
@@ -59,20 +53,5 @@ public class JWT {
                 .setSigningKey(DatatypeConverter.parseBase64Binary(SECRET_KEY))
                 .parseClaimsJws(this.jwt).getBody();
         return claims;
-    }
-
-    public boolean areEqual(String jwt){
-        return this.jwt.equals(jwt);
-    }
-    public boolean checkJTI(String jti){
-        Map<String, Object> jwtDecoded = this.decodeJWT();
-        return this.getJti().equals(jti);
-    }
-    public String checkAndGetRole(String jwt){
-        JWT newJwt = new JWT(jwt);
-        if(this.getRole().equals(newJwt.getRole())){
-            return this.getRole();
-        }
-        return null;
     }
 }

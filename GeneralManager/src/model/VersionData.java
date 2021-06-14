@@ -4,11 +4,8 @@ import java.io.Serializable;
 
 public class VersionData implements Serializable {
     private String timestamp;
-
     private String versionName;
-
     private long hash;
-
     private String description;
 
     public VersionData(String timestamp, String versionName, long hash, String description){

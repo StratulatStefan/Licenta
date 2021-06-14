@@ -20,7 +20,7 @@ public class UsersController {
     @Autowired
     private UserDao userDao;
 
-    AuthorizationService authorizationService = new AuthorizationService();
+    private AuthorizationService authorizationService = new AuthorizationService();
 
     /**
      * ============== CREATE ==============

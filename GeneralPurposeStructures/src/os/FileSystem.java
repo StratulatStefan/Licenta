@@ -14,6 +14,7 @@ import java.util.zip.CRC32;
  */
 public class FileSystem {
     private static int bufferSize = 1024;
+
     /**
      * Functie care verifica daca un fisier/director exista.
      * @param path Calea catre fisierul cautat.

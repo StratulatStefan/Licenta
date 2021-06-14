@@ -24,31 +24,27 @@ public class GeneralNode{
      * Adresa IP la care va fi mapat nodul intern
      */
     public static String ipAddress;
-
     /**
      * Calea de baza la care se vor stoca fisierele
      */
     private  static String storagePath = AppConfig.getParam("storagePath");
+    private static boolean initFlag = true;
+
     /**
      * Obiectul care va fi trimis la nodul general sub forma de heartbeat
      * **/
     private final static NodeBeat storageStatus = new NodeBeat();
-
-    private static boolean initFlag = true;
-
     public final static CRCTable crcTable = new CRCTable();
-
     private final static NewFiles newFiles = new NewFiles();
-
-
     public final static PendingList pendingList = new PendingList();
+
+
 
     /** -------- Managerii activitatilor -------- **/
     /**
      * Obiectul care se ocupa de mecanismul de hearbeats
      */
     private HearthBeatManager hearthBeatManager;
-
     /**
      * Obiectul care se va ocupa de comunicarea cu clientul
      */
@@ -58,7 +54,6 @@ public class GeneralNode{
      * Obiectul care se va ocupa de comunicarea cu nodul general pentru prelucrarea fisiere.
      */
     private FileSystemManager fileSystemManager;
-
     public static VersionControlManager versionControlManager;
 
 

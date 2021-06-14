@@ -53,7 +53,6 @@ public class HttpConnectionService {
         return content.toString();
     }
 
-
     public String putRequest(String urlink, Map<String, Object> data) throws IOException{
         return createOrUpdateRequest(urlink, data, HTTPMethod.HTTP_PUT);
     }

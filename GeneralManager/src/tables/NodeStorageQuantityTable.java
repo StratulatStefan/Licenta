@@ -22,14 +22,6 @@ public class NodeStorageQuantityTable{
     public final HashMap<String, StorageQuantity> storageStatus;
 
 
-    private Pair<Double, String> convertToBestScale(double bytes, int scale){
-        if(bytes / 1024. < 1){
-            String[] units = new String[]{"", "K", "M", "G"};
-            return new Pair<Double, String>((double) Math.round(bytes * 100) / 100, units[scale] + "B");
-        }
-        return convertToBestScale(bytes / 1024., scale + 1);
-    }
-
     /** -------- Constructor & Configurare -------- **/
     /**
      * Constructorul clasei;
@@ -108,6 +100,14 @@ public class NodeStorageQuantityTable{
             storageTable.add(node);
         }
         return storageTable;
+    }
+
+    private Pair<Double, String> convertToBestScale(double bytes, int scale){
+        if(bytes / 1024. < 1){
+            String[] units = new String[]{"", "K", "M", "G"};
+            return new Pair<Double, String>((double) Math.round(bytes * 100) / 100, units[scale] + "B");
+        }
+        return convertToBestScale(bytes / 1024., scale + 1);
     }
 
     /** -------- Functii de baza, supraincarcate -------- **/

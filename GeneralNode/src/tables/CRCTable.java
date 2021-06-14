@@ -8,7 +8,6 @@ import java.util.List;
 public class CRCTable {
     private final List<FileSystemEntry> fileSystemEntryList = new ArrayList<>();
 
-
     public void resetRegister(String userId, String filename){
         synchronized (this.fileSystemEntryList) {
             for (FileSystemEntry fileSystemEntry : fileSystemEntryList) {

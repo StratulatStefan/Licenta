@@ -66,11 +66,18 @@ public class ClientCommunicationManager {
 
     /** -------- Constructor & Configurare -------- **/
     /**
+     * Constructorul clasei;
+     * Citeste si instantiaza parametrii de configurare
+     */
+    public ClientCommunicationManager(){
+    }
+
+    /**
      * Functie care identifica tipul operatiei solicitate de utilizator
      * @param operation String-ul ce identifica operatia
      * @return Tipul operatiei sau null daca nu s-a identificat nicio operatie valida
      */
-    public ClientRequest getOperationType(Class<? extends ClientManagerRequest> operation){
+    private ClientRequest getOperationType(Class<? extends ClientManagerRequest> operation){
         if(operation == NewFileRequest.class){
             return ClientRequest.NEW_FILE;
         }
@@ -113,14 +120,6 @@ public class ClientCommunicationManager {
         return null;
     }
 
-    /**
-     * Constructorul clasei;
-     * Citeste si instantiaza parametrii de configurare
-     */
-    public ClientCommunicationManager(){
-    }
-
-
     /** -------- Functii de validare -------- **/
     /**
      * Functie care verifica daca un anumit utilizator detine un anumit fisier;
@@ -149,7 +148,7 @@ public class ClientCommunicationManager {
      * Functie care returneaza factorul de replicare specific tipului de utilizator;
      * Factorul de replicare va fi citit din fisierul de configurare
      */
-    public int getReplicationFactor(String userType){
+    private int getReplicationFactor(String userType){
         switch (userType){
             case "STANDARD": return Integer.parseInt(AppConfig.getParam("basicUserReplicationFactor"));
             case "PREMIUM" : return Integer.parseInt(AppConfig.getParam("premiumUserReplicationFactor"));
@@ -157,7 +156,7 @@ public class ClientCommunicationManager {
         return 0;
     }
 
-    public String generateChainForUpdate(String userId, String filename){
+    private String generateChainForUpdate(String userId, String filename){
         List<String> candidates = GeneralManager.statusTable.getAvailableNodesAddressesForFile(userId, filename);
         return String.join("-", candidates);
     }
@@ -169,7 +168,7 @@ public class ClientCommunicationManager {
      * @param replication_factor Factorul de replicare al fisierului
      * @return Lantul de noduri la care se va stoca fisierului
      */
-    public String generateNewChain(long filesize, int replication_factor) throws Exception{
+    private String generateNewChain(long filesize, int replication_factor) throws Exception{
         List<String> connectionAddresses = GeneralManager.connectionTable.getConnectionTable();
         if(connectionAddresses.size() <  replication_factor){
             LoggerService.registerError(GeneralManager.generalManagerIpAddress, "Nu sunt suficiente noduri disponibile");
@@ -259,7 +258,6 @@ public class ClientCommunicationManager {
         }
     }
 
-
     /** -------- Main -------- **/
     /** Functie care inglobeaza activitatea principala a fiecarui nod, aceea de a asigura comunicarea cu celelalte noduri
      * in vederea trimiterii si primirii de mesaje.
@@ -288,7 +286,7 @@ public class ClientCommunicationManager {
      * @param clientSocket Socket-ul nodului adiacent, de la care primeste date.
      * @return Runnable-ul necesar pornirii unui thread separat pentru aceasta comunicare.
      */
-    public Runnable clientCommunicationThread(Socket clientSocket){
+    private Runnable clientCommunicationThread(Socket clientSocket){
         return new Runnable() {
             @Override
             public void run(){
@@ -345,7 +343,7 @@ public class ClientCommunicationManager {
                                             System.out.println("Inregistram noul fisier.");
                                             String status = GeneralManager.contentTable.getFileStatusForUser(userId, filename);
                                             registerFileRequest(userId, filename, crc, filesize, usertype, status, description);
-                                            waitForFeedbackFromClient(userId, filename, filesize, usertype);
+                                            waitForFeedbackFromClient(userId, filename, filesize);
                                         }
                                         else {
                                             response.setException("eroare");
@@ -511,7 +509,7 @@ public class ClientCommunicationManager {
         };
     }
 
-    public void waitForFeedbackFromClient(String userId, String filename, long filesize, String userType){
+    private void waitForFeedbackFromClient(String userId, String filename, long filesize){
         new Thread(new Runnable() {
             @Override
             public void run() {

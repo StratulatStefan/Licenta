@@ -20,12 +20,11 @@ public class InternalNode {
 
     public InternalNode(){}
 
-    public InternalNode(String ip_address, int port, String location_country, String status){
+    public InternalNode(String ip_address, String location_country, String status){
         this.ip_address = ip_address;
         this.location_country = location_country;
         this.status = status;
     }
-
 
     public String getIp_address() {
         return ip_address;

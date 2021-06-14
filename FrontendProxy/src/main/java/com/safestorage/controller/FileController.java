@@ -19,7 +19,7 @@ import java.util.Map;
 @CrossOrigin(origins = "http://localhost:3000")
 @Controller
 public class FileController {
-    AuthorizationService authorizationService = new AuthorizationService();
+    private AuthorizationService authorizationService = new AuthorizationService();
 
     public static UploadPendingQueue uploadPendingQueue = new UploadPendingQueue();
 
@@ -153,7 +153,7 @@ public class FileController {
     }
 
     @RequestMapping(path = "/proxy/{filename}", method = RequestMethod.PUT)
-    public ResponseEntity<String> renameFile(@PathVariable String                   filename,
+    public ResponseEntity<String> renameFile(@PathVariable String                  filename,
                                              @RequestBody HashMap<String, String>  data,
                                              @RequestHeader("Authorization") String authorizationValue){
         int userId = -1;

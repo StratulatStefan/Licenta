@@ -51,6 +51,22 @@ public class NodeBeat implements Serializable {
     }
 
     /**
+     * Setter pentru adresa nodului curent
+     * @param address Adresa nodului
+     */
+    public void setNodeAddress(String address){
+        this.address = address;
+    }
+    /**
+     * Getter pentru adresa nodului curent
+     * @return Adresa nodului
+     */
+    public String getNodeAddress(){
+        return this.address;
+    }
+
+
+    /**
      * Setter pentru lista de fisiere pentru useri;
      * Se va adauga o inregistrare ce va contine identificatorul userului si toate fisierele lui
      * @param userDir Id-ul utilizatorul.
@@ -82,22 +98,6 @@ public class NodeBeat implements Serializable {
      */
     public HashMap<String, List<FileAttribute>> getUserFiles(){
         return this.userFiles;
-    }
-
-    /**
-     * Setter pentru adresa nodului curent
-     * @param address Adresa nodului
-     */
-    public void setNodeAddress(String address){
-        this.address = address;
-    }
-
-    /**
-     * Getter pentru adresa nodului curent
-     * @return Adresa nodului
-     */
-    public String getNodeAddress(){
-        return this.address;
     }
 
     /**

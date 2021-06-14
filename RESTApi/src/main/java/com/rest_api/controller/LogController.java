@@ -22,7 +22,7 @@ public class LogController {
     @Autowired
     private LogDao logDao;
 
-    AuthorizationService authorizationService = new AuthorizationService();
+    private AuthorizationService authorizationService = new AuthorizationService();
 
     /**
      * ============== CREATE ==============

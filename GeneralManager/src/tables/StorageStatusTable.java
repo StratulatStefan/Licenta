@@ -18,6 +18,8 @@ import java.util.stream.Collectors;
  */
 public class StorageStatusTable {
     /** -------- Atribute -------- **/
+    private static String generalManagerIpAddress = AppConfig.getParam("generalManagerIpAddress");
+
     /**
      * Tabela de inregistrari;
      * Cheie : Id-ul utilizatorului
@@ -27,8 +29,6 @@ public class StorageStatusTable {
      * }
      */
     private final HashMap<String, List<FileAttributesForStorage>> statusTable;
-
-    private static String generalManagerIpAddress = AppConfig.getParam("generalManagerIpAddress");
 
     /** -------- Constructori -------- **/
     /**
@@ -220,15 +220,6 @@ public class StorageStatusTable {
         }
     }
 
-    public List<String> getUserFiles(String user) {
-        synchronized (this.statusTable) {
-            return this.statusTable.get(user)
-                    .stream()
-                    .map(FileAttributesForStorage::getFilename)
-                    .collect(Collectors.toList());
-        }
-    }
-
     /**
      * Functie care returneaza lista adreselor nodurilor care stocheaza un anumit fisier.
      * @param user Id-ul utilizatorului.
@@ -351,34 +342,6 @@ public class StorageStatusTable {
             return new HashMap<String, Integer>(){{
                 for (FileAttributesForStorage userfile : statusTable.get(userId)) {
                     put(userfile.getFilename(), userfile.getNodes().size());
-                }
-            }};
-        }
-    }
-
-    /**
-     * Functie care returneaza crc-ul fiecarui fisier al unui anumit user.
-     * @param userId Id-ul utilizatorului.
-     */
-    public HashMap<String, List<Long>> getUserFilesCRC(String userId){
-        synchronized (this.statusTable) {
-            if(!this.checkUser(userId))
-                return null;
-            return new HashMap<String, List<Long>>(){{
-                for (FileAttributesForStorage userfile : statusTable.get(userId)) {
-                    put(userfile.getFilename(), userfile.getNodesCRCs());
-                }
-            }};
-        }
-    }
-
-    public HashMap<String, List<String>> getUserFilesVersions(String userId){
-        synchronized (this.statusTable) {
-            if (!this.checkUser(userId))
-                return null;
-            return new HashMap<String, List<String>>() {{
-                for (FileAttributesForStorage userfile : statusTable.get(userId)) {
-                    put(userfile.getFilename(), userfile.getNodesVersions());
                 }
             }};
         }

@@ -6,7 +6,8 @@ import java.io.*;
  * Are rolul de serializa si deserializa obiectul
  */
 public class Serializer {
-    private static int bufferSize = 4096;
+    private final static int bufferSize = 4096;
+
     /** -------- Functiile de serializare si deserializare -------- **/
     /**
      * Functia serializeaza un obiect primit ca parametru. Se tine cont de faptul ca orice mesaj

@@ -75,7 +75,6 @@ public class FileSystemManager {
         return null;
     }
 
-
     public List<Object> getUserFileHistoryForFrontend(String user, String filename){
         long fileHash = GeneralManager.contentTable.getCRCForUser(user, filename);
         List<Object> result = new ArrayList<>();
@@ -196,7 +195,7 @@ public class FileSystemManager {
         return getOverallFeedback(feedbackResponses).getStatus();
     }
 
-    public FeedbackTextResponse getOverallFeedback(List<FeedbackTextResponse> feedbackResponses){
+    private FeedbackTextResponse getOverallFeedback(List<FeedbackTextResponse> feedbackResponses){
         FeedbackTextResponse feedbackResponse = new FeedbackTextResponse();
         for(FeedbackTextResponse feedback : feedbackResponses){
             feedbackResponse.setSuccess(feedback.isSuccess());

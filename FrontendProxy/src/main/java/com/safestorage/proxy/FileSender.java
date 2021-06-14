@@ -45,10 +45,6 @@ public class FileSender {
         return true;
     }
 
-    private static String getDestinationIpAddress(String token) throws Exception{
-        return getAddressesFromToken(token)[0];
-    }
-
     private static String[] getAddressesFromToken(String token) throws Exception{
         if(validateToken(token))
             return token.replace(" ","").split("\\-");
@@ -57,7 +53,7 @@ public class FileSender {
 
     public static void sendFile(ClientManagerRequest clientManagerRequest, String token){
         try {
-            String destinationAddress = getDestinationIpAddress(token);
+            String destinationAddress = getAddressesFromToken(token)[0];
 
             Socket socket = new Socket(destinationAddress, generalManagerPort);
             FileHeader fileHeader = new FileHeader();
