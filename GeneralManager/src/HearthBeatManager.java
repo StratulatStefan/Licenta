@@ -12,11 +12,13 @@ import data.Time;
 import node_manager.Beat.RequestCRC;
 
 /**
- * Clasa care se va ocupa de tot mecanismul de heartbeats.
- * Va primi mesaje frecvent de la fiecare nod intern si va stoca statusul acestora.
+ * <ul>
+ * 	<li>Clasa care se va ocupa de tot mecanismul de heartbeats.</li>
+ * 	<li>Va primi mesaje frecvent de la fiecare nod intern si va stoca statusul acestora.</li>
+ * 	<li>Totodata, periodic va realiza cereri de verificare a intergritatii fisierelor, prin solicitarea sumelor de control.</li>
+ * </ul>
  */
 public class HearthBeatManager implements Runnable{
-    /** -------- Atribute -------- **/
     /**
      * Adresa de multicast
      */
@@ -38,13 +40,14 @@ public class HearthBeatManager implements Runnable{
      * Numarul de heart-beat-uri la care se face clean-up-ul tabelei de conexiuni
      */
     private static int cleanupFrequency = Integer.parseInt(AppConfig.getParam("cleanupFrequency"));
-
+    /**
+     * Frecventa cu care se realizeaza verificarea integritatii sistemului.
+     */
     private static int checkStorageHealthFrequency = Integer.parseInt(AppConfig.getParam("checkStorageHealthFrequency"));
 
 
-    /** -------- Constructor & Configurare -------- **/
     /**
-     * Constructorul managerului de heartbeat-uri pentru nodul curent.
+     * Constructorul managerului comunicatiei multicast.
      * @param address Adresa nodului curent
      */
     public HearthBeatManager(String address) throws Exception{
@@ -54,13 +57,14 @@ public class HearthBeatManager implements Runnable{
 
     /** -------- Principalele actiuni -------- **/
     /**
-     * Functie care se ocupa de secventa de trimitere a heart-beat-urilor, odata la frequency secunde.
-     * Fiecare trimitere a beat-urilor este urmata de verificarea tabelei de conexiuni.
-     * @param group Adresa de multicast pe care se va trimite mesajul
-     * @param socket Socket-ul nodului curent
-     * @return Runnable pe baza caruia se va porni thread-ul de trimitere
+     * <ul>
+     * 	<li>Functie care contine bucla de verificare a conexiunilor cu nodurile interne.</li>
+     * 	<li>In cadrul unei iteratii se va verifica daca sunt noduri care nu au mai trimis <strong>heartbeat</strong>-uri.</li>
+     * 	<li>Astfel de noduri vor fi eliminate, impreuna cu toate maparile din tabela de status, astfel incat sa se realizeze replicarea fisielor pe alte noduri.</li>
+     * </ul>
+     * @return Runnable pe baza caruia se va porni thread-ul de cleanup
      */
-    public Runnable cleanUp(InetAddress group, HearthBeatSocket socket){
+    public Runnable cleanUp(){
         return new Runnable(){
             @Override
             public void run(){
@@ -97,7 +101,6 @@ public class HearthBeatManager implements Runnable{
                             GeneralManager.contentTable.initialize(GeneralManager.statusTable);
                         }
                     } catch (InterruptedException exception) {
-                        socket.close();
                         LoggerService.registerError(GeneralManager.generalManagerIpAddress,
                                 "InterruptedException occured. : " + exception.getMessage());
                     }
@@ -108,8 +111,10 @@ public class HearthBeatManager implements Runnable{
     }
 
     /**
-     * Functie care se ocupa de primirea mesajelor de la celelalte noduri. La fiecare primire a unui nou
-     * heartbeat, se actualizeaza tabela de conexiuni. Primirea se face incontinuu, fara timeout pe recv.
+     * <ul>
+     * 	<li>Functie care se ocupa de primirea mesajelor de la celelalte noduri.</li>
+     * 	<li> La fiecare primire a unui nouheartbeat, se actualizeaza <strong>tabela de conexiuni</strong> si <strong>tabela de status</strong>.</li>
+     * </ul>
      * @param socket Socket-ul nodului curent
      * @return Runnable-ul pe baza caruia se va crea thread-ul de receptie a hearth-beat-urilor.
      */
@@ -148,6 +153,16 @@ public class HearthBeatManager implements Runnable{
         };
     }
 
+    /**
+     * <ul>
+     * 	<li>Functia de verificare a integritatii fisierelor.</li>
+     * 	<li> Aceasta verificare se realizeaza cu ajutorul sumei de control.</li>
+     * 	<li>Se va trimite catre fiecare nod intern o cerere <strong>RequestCRC</strong> de calculare a sumei de control si de includere a acesteia in hearbeat, imediat dupa finalizarea calcului.</li>
+     * </ul>
+     * @param group Grupul de multicast in care va fi trimisa cererea de verificare a integritatii.
+     * @param socket Socket-ul pe care este mapata conexiunea la nodul curent.
+     * @return
+     */
     public Runnable requestCRC(InetAddress group, HearthBeatSocket socket){
         return new Runnable(){
             @Override
@@ -174,6 +189,13 @@ public class HearthBeatManager implements Runnable{
         };
     }
 
+    /**
+     * <ul>
+     * 	<li>Functie apelata in cadrul mecanismului de <strong>cleanup</strong> prin care se verifica
+     *      daca exista in coada de asteptare, cereri de inregistrare de noi fisiere.</li>
+     *  <li>Se vor extrage maxim 3 astfel de cereri in cadrul unei iteratii.</li>
+     * </ul>
+     */
     public void checkForFileStatusChange(){
         for(int i = 0; i < 3; i++){
             try {
@@ -189,6 +211,14 @@ public class HearthBeatManager implements Runnable{
         }
     }
 
+    /**
+     * <ul>
+     * 	<li>Functie apelata la primirea unui heartbeat de la un nod intern,
+     *      prin care se actualizeaza cantitatea de memorie disponibila pentru acesta.</li>
+     * </ul>
+     * @param nodeAddress Adresa nodului de la care s-a primit un <strong>heartbeat</strong>
+     * @param quantity Cantitatea de memorie inregistrata.
+     */
     public void registerNodeStorageQuantity(String nodeAddress, long quantity){
         new Thread(new Runnable() {
             @Override
@@ -202,12 +232,12 @@ public class HearthBeatManager implements Runnable{
         }).start();
     }
 
-    /** -------- Main -------- **/
     /**
-     * Acest manager de hearbeat-uri va trebui sa fie executat pe un thread separat, astfel incat sa nu blocheze comunicarea
-     * managerului general cu nodurile conectate. Asadar, trebuie implementata functia run, care se va executa la apelul start.
-     *
-     * Principala bucla care se ocupa de manevrarea heartbeat-urilor (trimitere/receptie).
+     * <ul>
+     * 	<li>Acest manager de hearbeat-uri va trebui sa fie executat pe un thread separat, astfel incat sa nu blocheze comunicarea managerului general cu nodurile conectate.</li>
+     * 	<li> Asadar, trebuie implementata functia run, care se va executa la apelul start.</li>
+     * 	<li>Principala bucla care se ocupa de manevrarea heartbeat-urilor <strong>trimitere/receptie</strong>.</li>
+     * </ul>
      */
     public void run(){
         try {
@@ -216,7 +246,7 @@ public class HearthBeatManager implements Runnable{
             HearthBeatSocket socket = new HearthBeatSocket(nodeAddress, multicastPort);
             socket.setNetworkInterface(HearthBeatSocket.NetworkInterfacesTypes.LOCALHOST);
             socket.joinGroup(group);
-            Thread cleanUpThread = new Thread(cleanUp(group, socket));
+            Thread cleanUpThread = new Thread(cleanUp());
             Thread receivingThread = new Thread(receivingLoop(socket));
             Thread requestCRCThread = new Thread(requestCRC(group, socket));
             cleanUpThread.start();

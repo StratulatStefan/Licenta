@@ -8,7 +8,6 @@ import java.text.SimpleDateFormat;
  * Clasa folosita pentru calcule/reprezentari cu timpi
  */
 public class Time {
-    /** -------- Atribute -------- **/
     /**
      * Timestamp-ul la care ne raportam, astfel incat sa nu obtinem o valoare foarte mare.
      */
@@ -24,11 +23,11 @@ public class Time {
      */
     private static SimpleDateFormat formattedTime = new SimpleDateFormat("dd-MM-yyyy|hh:mm:ss");
 
-
-    /** -------- Gettere -------- **/
     /**
-     * Functie care returneaza timestamp-ul curent, raportat la timestampul de baza al clasei.
-     * Timpul este exprimat in secunde
+     * <ul>
+     * 	<li> Functie care returneaza timestamp-ul curent, raportat la timestampul de baza al clasei.</li>
+     * 	<li> Timpul este exprimat in secunde.</li>
+     * </ul>
      */
     public static long getCurrentTimestamp(){
         currentTimestamp.setTime(System.currentTimeMillis());
@@ -36,7 +35,7 @@ public class Time {
     }
 
     /**
-     * Functie care returneaza timpul in format natural (data si ora)
+     * Functie care returneaza timpul in format natural (data si ora).
      * @return Timpul formatat
      */
     public static String getCurrentTimeWithFormat(){

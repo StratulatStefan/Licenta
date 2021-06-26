@@ -15,7 +15,6 @@ import java.lang.*;
  * Clasa generala a managerului.
  */
 public class GeneralManager{
-    /** -------- Atribute generale -------- **/
     /**
      * Adresa IP la care va fi mapat managerul general
      */
@@ -25,8 +24,6 @@ public class GeneralManager{
      */
     public static String storagePath = AppConfig.getParam("storagePath");
 
-
-    /** -------- Tabele -------- **/
     /**
      * Tabela (o lista) nodurilor conectate in retea, care comunica cu nodul curent.
      */
@@ -47,10 +44,11 @@ public class GeneralManager{
      */
     public static NodeStorageQuantityTable nodeStorageQuantityTable;
 
+    /**
+     * Lista de asteptare folosita in cadrul procesului de stocare si inregistrare a unui nou fisier.
+     */
     public static PendingQueue pendingQueue;
 
-
-    /** -------- Managerii activitatilor -------- **/
     /**
      * Obiectul care se ocupa de mecanismul de hearthbeats
      */
@@ -66,6 +64,9 @@ public class GeneralManager{
      */
     private ReplicationManager replicationManager;
 
+    /**
+     * Obiectul care se va ocupa de mecanismul de feedback
+     */
     public static FeedbackManager feedbackManager;
 
     /**
@@ -73,11 +74,11 @@ public class GeneralManager{
      */
     public static FileSystemManager fileSystemManager = new FileSystemManager();
 
-
-    /** -------- Functii de initializare -------- **/
-
     /**
-     * Constructorul clasei
+     * <ul>
+     * 	<li>Constructorul clasei.</li>
+     * 	<li> Va instantia obiectele de tip manager de activitati.</li>
+     * </ul>
      */
     public GeneralManager() throws Exception {
         feedbackManager = new FeedbackManager();
@@ -86,24 +87,24 @@ public class GeneralManager{
         this.replicationManager = new ReplicationManager();
     }
 
-    /** -------- Main -------- **/
     /**
-     * Functia care porneste toate activitatile managerilor;
-     * Apeluri de functii sau pornire de thread-uri
+     * <ul>
+     * 	<li>Functia care porneste toate activitatile managerilor.</li>
+     * 	<li>Apeluri de functii sau pornire de thread-uri.</li>
+     * </ul>
      */
     public void startActivity() throws Exception {
         GeneralManager.pendingQueue = new PendingQueue();
         new Thread(hearthBeatManager).start();
-
         new Thread(replicationManager).start();
-
         new Thread(feedbackManager).start();
-
-        clientCommunicationManager.clientCommunicationLoop(generalManagerIpAddress);
+        clientCommunicationManager.clientCommunicationLoop();
     }
 
     /**
-     * @param args Argumentele furnizate la linia de comanda
+     * <ul>
+     * 	<li>Functia main care va instantia si rula toti managerii de activitati.</li>
+     * </ul>
      */
     public static void main(String[] args){
         try {

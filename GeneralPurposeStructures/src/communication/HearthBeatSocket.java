@@ -7,21 +7,21 @@ import java.net.*;
 /* better understanding of multicastSocket concept : https://tldp.org/HOWTO/Multicast-HOWTO-2.html */
 
 /**
- * Clasa incapsuleaza toate atributele corespunzatore unui Socket de multicast;
- * Pe langa construirea efectiva a canalului de comunicatie, avem la dispozitie si functii de trimitere/receptionare de continut.
+ * <ul>
+ * 	<li> Clasa incapsuleaza toate atributele corespunzatore unui Socket de multicast.</li>
+ * 	<li> Va trebui sa mosteneasca clasa <strong>MulticastSocket</strong>.</li>
+ * 	<li> Pe langa construirea efectiva a canalului de comunicatie, avem la dispozitie si functii de trimitere/receptionare de continut.</li>
+ * </ul>
  */
 public class HearthBeatSocket extends MulticastSocket {
-    /** -------- Extra-descrieri -------- **/
     /**
      * Enum care incapsuleaza principalele interfete de retea folosite
      */
     public enum NetworkInterfacesTypes {
-        LOCALHOST, /** Pe acelasi dispozitiv **/
+        LOCALHOST,            /** Pe acelasi dispozitiv **/
         LOCAL_PUBLIC_NETWORK /** Dispozitive diferite din cadrul aceleiasi retele locale **/
     }
 
-
-    /** -------- Atribute -------- **/
     /**
      * Portul de multicast
      */
@@ -31,9 +31,6 @@ public class HearthBeatSocket extends MulticastSocket {
      */
     private Address address;
 
-
-
-    /** -------- Constructori & Configurare -------- **/
     /**
      * Constructorul unui socket de Multicast
      * @param address Adresa la care va face bind socket-ul procesului curent
@@ -81,16 +78,13 @@ public class HearthBeatSocket extends MulticastSocket {
         }
     }
 
-
-
-    /** -------- Trimitere & Receptionare mesaje -------- **/
-
     /**
-     * Trimiterea unui mesaj prin multicast.
-     * Trebuie sa se aiba in vedere ca procesul curent sa paraseasca grupul de multicast, pentru a nu primi
-     * mesajul trimis de el. Dupa trimiterea mesajului, se alatura din nou grupului, pentru a primi in continuare mesaje.
-     * Totodata, mesajul se transmite sub forma unui DatagramPacket, care va ingloba atat mesajul propriu-zis, in format binar,
-     * cat si adresa catre care va trimite mesajul (adresa ip + port)
+     * <ul>
+     * 	<li> Trimiterea unui mesaj prin multicast.</li>
+     * 	<li> Trebuie sa se aiba in vedere ca procesul curent sa paraseasca grupul de multicast, pentru a nu primi mesajul trimis de el.</li>
+     * 	<li> Dupa trimiterea mesajului, se alatura din nou grupului, pentru a primi in continuare mesaje.</li>
+     * 	<li> Totodata, mesajul se transmite sub forma unui DatagramPacket, care va ingloba atat mesajul propriu-zis, in format binar, cat si adresa catre care va trimite mesajul <strong>adresa ip + port</strong>.</li>
+     * </ul>
      * @param group Adresa canalului de comunicatie de tip multicast.
      * @param message Mesajul care va fi trimis prin multicast.
      */
@@ -102,8 +96,10 @@ public class HearthBeatSocket extends MulticastSocket {
     }
 
     /**
-     * Functie care foloseste functia de trimitere a mesajului binar. Insa, aceastsa functie primeste mesajul
-     * ca si string si face conversia la binar, inainte de trimitere.
+     * <ul>
+     * 	<li> Functie care foloseste functia de trimitere a mesajului binar.</li>
+     * 	<li> Insa, aceastsa functie primeste mesajul ca si string si face conversia la binar, inainte de trimitere.</li>
+     * </ul>
      * @param group Adresa canalului de comunicatie de tip multicast.
      * @param message Mesajul care va fi trimis prin multicast.
      */
@@ -113,11 +109,11 @@ public class HearthBeatSocket extends MulticastSocket {
     }
 
     /**
-     * Primirea unui mesaj prin multicast de la un alt nod al grupului.
-     * Trebuie sa se aiba in vedere ca rezultatul va fi stocat intr-un obiect de tip DatagramPacket,
-     * iar mesajul propriu zis va fi in format binar.
-     * Totodata, aceasta functie este blocanta si (daca este setat) va genera o exceptie de Timeout daca
-     * se asteapta prea mult timp in bucla de receptie.
+     * <ul>
+     * 	<li> Primirea unui mesaj prin multicast de la un alt nod al grupului.</li>
+     * 	<li> Trebuie sa se aiba in vedere ca rezultatul va fi stocat intr-un obiect de tip DatagramPacket, iar mesajul propriu zis va fi in format binar.</li>
+     * 	<li> Totodata, aceasta functie este blocanta si <strong>daca este setat</strong> va genera o exceptie de Timeout daca se asteapta prea mult timp in bucla de receptie.</li>
+     * </ul>
      * @return Mesajul primit sub forma de string
      */
     public Object receiveMessage() throws IOException, ClassNotFoundException {

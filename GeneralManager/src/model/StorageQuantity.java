@@ -6,11 +6,12 @@ import sun.plugin2.message.Serializer;
 import java.io.Serializable;
 
 /**
- * Clasa care descrie cantitatea stocarii unei entitati;
- * Entitate : user/nod intern
+ * <ul>
+ * 	<li>Clasa care descrie cantitatea stocarii unei entitati.</li>
+ * 	<li> Entitate : user/nod intern.</li>
+ * </ul>
  */
 public class StorageQuantity implements Serializable {
-    /** -------- Atribute -------- **/
     /**
      * Cantitatea totala de memorie disponibila pentru o entitate
      */
@@ -20,7 +21,6 @@ public class StorageQuantity implements Serializable {
      */
     private long usedStorage = 0;
 
-    /** -------- Gettere & Settere -------- **/
     /**
      * Getter pentru cantitatea ramasa de memorie
      */
@@ -33,8 +33,6 @@ public class StorageQuantity implements Serializable {
      *
      */
     public void updateUsedStorage(long consumedStorage) {
-        //if(this.availableStorage == -1)
-        //    this.availableStorage = this.totalStorage;
         this.usedStorage = consumedStorage;
     }
 

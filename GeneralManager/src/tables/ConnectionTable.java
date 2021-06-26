@@ -9,20 +9,21 @@ import communication.Address;
 import data.Time;
 
 /**
- * Tabela de conexiuni; Va contine adresele tuturor nodurilor conectate la nodul general, impreuna cu
- * momentul de timp la care s-a primit ultima confirmare a existentei.
+ * <ul>
+ * 	<li>Tabela de conexiuni.</li>
+ * 	<li> Va contine adresele tuturor nodurilor conectate la nodul general, impreuna cu momentul de timp la care s-a primit ultima confirmare a existentei.</li>
+ * </ul>
  */
 public class ConnectionTable {
-    /** -------- Atribute -------- **/
     /**
-     * Aceasta clasa este un wrapper pentru o lista de perechi de adrese;
-     * Obiectul asupra carora se fac toate operatiile este reprezentat de o lista;
-     * Lista contine perechi (adresa,contor), si va fi folosita pentru afisare conexiunilor nodului curent.
+     * <ul>
+     * 	<li>Aceasta clasa este un wrapper pentru o lista de perechi de adrese.</li>
+     * 	<li>Obiectul asupra carora se fac toate operatiile este reprezentat de o lista.</li>
+     * 	<li>Lista contine perechi <strong>adresa,contor</strong>, si va fi folosita pentru afisare conexiunilor nodului curent.</li>
+     * </ul>
      */
     private final List<Pair<Address, Long>> connectionTable;
 
-
-    /** -------- Constructor -------- **/
     /**
      * Constructorul clasei, care initializeaza lista vida.
      */
@@ -30,8 +31,6 @@ public class ConnectionTable {
         this.connectionTable = Collections.synchronizedList(new ArrayList<>());
     }
 
-
-    /** -------- Getter -------- **/
     /**
      * Functie care returneaza lista de adrese din tabela de conexiuni
      */
@@ -50,11 +49,12 @@ public class ConnectionTable {
         return this.connectionTable.size();
     }
 
-
     /** -------- Functii de prelucrare a tabelei -------- **/
     /**
-     * Functie de adaugare a unei adrese la lista de adrese.
-     * Se considera ca orice adresa valida (o conexiune existenta) are contorul 0.
+     * <ul>
+     * 	<li>Functie de adaugare a unei adrese la lista de adrese.</li>
+     * 	<li>Se considera ca orice adresa valida <strong>o conexiune existenta</strong> are contorul 0.</li>
+     * </ul>
      * @param address Adresa ce va fi adaugata.
      */
     public void addAddress(Address address){
@@ -65,8 +65,10 @@ public class ConnectionTable {
     }
 
     /**
-     * Functie de eliminare a unei adrese din lista de adrese.
-     * Se apeleaza atunci cand o conexiune nu mai este stabila.
+     * <ul>
+     * 	<li>Functie de eliminare a unei adrese din lista de adrese.</li>
+     * 	<li>Se apeleaza atunci cand o conexiune nu mai este stabila.</li>
+     * </ul>
      * @param address Adresa ce va fi stearsa.
      */
     public void removeAddress(Address address){
@@ -78,8 +80,10 @@ public class ConnectionTable {
     }
 
     /**
-     * Functie care confirma existenta conexiunii cu un anumit nod. Aceasta se indica prin setarea
-     * timestampului conexiunii respective cu timpul curent.
+     * <ul>
+     * 	<li>Functie care confirma existenta conexiunii cu un anumit nod.</li>
+     * 	<li> Aceasta se indica prin setareatimestampului conexiunii respective cu timpul curent.</li>
+     * </ul>
      * @param address Adresa nodului cu care exista conexiune.
      * @throws Exception generata daca adresa specificata nu exista
      */
@@ -97,8 +101,6 @@ public class ConnectionTable {
         }
     }
 
-
-
     /** -------- Functii de validare a tabelei -------- **/
     /**
      * Functie de verificare a existentei unei anumite adrese in lista de adrese.
@@ -115,9 +117,12 @@ public class ConnectionTable {
     }
 
     /**
-     * Functie care verifica starea conexiunilor. O conexiune exista daca diferenta dintre timestampul curent si timestampul
-     * conexiunii este mai mica decat limita. Altfel, pe masura ce nodul curent nu mai primeste mesaje de la nodul conex, timestampul
-     * nu se mai modifica si, daca ajunge la o limita, conexiunea se considera rupta.
+     * <ul>
+     * 	<li>Functie care verifica starea conexiunilor.</li>
+     * 	<li> O conexiune exista daca diferenta dintre timestampul curent si timestampulconexiunii este mai mica decat limita.</li>
+     * 	<li> Altfel, pe masura ce nodul curent nu mai primeste mesaje de la nodul conex, timestampulnu se mai modifica si,
+             daca ajunge la o limita, conexiunea se considera rupta.</li>
+     * </ul>
      * @param limit Limita de timp de la care o conexiune este considerata rupta.
      * @return Lista de conexiuni rupte.
      */

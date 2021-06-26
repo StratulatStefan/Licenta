@@ -21,12 +21,12 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 /**
- * Clasa care va incapsula toata interactiunea dintre nodul general si client (frontend).
- * Principala actiune este de a asculta pentru cereri de prelucrare sau adaugare de fisiere si de a delega actiunea
- * inapoi sau nodurilor interne.
+ * <ul>
+ * 	<li>Clasa care va incapsula toata interactiunea dintre nodul general si client.</li>
+ * 	<li>Principala actiune este de a asculta pentru cereri de prelucrare sau adaugare de fisiere si de a delega actiunea catre nodurilor interne.</li>
+ * </ul>
  */
 public class ClientCommunicationManager {
-    /** -------- Extra-descrieri -------- **/
     /**
      * Enum care va cuprinde toate tipurile de operatii solicitate de client
      */
@@ -53,27 +53,32 @@ public class ClientCommunicationManager {
         FILE_NOT_FOUND
     }
 
-    /** -------- Atribute -------- **/
     /**
-     * Dimensiunea bufferului in care vor fi citite datele de la un nod adiacent
+     * Dimensiunea unui pachet de date vehiculat prin canalul de comunicatie
      */
     private static int bufferSize = Integer.parseInt(AppConfig.getParam("buffersize"));
     /**
      * Port-ul de transmisie a datelor (client - nod general)
      */
     private static int dataTransmissionPort = Integer.parseInt(AppConfig.getParam("dataTransmissionPort"));
+    /**
+     * <ul>
+     * 	<li>Adresa serverului cu interfata de tip Rest.</li>
+     * 	<li>Va fi necesara pentru a se putea realiza conectarea la acest server,
+     *       in vederea inregistrarii cantitatii de memorie ocupate de un fisier, in urma adaugarii.</li>
+     * </ul>
+     */
     private static String usersRestApi = AppConfig.getParam("usersRestApi");
 
     /** -------- Constructor & Configurare -------- **/
     /**
      * Constructorul clasei;
-     * Citeste si instantiaza parametrii de configurare
      */
     public ClientCommunicationManager(){
     }
 
     /**
-     * Functie care identifica tipul operatiei solicitate de utilizator
+     * Functie care identifica tipul operatiei solicitate de utilizator pe baza obiectului cerere primit
      * @param operation String-ul ce identifica operatia
      * @return Tipul operatiei sau null daca nu s-a identificat nicio operatie valida
      */
@@ -122,10 +127,10 @@ public class ClientCommunicationManager {
 
     /** -------- Functii de validare -------- **/
     /**
-     * Functie care verifica daca un anumit utilizator detine un anumit fisier;
-     * Cautarea se face in tabela de content;
-     * @param user Id-ul utilizatorului.
-     * @param filename Numele fisierului cautat.
+     * <ul>
+     * 	<li>Functie care verifica daca un anumit utilizator detine un anumit fisier.</li>
+     * 	<li>Cautarea se face in tabela de content.</li>
+     * </ul>
      */
     public ClientRequestStatus checkFileStatus(String user, String filename, long crc){
         try{
@@ -145,8 +150,10 @@ public class ClientCommunicationManager {
 
     /** -------- Functii de generare & inregistrare -------- **/
     /**
-     * Functie care returneaza factorul de replicare specific tipului de utilizator;
-     * Factorul de replicare va fi citit din fisierul de configurare
+     * <ul>
+     * 	<li>Functie care returneaza factorul de replicare specific tipului de utilizator.</li>
+     * 	<li>Factorul de replicare va fi citit din fisierul de configurare.</li>
+     * </ul>
      */
     private int getReplicationFactor(String userType){
         switch (userType){
@@ -156,14 +163,28 @@ public class ClientCommunicationManager {
         return 0;
     }
 
+    /**
+     * <ul>
+     * 	<li>La adaugarea unei versiuni actualizate a unui fisier, din punct de vedere a continutul,
+     *      se va proceda ca in cazul procesuluide stocare a unui nou fisier.</li>
+     * 	<li>Diferenta se va realiza in procesul de identificare a nodurilor interne care sa stocheze replicile fisierului.</li>
+     * 	<li>In cazul unui nou fisier se vor cauta trei noi noduri care sa stocheze fisierul.</li>
+     * 	<li>Aceasta functie va cauta adresele nodurilor care stocheaza deja fisierul.</li>
+     * </ul>
+     * @param userId Identificatorul unic al fisierului.
+     * @param filename Numele fisierului.
+     * @return Lista de noduri ce cont fisierul, organizata sub forma unui string.
+     */
     private String generateChainForUpdate(String userId, String filename){
         List<String> candidates = GeneralManager.statusTable.getAvailableNodesAddressesForFile(userId, filename);
         return String.join("-", candidates);
     }
 
     /**
-     * Functie care va genera lantul de noduri la care se va stoca un fisier nou aparut in sistem.
-     * Totadata, inregistreaza consumul de memorie in tabela de stocare a nodurilor.
+     * <ul>
+     * 	<li>Functie care va genera lantul de noduri la care se va stoca un fisier nou aparut in sistem.</li>
+     * 	<li>Totadata, inregistreaza consumul de memorie in tabela de stocare a nodurilor.</li>
+     * </ul>
      * @param filesize Dimensiunea fisierului ce va fi stocat
      * @param replication_factor Factorul de replicare al fisierului
      * @return Lantul de noduri la care se va stoca fisierului
@@ -189,14 +210,15 @@ public class ClientCommunicationManager {
         return token;
     }
 
-
     /**
-     * TODO rework description
-     * Functie apelata la adaugarea unui nou fisier;
-     * Aadauga fisierul in tabela de content (cea care descrie toate fisierele care ar trebui sa fie existe in sistem);
-     * Aceasta functie se apeleaza cand apare un nou fisier in sistem; se va pune inregistrarea in starea de PENDING;
-     * Fisierul nu va fi considerat de catre mecanismul de replicare in aceasta stare (se asteapta pana se primeste confirmare,
-     * adica se schimba starea in valid)
+     * <ul>
+     * 	<li>Functie apelata la adaugarea unui nou fisier.</li>
+     * 	<li>Aadauga fisierul in tabela de content <strong>cea care descrie toate fisierele care ar trebui sa fie existe in sistem</strong>.</li>
+     * 	<li>Aceasta functie se apeleaza cand apare un nou fisier in sistem.</li>
+     * 	<li>Se va pune inregistrarea in starea de PENDING.</li>
+     * 	<li>Fisierul nu va fi considerat de catre mecanismul de replicare in aceasta stare.</li>
+     * 	<li> Se asteapta pana se primeste confirmare,adica se schimba starea in valid.</li>
+     * </ul>
      * @param user Id-ul utilizatorului care a adaugat fisierul.
      * @param filename Numele fisierului.
      * @param userType Tipul utilizatorului, pe baza caruia se va determina si factorul de replicare, din fisierul de config.
@@ -226,9 +248,11 @@ public class ClientCommunicationManager {
     }
 
     /**
-     * TODO rework description
-     * Functie apelata la confirmarea stocarii unui nou fisier
-     * Schimba starea fisierului din pending in valid.
+     * <ul>
+     * 	<li>Functie apelata la confirmarea stocarii unui nou fisier.</li>
+     * 	<li>Fisierul va fi adaugat intr-o coada de asteptare, de unde va fi scos abia atunci cand
+     *      toate nodurile interne vor indica stocarea fisierului <strong>NodeBeat</strong>Schimba starea fisierului din pending in valid.</li>
+     * </ul>
      * @param user Id-ul utilizatorului care a adaugat fisierul.
      * @param filename Numele fisierului.
      */
@@ -243,6 +267,19 @@ public class ClientCommunicationManager {
         }
     }
 
+    /**
+     * <ul>
+     * 	<li>Functie care inregistreaza consumul din memoria utilizatorului, la adaugarea/eliminarea unui fisier.</li>
+     * 	<li>Se realizeaza o cerere catre API-ul REST, care va salva aceste date in baza de date, in tabela de tip <strong>User</strong>.</li>
+     * </ul>
+     * @param user Identificatorul unic al utilizatorului
+     * @param size Cantitatea de memorie consumata
+     * @param consumption
+     *        <ul>
+     * 	        <li>true = a fost consumata memorie.</li>
+     * 	        <li>false = a fost eliberata memorie.</li>
+     *        </ul>
+     */
     public void registerUserMemoryConsumption(String user, long size, boolean consumption){
         HttpConnectionService httpConnectionService = new HttpConnectionService();
         String apiPath = usersRestApi + "/" + user + "/storage";
@@ -258,12 +295,15 @@ public class ClientCommunicationManager {
         }
     }
 
-    /** -------- Main -------- **/
-    /** Functie care inglobeaza activitatea principala a fiecarui nod, aceea de a asigura comunicarea cu celelalte noduri
-     * in vederea trimiterii si primirii de mesaje.
+    /**
+     * <ul>
+     * 	<li>Functia care instantiaza comunicarea cu clientul.</li>
+     * 	<li> Se instantiaza un obiect de tip <strong>ServerSocket</strong>, prin intermediul caruia se va putea comunica cu clientul.</li>
+     * 	<li>Se asteapta pentru conexiuni, urmand ca fiecare interactiune cu clientul sa fie tratata in mod paralel.</li>
+     * </ul>
      */
-    public void clientCommunicationLoop(String generalManagerIpAddress) throws Exception{
-        Address address = new Address(generalManagerIpAddress, dataTransmissionPort);
+    public void clientCommunicationLoop() throws Exception{
+        Address address = new Address(GeneralManager.generalManagerIpAddress, dataTransmissionPort);
         ServerSocket serverSocket = new ServerSocket();
         try{
             serverSocket.bind(new InetSocketAddress(address.getIpAddress(), address.getPort()));
@@ -281,8 +321,7 @@ public class ClientCommunicationManager {
     }
 
     /**
-     * Functie care inglobeaza comunicarea de date cu un nod adicant, avandu-se in vedere primirea de date de la un
-     * nod adiacent si, eventual, trimiterea informatiilor mai departe, in cazul in care nu este nod terminal.
+     * Functie care descrie functionalitatile necesare realizarii fiecarei operatii solicitate de client.
      * @param clientSocket Socket-ul nodului adiacent, de la care primeste date.
      * @return Runnable-ul necesar pornirii unui thread separat pentru aceasta comunicare.
      */
@@ -509,6 +548,13 @@ public class ClientCommunicationManager {
         };
     }
 
+    /**
+     * <ul>
+     * 	<li>In cazul operatiei de adaugare a unui nou fisier, inregistrarea completa a fisierului in tabela de continut,
+     *      cu starea <strong>VALID</strong> se realizeaza abia dupa ce se primeste confirmare ca fisierul a fost inregistrat cu succes.</li>
+     * 	<li> Aceasta functie asteapta confirmarea din partea aplicatiei intermediar.</li>
+     * </ul>
+     */
     private void waitForFeedbackFromClient(String userId, String filename, long filesize){
         new Thread(new Runnable() {
             @Override

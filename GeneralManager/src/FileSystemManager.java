@@ -12,31 +12,30 @@ import java.util.HashMap;
 import java.util.List;
 
 /**
- * Clasa care se ocupa de interactiunea cu nodurile generale, in ceea ce priveste prelucrarea fisierelor;
- * Principalele activitati sunt crearea obiectului cererii si trimiterea acestuia catre nodul general.
+ * <ul>
+ * 	<li>Clasa care se ocupa de interactiunea cu nodurile interne, in ceea ce priveste prelucrarea fisierelor.</li>
+ * 	<li>Principalele activitati sunt crearea obiectului cererii si trimiterea acestuia catre nodul intern.</li>
+ * </ul>
  */
 public class FileSystemManager {
-    /** -------- Atribute -------- **/
     /**
      * Portul pe care nodul general asculta pentru aceste prelucrari.
      */
     private static int replicationPort = Integer.parseInt(AppConfig.getParam("replicationPort"));
+    /**
+     * Dimensiunea unui pachet de date vehiculat pe canalul de comunicatie.
+     */
     private static int buffersize = Integer.parseInt(AppConfig.getParam("buffersize"));
 
 
-    /** -------- Constructor & Configurare -------- **/
-
     /**
      * Constructorul clasei;
-     * Citeste si instantiaza parametrii de configurare
      */
     public FileSystemManager(){
     }
 
-
-    /** -------- Trimitere cerere -------- **/
     /**
-     * Functia care trimite un obiect de cerere de prelucrare catre nodul general.
+     * Functia care trimite un obiect de tip cerere de prelucrare catre nodul general.
      * @param destionationAddress Adresa nodului intern.
      * @param request Obiectul de cerere de prelucrare; Are tipul de baza al acestui tip de cerere de prelucrare (EditRequest)
      */
@@ -75,6 +74,13 @@ public class FileSystemManager {
         return null;
     }
 
+    /**
+     * <ul>
+     * 	<li>Functie care solicita toate versiunile unui fisier.</li>
+     * 	<li> Se va extrage adresa unui nod intern care stocheaza fisierul, din tabela de status,se va trimite o cerere catre acel nod.</li>
+     * 	<li> Rezultatul va fi returnat catre client.</li>
+     * </ul>
+     */
     public List<Object> getUserFileHistoryForFrontend(String user, String filename){
         long fileHash = GeneralManager.contentTable.getCRCForUser(user, filename);
         List<Object> result = new ArrayList<>();
@@ -103,10 +109,11 @@ public class FileSystemManager {
         }
     }
 
-    /** -------- Construirea obiecte cerere & Trimitere -------- **/
     /**
-     * Cerere de replicare;
-     * Construire obiect si trimitere.
+     * <ul>
+     * 	<li>Cerere de replicare.</li>
+     * 	<li>Construire obiect si trimitere.</li>
+     * </ul>
      * @param user Id-ul utilizatorului.
      * @param filename Numele fisierului.
      * @param sourceAddress Adresa nodului catre care se trimite si care va initia replicarea.
@@ -133,9 +140,11 @@ public class FileSystemManager {
     }
 
     /**
-     * Cerere de eliminare;
-     * Construire obiect si trimitere.
-     * Se va trimite o cerere de eliminare catre fiecare nod din lista.
+     * <ul>
+     * 	<li>Cerere de eliminare.</li>
+     * 	<li>Construire obiect si trimitere.</li>
+     * 	<li>Se va trimite o cerere de eliminare catre fiecare nod din lista.</li>
+     * </ul>
      * @param user Id-ul utilizatorului.
      * @param filename Numele fisierului.
      * @param destinationAddresses Adresele nodurilor de la care se va elimina fisierului.
@@ -155,9 +164,11 @@ public class FileSystemManager {
     }
 
     /**
-     * Cerere de redenumire;
-     * Construire obiect si trimitere.
-     * Se va trimite o cerere de redenumire catre fiecare nod din lista.
+     * <ul>
+     * 	<li>Cerere de redenumire.</li>
+     * 	<li>Construire obiect si trimitere.</li>
+     * 	<li>Se va trimite o cerere de redenumire catre fiecare nod din lista.</li>
+     * </ul>
      * @param userId Id-ul utilizatorului.
      * @param filename Numele fisierului.
      * @param newname Noul nume al fisierului
@@ -192,10 +203,6 @@ public class FileSystemManager {
                 }
             }
         }
-        return getOverallFeedback(feedbackResponses).getStatus();
-    }
-
-    private FeedbackTextResponse getOverallFeedback(List<FeedbackTextResponse> feedbackResponses){
         FeedbackTextResponse feedbackResponse = new FeedbackTextResponse();
         for(FeedbackTextResponse feedback : feedbackResponses){
             feedbackResponse.setSuccess(feedback.isSuccess());
@@ -204,7 +211,7 @@ public class FileSystemManager {
                 break;
         }
         LoggerService.registerSuccess(GeneralManager.generalManagerIpAddress,
-            "Status overall : " + feedbackResponse.getStatus());
-        return feedbackResponse;
+                "Status overall : " + feedbackResponse.getStatus());
+        return feedbackResponse.getStatus();
     }
 }

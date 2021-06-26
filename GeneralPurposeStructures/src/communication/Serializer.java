@@ -2,18 +2,24 @@ package communication;
 import java.io.*;
 
 /**
- * Clasa folosita pentru transmiterea obiectelor prin canalul de comunicatie;
- * Are rolul de serializa si deserializa obiectul
+ * <ul>
+ * 	<li> Clasa folosita pentru transmiterea obiectelor prin canalul de comunicatie.</li>
+ * 	<li> Are rolul de serializa si deserializa obiectul.</li>
+ * </ul>
  */
 public class Serializer {
+    /**
+     * Dimensiunea unui pachet de date.
+     */
     private final static int bufferSize = 4096;
 
-    /** -------- Functiile de serializare si deserializare -------- **/
     /**
-     * Functia serializeaza un obiect primit ca parametru. Se tine cont de faptul ca orice mesaj
-     * trimis prin retea trebuie sa aiba bufferSize octeti; Asadar, acolo unde este cazul, se completeaza
-     * cu zerouri.
-     * Obiect -> Stream binar care poate fi transmis prin canalul de comunicatie
+     * <ul>
+     * 	<li> Functia serializeaza un obiect primit ca parametru.</li>
+     * 	<li> Se tine cont de faptul ca orice mesaj trimis prin retea trebuie sa aiba bufferSize octeti.</li>
+     * 	<li> Asadar, acolo unde este cazul, se completeaza cu zerouri.</li>
+     * 	<li> Obiect -> Stream binar care poate fi transmis prin canalul de comunicatie.</li>
+     * </ul>
      * @param object Obiectul ce se doreste a fi serializat
      * @return Stream-ul binar.
      */
@@ -36,7 +42,10 @@ public class Serializer {
     }
 
     /**
-     * Functie care deserializeaza (transforma) un stream binar de date, intr-un obiect.
+     * <ul>
+     * 	<li> Functie care deserializeaza <strong>transforma</strong> un stream binar de date, intr-un obiect.</li>
+     * 	<li>  Conversia obiectului la tipul dorit se face la folosire.</li>
+     * </ul>
      * @param bytestream Stream-ul binar de date
      * @return Obiectul construit pe baza stream-ului de date.
      */

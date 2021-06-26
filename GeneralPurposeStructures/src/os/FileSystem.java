@@ -1,5 +1,7 @@
 package os;
 
+import data.Pair;
+
 import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -13,6 +15,9 @@ import java.util.zip.CRC32;
  * Clasa care adreseaza unele functionalitati disponibile la nivelul sistemului de operare.
  */
 public class FileSystem {
+    /**
+     * Dimensiunea unui pachet de date.
+     */
     private static int bufferSize = 1024;
 
     /**
@@ -102,9 +107,11 @@ public class FileSystem {
     }
 
     /**
-     * Functie care determina dimensiunea in kilobytes a unei entitati a sistemului de fisiere
-     * Ne referim la fisiere sau chiar foldere intregi
-     * In cazul directoarelor, parcurgerea se face recursiv astfel incat sa analizam tot content-ul
+     * <ul>
+     * 	<li> Functie care determina dimensiunea in kilobytes a unei entitati a sistemului de fisiere.</li>
+     * 	<li> Ne referim la fisiere sau chiar foldere intregi.</li>
+     * 	<li> In cazul directoarelor, parcurgerea se face recursiv astfel incat sa analizam tot content-ul.</li>
+     * </ul>
      * @param directory Numele fisierului/directorului a carui dimensiune dorim sa o determinam.
      * @return Dimensiunea in kilobytes.
      */
@@ -166,8 +173,11 @@ public class FileSystem {
     }
 
     /**
-     * Functie care returneaza tot continutul unui fisier text; continutul este organizat sub forma de linii.
-     * Se ignora liniile goale. ("")
+     * <ul>
+     * 	<li> Functie care returneaza tot continutul unui fisier text.</li>
+     * 	<li> continutul este organizat sub forma de linii.</li>
+     * 	<li> Se ignora liniile goale.</li>
+     * </ul>
      * @param filepath Calea catre fisierul care se doreste a fi citit.
      * @return Lista de linii cu continutul fisierului.
      * @throws IOException Exceptie generata daca nu putem deschide/inchide fisierul sau reader-ul
@@ -187,8 +197,10 @@ public class FileSystem {
     }
 
     /**
-     * Functie care adayga continut text la un anumit fisier.
-     * La final se adauga o noua linie (CRLF)
+     * <ul>
+     * 	<li> Functie care adayga continut text la un anumit fisier.</li>
+     * 	<li> La final se adauga o noua linie <strong>CRLF</strong>.</li>
+     * </ul>
      * @param filepath Calea care fisierul care va fi moddificat
      * @param content Continutul care va fi adaugat
      */
@@ -203,15 +215,32 @@ public class FileSystem {
     }
 
     /**
-     * Functie care returneaza numele unui fisier cu extensia schimbata extensia.
-     * Se poate furniza atat numele fisierului cat si calea absolut catre acel fisier.
-     * Se foloseste cand dorim sa obtinem calea catre fisierul de metadate
-     * exemplu: lab.py -> lab.metadata
+     * <ul>
+     * 	<li> Functie care returneaza numele unui fisier cu extensia schimbata extensia.</li>
+     * 	<li> Se poate furniza atat numele fisierului cat si calea absolut catre acel fisier.</li>
+     * 	<li> Se foloseste cand dorim sa obtinem calea catre fisierul de metadate.</li>
+     * 	<li> exemplu: lab.</li>
+     * 	<li>py -> lab.</li>
+     * 	<li>metadata.</li>
+     * </ul>
      * @param filepath Numele fisierului sau calea absoluta catre fisier
      * @param newExtension noua extensia a fisierului
      * @return Numele fisierului cu extensia schimbata
      */
     public static String changeFileExtension(String filepath, String newExtension){
         return filepath.substring(0, filepath.lastIndexOf(".")) + newExtension;
+    }
+
+    /**
+     * <ul>
+     * 	<li> Functie care primeste ca parametru o dimensiune exprimata in octeti si, in mod recursiv, determina dimensiunea la o scara mai mare.</li>
+     * </ul>
+     */
+    public static Pair<Double, String> convertToBestScale(double bytes, int scale){
+        if(bytes / 1024. < 1){
+            String[] units = new String[]{"", "K", "M", "G"};
+            return new Pair<Double, String>((double) Math.round(bytes * 100) / 100, units[scale] + "B");
+        }
+        return convertToBestScale(bytes / 1024., scale + 1);
     }
 }

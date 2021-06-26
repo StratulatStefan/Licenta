@@ -1,11 +1,12 @@
 package communication;
 
 /**
- * Clasa care incapsuleaza o adresa de retea, formata din adresa IP si port.
- * Se asigura si mecanisme de validare a celor doua atribute
+ * <ul>
+ * 	<li>Clasa care incapsuleaza o adresa de retea, formata din adresa IP si port.</li>
+ * 	<li> Se asigura si mecanisme de validare a celor doua atribute.</li>
+ * </ul>
  */
 public class Address {
-    /** -------- Atribute -------- **/
     /**
      * Adresa IP
      */
@@ -15,14 +16,13 @@ public class Address {
      */
     private int port;
 
-
-    /** -------- Constructor -------- **/
     /**
-     * Constructorul care, pe baza adresei ip si a portului specificate, va crea obiectul adresa.
-     * Crearea este conditionata de formatul corect al acestor date.
-     * @param ipAddress Adresa IP
+     * <ul>
+     * 	<li>Constructorul care, pe baza adresei ip si a portului specificate, va crea obiectul adresa.</li>
+     * 	<li> Crearea este conditionata de formatul corect al acestor date.</li>
+     * </ul>
+     * @param ipAddress adresa IP
      * @param port Portul
-     * @throws Exception genarata daca ip-ul sau port-ul nu respecta formatul dorit.
      */
     public Address(String ipAddress, int port) throws Exception {
         if(this.validateIpAddress(ipAddress))
@@ -31,8 +31,6 @@ public class Address {
             this.port = port;
     }
 
-
-    /** -------- Gettere & Settere -------- **/
     /**
      * Getter pentru port
      * @return numarul intreg ce reprezinta portul
@@ -40,7 +38,6 @@ public class Address {
     public int getPort() {
         return port;
     }
-
     /**
      * Getter pentru adresa IP
      * @return sir de caractere ce reprezinta adresa ip
@@ -48,10 +45,13 @@ public class Address {
     public String getIpAddress() { return ipAddress; }
 
 
-    /** -------- Functii de validare -------- **/
     /**
-     * Functie care valideaza daca un string furnizat respecta formatul unei adrese IP
-     * Trebuie sa contina patru numere pozitive reprezentate pe maxim 8 biti, delimitate prin "."
+     /**
+     * <ul>
+     * 	<li> Functie care valideaza daca un string furnizat respecta formatul unei adrese IP.</li>
+     * 	<li> Trebuie sa contina patru numere pozitive reprezentate pe maxim 8 biti, delimitate prin ".</li>
+     * 	<li>".</li>
+     * </ul>
      * @param ipAddress String-ul asupra caruia se face verificarea
      * @return daca se respecta formatul adresei ip
      * @throws Exception generata daca nu se respecta formatul adresei IP
@@ -77,8 +77,10 @@ public class Address {
     }
 
     /**
-     * Functie care valideaza daca un numar furnizat respecta formatul unui port
-     * Trebuie sa fie un numar pozitiv din intervalul [1000, 9999]
+     * <ul>
+     * 	<li> Functie care valideaza daca un numar furnizat respecta formatul unui port.</li>
+     * 	<li> Trebuie sa fie un numar pozitiv din intervalul [1000, 9999].</li>
+     * </ul>
      * @param port Numarul asupra caruia se face verificarea
      * @return daca se respecta formatul portului
      * @throws Exception generata daca nu se respecta formatul portului
@@ -93,11 +95,11 @@ public class Address {
         return true;
     }
 
-
-    /** -------- Functii de parsare -------- **/
     /**
-     * Functie care transforma un string intr-o adresa, avand in vedere formatul ip : port (+- un spatiu).
-     * Orice alta abatere de la format este respinsa.
+     * <ul>
+     * 	<li> Functie care transforma un string intr-o adresa, avand in vedere formatul ip : port <strong>+- un spatiu</strong>.</li>
+     * 	<li> Orice alta abatere de la format este respinsa.</li>
+     * </ul>
      * @param address String-ul care contine adresa in format text.
      * @return Adresa creata daca string-ul este valid.
      */
@@ -116,11 +118,11 @@ public class Address {
         }
     }
 
-
-    /** -------- Functii de baza, supraincarcate -------- **/
     /**
-     * Functie care verifica daca doua adrese sunt egale.
-     * Egalitatea este determinata de egalitatea membrilor (ip si port)
+     * <ul>
+     * 	<li> Functie care verifica daca doua adrese sunt egale.</li>
+     * 	<li> Egalitatea este determinata de egalitatea membrilor <strong>ip si port</strong>.</li>
+     * </ul>
      * @param object Adresa cu care se face comparatia
      * @return egalitatea dintre cele doua adrese
      */

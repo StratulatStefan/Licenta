@@ -13,11 +13,15 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 /**
- * Clasa care inglobeaza status-urile stocarii tuturor nodurilor interne conectate la nodul general.
- * Va contine lista de utilizatori, impreuna cu fisierele fiecarui utilizator si nodurile la care sunt stocate
+ * <ul>
+ * 	<li>Clasa care inglobeaza status-urile stocarii tuturor nodurilor interne conectate la nodul general.</li>
+ * 	<li>Va contine lista de utilizatori, impreuna cu fisierele acestara si nodurile pe care sunt stocate.</li>
+ * </ul>
  */
 public class StorageStatusTable {
-    /** -------- Atribute -------- **/
+    /**
+     * Adresa nodului general.
+     */
     private static String generalManagerIpAddress = AppConfig.getParam("generalManagerIpAddress");
 
     /**
@@ -32,18 +36,21 @@ public class StorageStatusTable {
 
     /** -------- Constructori -------- **/
     /**
-     * Constructorul clasei;
-     * Initializeaza tabela de inregistrari
+     * <ul>
+     * 	<li>Constructorul clasei.</li>
+     * 	<li>Initializeaza tabela de inregistrari.</li>
+     * </ul>
      */
     public StorageStatusTable(){
         this.statusTable = new HashMap<String, List<FileAttributesForStorage>>();
     }
 
 
-    /** -------- Functii de prelucrare a tabelei -------- **/
     /**
-     * Functie generala care modifica tabela, la sosirea unui nou heartbeat de la nodul intern;
-     * Se includ operatii de adaugare a unui fisier, de eliminare a unui fisier, de curatare.
+     * <ul>
+     * 	<li>Functie generala care modifica tabela, la sosirea unui nou heartbeat de la nodul intern.</li>
+     * 	<li>Se includ operatii de adaugare a unui fisier, de eliminare a unui fisier, de curatare.</li>
+     * </ul>
      * @param storageEntry Heartbeat de la nodul intern; Va contine adresa nodului, impreuna
      *                     cu toti utilizatorii existenti si fisierele acestora
      */
@@ -133,9 +140,11 @@ public class StorageStatusTable {
     }
 
     /**
-     * Functie care elimina toate inregistrarile unui nod care tocmai s-a deconectat;
-     * Se elimina fisierele nodului deconectat; Daca pentru un user/fisier nu mai exista noduri
-     * care sa stocheze fisierul, atunci userul/fisierul se vor elimina din tabela;
+     * <ul>
+     * 	<li>Functie care elimina toate inregistrarile unui nod care tocmai s-a deconectat.</li>
+     * 	<li>Se elimina fisierele nodului deconectat.</li>
+     * 	<li>Daca pentru un user/fisier nu mai exista noduricare sa stocheze fisierul, atunci userul/fisierul se vor elimina din tabela.</li>
+     * </ul>
      * @param address Adresa nodului deconectat
      */
     public void cleanUpAtNodeDisconnection(String address){
@@ -156,7 +165,6 @@ public class StorageStatusTable {
         }
     }
 
-    /** -------- Functii de valiare -------- **/
     /**
      * Functie care verifica daca tabela contine un anumit utilizator
      */
@@ -198,12 +206,12 @@ public class StorageStatusTable {
         return false;
     }
 
-
-    /** -------- Gettere -------- **/
     /**
-     * Functie care verifica si returneaza (daca) anumite fisiere au fost eliminate de la anumite noduri;
-     * Functia se foloseste atunci ca dorim sa verificam daca, in heartbeat-ul curent, anumite fisiere nu se mai
-     * gasesc in stocarea nodului si trebuie eliminate.
+     * <ul>
+     * 	<li>Functie care verifica si returneaza <strong>daca</strong> anumite fisiere au fost eliminate de la anumite noduri.</li>
+     * 	<li>Functia se foloseste atunci ca dorim sa verificam daca, in heartbeat-ul curent, anumite fisiere nu se mai
+     *      gasesc in stocarea nodului si trebuie eliminate.</li>
+     * </ul>
      * @param user Identificatorul utilizatorului.
      * @param userAddress Adresa nodului intern.
      * @param userFiles Fisierele existente in stocarea nodului curent; Daca gasim fisiere care nu se mai afla in stocare,
@@ -280,6 +288,13 @@ public class StorageStatusTable {
         }
     }
 
+    /**
+     * Functie care returneaza dimensiunea unui anumit fisier
+     * @param user Id-ul utilizatorului.
+     * @param file Numele fisierului.
+     * @param address Adresa nodului care contine fisierul a carui dimensiune se cauta.
+     * @return CRC-ul fisierului.
+     */
     public Long getFileSize(String user, String file, String address){
         synchronized (this.statusTable){
             try {
@@ -294,6 +309,12 @@ public class StorageStatusTable {
         }
     }
 
+    /**
+     * Functie care returneaza numarul ultimei versiuni a unui fisier.
+     * @param user Id-ul utilizatorului.
+     * @param file Numele fisierului.
+     * @return CRC-ul fisierului.
+     */
     public String getLastVersionOfFile(String user, String file){
         synchronized (this.statusTable){
             try {
@@ -309,7 +330,7 @@ public class StorageStatusTable {
     }
 
     /**
-     * Functie care returneaza o referinta la un fisier
+     * Functie care returneaza o referinta la un fisier al unui utilizator.
      */
     public int getUserFile(String userId, String filename) {
         if (!checkUser(userId))
@@ -347,6 +368,17 @@ public class StorageStatusTable {
         }
     }
 
+    /**
+     * <ul>
+     * 	<li>Functie care returenaza adresa unuia dintre nodurile care stocheaza un anumit fisier.</li>
+     * 	<li> Adresa va fi necesara in procesul de descarcare a unui fisier sau de extragere a versiunilor unui fisier</li>
+     * </ul>
+     * @param userId Identificatorul unic al utilizatorului
+     * @param filename Numele fisierului
+     * @param crc Suma de control a fisierului
+     * @return Adresa unui nod care contine o replica a fisierului cautat.
+     * @throws Exception Nu s-a gasit niciun nod care stocheaza o replica valida a fisierului
+     */
     public String getCandidateAddress(String userId, String filename, long crc) throws Exception{
         int userFileId = this.getUserFile(userId, filename);
         FileAttributesForStorage fileAttributes = this.statusTable.get(userId).get(userFileId);
@@ -358,6 +390,11 @@ public class StorageStatusTable {
         throw new Exception("No valid node found!");
     }
 
+    /**
+     * <ul>
+     * 	<li>Functie care returneaza tabela de status, astfel incat sa fie trimisa catre client pentru monitorizare.</li>
+     * </ul>
+     */
     public List<FileAttributesForStorage> getStorageStatusTable() throws Exception {
         List<FileAttributesForStorage> results =  new ArrayList<>();
         for(String userId : new ArrayList<>(this.statusTable.keySet())){
@@ -369,7 +406,6 @@ public class StorageStatusTable {
         return results;
     }
 
-    /** -------- Functii de baza, supraincarcate -------- **/
     @Override
     public String toString() {
         StringBuilder stringBuilder = new StringBuilder();

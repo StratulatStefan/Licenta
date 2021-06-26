@@ -10,39 +10,49 @@ import logger.LoggerService;
 import model.FileAttributes;
 
 /**
- * Clasa care incapsuleaza tabela ce va contine toate fisierele care ar trebui sa se afle la nodul general,
- * impreuna cu utilizatorul caruia ii apartin si factorul de replicare.
+ * <ul>
+ * 	<li>Clasa care incapsuleaza tabela ce va contine toate fisierele care ar trebui sa se afle la nodul general,impreuna cu utilizatorul caruia ii apartin si factorul de replicare.</li>
+ * </ul>
  */
 public class ContentTable implements Serializable {
+    /**
+     * Adresa nodului general.
+     */
     private static String generalManagerIpAddress = AppConfig.getParam("generalManagerIpAddress");
 
-    /** -------- Atribute -------- **/
     /**
-     * Flag care sugereaza daca tabela necesita initializare;
-     * Se va modifica imediat dupa initializare.
+     * <ul>
+     * 	<li>Flag care sugereaza daca tabela necesita initializare.</li>
+     * 	<li>Se va modifica imediat dupa initializare.</li>
+     * </ul>
      */
     public boolean needInit = true;
 
     /**
-     * Tabela de inregistrari; Utilizatorul unic si fisierele acestuia.
+     * <ul>
+     * 	<li>Tabela de inregistrari.</li>
+     * 	<li> Utilizatorul unic si fisierele acestuia.</li>
+     * </ul>
      */
     private final HashMap<String, List<FileAttributes>> contentTable;
 
-
-    /** -------- Constructori & Initializare -------- **/
     /**
-     * Constructorul clasei;
-     * Creeaza o noua tabela de inregistrari.
+     * <ul>
+     * 	<li>Constructorul clasei.</li>
+     * 	<li>Creeaza o noua tabela de inregistrari.</li>
+     * </ul>
      */
     public ContentTable(){
         this.contentTable = new HashMap<String, List<FileAttributes>>();
     }
 
     /**
-     * Functia de initializare;
-     * Adauga inregistrari in tabela, pe baza status-urilor stocarii primite de la toate nodurile interne
-     * pe parcursului primului heartbeat;
-     * Se va apela o singura data, la initializare;
+     * <ul>
+     * 	<li>Functia de initializare.</li>
+     * 	<li>Adauga inregistrari in tabela, pe baza status-urilor stocarii primite de la toate nodurile interne
+     * 	    pe parcursului primului heartbeat.</li>
+     * 	<li>Se va apela la intervale regulate de timp, pana se va efectua cu succes initializarea</li>
+     * </ul>
      * @param storageStatusTable Tabela cu status-urile stocarii nodurilor interne
      */
     public void initialize(StorageStatusTable storageStatusTable){
@@ -74,11 +84,12 @@ public class ContentTable implements Serializable {
         }
     }
 
-
-    /** -------- Functii de prelucrare a tabelei -------- **/
     /**
-     * Functie de adaugare a unei noi inregistrari in tabela.
-     * Daca inregistrarea exista deja, se va modifica; Altfel, se va crea una noua.
+     * <ul>
+     * 	<li>Functie de adaugare a unei noi inregistrari in tabela.</li>
+     * 	<li>Daca inregistrarea exista deja, se va modifica.</li>
+     * 	<li> Altfel, se va crea una noua.</li>
+     * </ul>
      * @param userId Id-ul utilizatorului pentru care se doreste adaugarea inregistrarii;
      * @param filename Numele fisierului;
      * @param replication_factor Factorul de replicare;
@@ -182,6 +193,14 @@ public class ContentTable implements Serializable {
         }
     }
 
+    /**
+     * Functie de modificare a versiunii unui fisier.
+     * @param userId identificatorul utilizatorului
+     * @param filename numele fisierului
+     * @param version numarul versiunii
+     * @param description descrierea versiunii
+     * @throws Exception Inregisrarea exista deja
+     */
     public void updateFileVersion(String userId, String filename, int version, String description) throws Exception {
         synchronized (this.contentTable) {
             if (!this.containsUser(userId)) {
@@ -210,6 +229,13 @@ public class ContentTable implements Serializable {
         }
     }
 
+    /**
+     * Functie de modificare a dimensiunii unui fisier.
+     * @param userId identificatorul utilizatorului
+     * @param filename numele fisierului
+     * @param filesize Dimensiunea fisierului
+     * @throws Exception Inregisrarea exista deja
+     */
     public void updateFileSize(String userId, String filename, long filesize) throws Exception{
         synchronized (this.contentTable) {
             if (!this.containsUser(userId)) {
@@ -231,10 +257,6 @@ public class ContentTable implements Serializable {
         }
     }
 
-
-
-
-    /** -------- Functii de validare -------- **/
     /**
      * Functie care verifica daca un utilizator exista.
      * @param userId Id-ul utilizatorului cautat;
@@ -272,8 +294,6 @@ public class ContentTable implements Serializable {
         return false;
     }
 
-
-    /** -------- Gettere -------- **/
     /**
      * Getter pentru lista id-urilor tuturor utilizatorilor.
      */
@@ -296,6 +316,10 @@ public class ContentTable implements Serializable {
         }
     }
 
+    /**
+     * Getter pentru lista fisierelor unui utilizator.
+     * @param userId Identificatorul utilizatorului
+     */
     public HashMap<String, Integer> getUserFiless(String userId) throws Exception{
         synchronized (this.contentTable) {
             if(!this.containsUser(userId)){
@@ -309,6 +333,12 @@ public class ContentTable implements Serializable {
         }
     }
 
+    /**
+     * Getter pentru statusul unui fisier.
+     * @param userId Identificatorul utilizatorului
+     * @param filename Numele fisierului
+     * @return Statusul fisierului.
+     */
     public String getFileStatusForUser(String userId, String filename){
         try {
             for(FileAttributes file : this.getUserFiles(userId)){
@@ -323,6 +353,12 @@ public class ContentTable implements Serializable {
         return null;
     }
 
+    /**
+     * Getter pentru suma de control a unui fisier.
+     * @param userId Identificatorul utilizatorului
+     * @param filename Numele fisierului
+     * @return Suma de control.
+     */
     public long getCRCForUser(String userId, String filename){
         try {
             for(FileAttributes file : this.getUserFiles(userId)){
@@ -337,6 +373,12 @@ public class ContentTable implements Serializable {
         return -1;
     }
 
+    /**
+     * Getter pentru numarul versiunii unui fisier.
+     * @param userId Identificatorul utilizatorului
+     * @param filename Numele fisierului
+     * @return Numarul versiunii
+     */
     public String getVersionForUser(String userId, String filename){
         try {
             for(FileAttributes file : this.getUserFiles(userId)){
@@ -351,6 +393,12 @@ public class ContentTable implements Serializable {
         return null;
     }
 
+    /**
+     * Getter pentru dimensiunea unui fisier.
+     * @param userId Identificatorul utilizatorului
+     * @param filename Numele fisierului
+     * @return Dimensiunea unui fisier.
+     */
     public long getFileSizeOfUserFile(String userId, String filename){
         try {
             for(FileAttributes file : this.getUserFiles(userId)){
@@ -365,6 +413,14 @@ public class ContentTable implements Serializable {
         return -1;
     }
 
+    /**
+     * <ul>
+     * 	<li>Functie care creeaza o reprezentare a tebelei de content, astfel incat sa poata fitrimisa catre client.</li>
+     * 	<li> Se va crea o lista de <strong>Object</strong>, pentru a putea adauga diverse tipuri de date.</li>
+     * </ul>
+     * @param userId Identificatorul utilizatorului
+     * @return Reprezentarea tabelei de content sub forma unei liste de obiecte.
+     */
     public List<Object> getUserFilesForFrontend(String userId) throws Exception {
         List<Object> userFiles = new ArrayList<>();
         for(FileAttributes file : this.getUserFiles(userId)){
@@ -382,6 +438,9 @@ public class ContentTable implements Serializable {
         return userFiles;
     }
 
+    /**
+     * Getter pentru tabela de continut
+     */
     public List<FileAttributes> getContentTable() throws Exception {
         List<FileAttributes> results =  new ArrayList<>();
         for(String userId : new ArrayList<>(this.contentTable.keySet())){
@@ -393,7 +452,6 @@ public class ContentTable implements Serializable {
         return results;
     }
 
-    /** -------- Functii de baza, supraincarcate -------- **/
     @Override
     public String toString() {
         StringBuilder stringBuilder = new StringBuilder();
