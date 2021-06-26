@@ -15,11 +15,37 @@ import java.net.Socket;
 import java.util.Arrays;
 import java.util.List;
 
+/**
+ * <ul>
+ * 	<li>Clasa care expune functionalitatile specifice comunicarii dintre client si nodul general.</li>
+ * 	<li> Sunt disponibile toate metodele prin care suntformulate cereri de prelucrare a fisierelor si interogare a starii, catre nodul general.</li>
+ * 	<li>Parametrii de configurare vor fi incarcati din fisierul de configurare, cu ajutorul clasei <strong>AppConfig</strong>.</li>
+ * </ul>
+ */
 public class FrontendManager {
+    /**
+     * Dimensiunea unui pachet de date primit pe canalul de comunicatie, in comunicarea cu nodul intern.
+     */
     private static int bufferSize               = Integer.parseInt(AppConfig.getParam("buffersize"));
+    /**
+     * Adresa nodului general.
+     */
     private static String generalManagerAddress = AppConfig.getParam("generalManagerAddress");
+    /**
+     * Portul nodului general.
+     */
     private static int generalManagerPort       = Integer.parseInt(AppConfig.getParam("generalManagerPort"));
 
+    /**
+     * <ul>
+     * 	<li>Functie care va realiza comunicarea efectiva cu nodul general, in vederea trimiterii cererilor.</li>
+     * 	<li>Se va deschide un <strong>Socket</strong> de tip client pentru comunicarea cu clientul, se va trimite cererea si se va astepta raspunsul acestuiasub forma unui obiect, in functie de complexitatea cererii : <strong>ManagerTextResponse</strong> sau <strong>ManagerComplexeResponse</strong>.</li>
+     * </ul>
+     * @param clientRequest Obiectul care va reprezenta cererea clientului.
+     * @return Raspunsul nodului general
+     * @throws NullPointerException Raspuns invalid de la nodul general.
+     * @throws ClassNotFoundException Obiect gresit pentru cerere
+     */
     public static ManagerResponse managerOperationRequest(ClientManagerRequest clientRequest) throws NullPointerException, IOException, ClassNotFoundException {
         String op = "";
         Class operation = clientRequest.getClass();
@@ -121,6 +147,16 @@ public class FrontendManager {
         return null;
     }
 
+    /**
+     * <ul>
+     * 	<li>Functie care expune tot procesul necesar efectuarii cererilor de prelucrare a fisierelor.</li>
+     * 	<li>Sunt tratate cererile de adaugare <strong>NewFileRequest</strong>, eliminare <strong>DeleteFileRequest</strong>
+     * 	    si redenumire <strong>RenameFileRequest</strong>.</li>
+     * 	<li>In cazul operatiei de stocare, se trimite cerere catre nodul general prin care se solicita adresele nodurilor interne
+     * 	    care vor putea stoca fisierul, apoi se incepe procesul trimiterii fisierelor catre noduri si asteptarii feedback-ului.</li>
+     * </ul>
+     * @param requestData Obiectul care va reprezenta cererea clientului.
+     */
     public static void mainActivity(ClientManagerRequest requestData){
         new Thread(new Runnable() {
             @Override

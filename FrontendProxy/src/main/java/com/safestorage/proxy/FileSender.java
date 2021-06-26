@@ -16,13 +16,44 @@ import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
 
+/**
+ * <ul>
+ * 	<li>Clasa care expune toate modele necesare vehicularii de fisiere intre client si nodurile interne.</li>
+ * 	<li>Fiecare cerere va incepe cu o comunicare cu managerul general, in vederea extragerii informatiilor specifice cererii.</li>
+ * 	<li> Sunt expuse metodele de <strong>upload</strong> si <strong>download</strong>.</li>
+ * 	<li>Pentru fiecare operatie, se vor expune si metodele de asteptare a feedback-ului de la nodurile interne.</li>
+ * 	<li>Parametrii de configurare vor fi incarcati din fisierul de configurare, cu ajutorul clasei <strong>AppConfig</strong></li>
+ * </ul>
+ */
 public class FileSender {
+    /**
+     * Dimensiunea unui pachet de date primit pe canalul de comunicatie, in comunicarea cu nodul intern.
+     */
     private static int bufferSize               = Integer.parseInt(AppConfig.getParam("buffersize"));
+    /**
+     * Portul nodului general.
+     */
     private static int generalManagerPort       = Integer.parseInt(AppConfig.getParam("generalManagerPort"));
+    /**
+     * Adresa nodului general.
+     */
     private static String generalManagerAddress = AppConfig.getParam("generalManagerAddress");
+    /**
+     * Portul de feedback.
+     */
     private static int feedbackPort             = Integer.parseInt(AppConfig.getParam("feedbackport"));
+    /**
+     * Calea la care vor fi stocate fisierele clientului, in urma descarcarii de la nodurile interne.
+     */
     private static String downloadFilePath      = AppConfig.getParam("filedownloadpath");
 
+    /**
+     * <ul>
+     * 	<li>Fiecare fisier al unui utilizator va fi stocat in mai multe replici, pe mai multe noduri interne.</li>
+     * 	<li> Nodul general va decide care vor fi aceste noduri,prin intermediul unui <strong>token</strong>, ce va contine un lant cu nodurile care vor stoca fisierul.</li>
+     * 	<li> Aceasta functie verifica daca <strong>token</strong>-ul respecta forma de lant iarfiecare element individual reprezinta o adresa IP valida.</li>
+     * </ul>
+     */
     private static boolean validateToken(String token) throws Exception{
         if(token.length() == 0)
             throw new Exception("Null token!");
@@ -45,12 +76,28 @@ public class FileSender {
         return true;
     }
 
+    /**
+     * <ul>
+     * 	<li>Functie prin care sunt extrase adresele nodurilor interne din <strong>token</strong>.</li>
+     * 	<li> Inainte de extragere, se va verifica daca token-ul este valid,cu ajutorul metodei <strong>validateToken</strong>.</li>
+     * </ul>
+     * @return Lista de adrese.
+     * @throws Exception Token invalid.
+     */
     private static String[] getAddressesFromToken(String token) throws Exception{
         if(validateToken(token))
             return token.replace(" ","").split("\\-");
         return null;
     }
 
+    /**
+     * <ul>
+     * 	<li>Functie prin care se realizeaza tot procesul trimiterii unui fisier catre primul din lantul de adrese.</li>
+     * 	<li> Se vor trimite mai intai metadatele, sub formaobiectului de tip <strong>FileHeader</strong>, apoi se va trimite fluxul de octeti ce alcatuiesc fisierul.</li>
+     * </ul>
+     * @param clientManagerRequest Cererea clientului, de stocare a unui fisier.
+     * @param token Token-ul primit de la nodul general.
+     */
     public static void sendFile(ClientManagerRequest clientManagerRequest, String token){
         try {
             String destinationAddress = getAddressesFromToken(token)[0];
@@ -81,6 +128,21 @@ public class FileSender {
         }
     }
 
+    /**
+     * <ul>
+     * 	<li>Functie care expune procesul receptionarii si validarii feedback-ului primit de la nodurile interne in urma procesului de stocare a unui fisier.</li>
+     * 	<li>In mod paralel, se asteapta un feedback de la fiecare nod intern.</li>
+     * 	<li> Un feedback se va considera valid daca vor corespunde atat numele fisierului,cat si suma de control.</li>
+     * 	<li> Pentru a valida feedback-ul global, se impune ca cel putin un feedback primit sa fie valid.</li>
+     * 	<li>Daca feedback-ul global este valid, se trimite confirmare catre nodul general si catre client.</li>
+     * </ul>
+     * @param userId Identificatorul unic al utilizatorului care detine fisierul.
+     * @param token Lista de fisiere de la care se asteapta feedback.
+     * @param filename Numele fisierului.
+     * @param timeout Timpul de expirare al asteptarii feedback-ului de la un nod.
+     * @param CRC Suma de control a fisierului.
+     * @throws Exception Feedback invalid sau Timeout.
+     */
     public static void waitForFeedback(String userId, String token, String filename, long timeout, long CRC) throws Exception {
         int total_nodes = 0;
         int received_nodes = 0;
@@ -142,6 +204,15 @@ public class FileSender {
         }
     }
 
+    /**
+     * <ul>
+     * 	<li>Functie prin care se expune functionalitatea trimiterii feedback-ului catre nodul general, in urma primirii feedback-ului de la nodurile interne.</li>
+     * 	<li>Comunicarea cu nodul general se va realiza pe un <strong>thread</strong> separat, prin trimiterea obiectelor de tip <strong>NewFileRequestFeedback</strong>.</li>
+     * </ul>
+     * @param userId Identificatorul unic al utilizatorului care detine fisierul.
+     * @param filename Numele fisierului.
+     * @param status Feedback-ul primit de la nodurile interne, ce trebuie trimis catre nodul general.
+     */
     public static void sendFeedbackToGM(String userId, String filename, String status){
         new Thread(new Runnable() {
             @Override
@@ -166,6 +237,18 @@ public class FileSender {
         }).start();
     }
 
+    /**
+     * <ul>
+     * 	<li>Functie care expune tot procesul descarcarii unui fisier.</li>
+     * 	<li> Se creeaza cererea de descarcare a unui fisier <strong>DownloadFileRequest</strong>, care este trimisa catre nodul intern,
+     * 	     identificat prin adresa furnizata de nodul general.</li>
+     * 	<li> Se primeste de la nodul intern fluxul de octeti ce alcatuiesc fisier sise scrie fisierul in memoria proprie.</li>
+     * </ul>
+     * @param destionationAddress Adresa nodului intern care va furniza fisierul.
+     * @param userId Identificatorul unic al utilizatorului ce detine fisierul.
+     * @param filename Numele fisierului.
+     * @return Calea catre locatia din sistemul de fisiere unde a fost salvat fisierul.
+     */
     public static String downloadFile(String destionationAddress, String userId, String filename){
         try {
             DownloadFileRequest downloadFileRequest = new DownloadFileRequest();
