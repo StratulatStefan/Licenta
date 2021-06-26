@@ -1,17 +1,23 @@
 package node_manager;
 
 /**
- * Clasa folosita pentru a incapsula cererea de redenumire a unui fisier, trimisa de la managerul general la nodul intern
- * Va mosteni clasa ClientRequestManager, care incapsuleaza o cerere dintre managerul general si nodul intern
- * Pe langa atributele de baza ale unei cereri dintre client si managerul general, avem nevoie si de noul nume al fisierului.
+ * <ul>
+ * 	<li>Clasa folosita pentru a reprezenta cererea de redenumire a unui fisier, trimisa de la managerul general la nodul intern.</li>
+ * 	<li>Va mosteni clasa <strong>ClientRequestManager</strong>, care incapsuleaza o cerere dintre managerul general si nodul intern.</li>
+ * 	<li>Pe langa atributele de baza ale unei cereri dintre client si managerul general, avem nevoie si de noul nume al fisierului.</li>
+ * </ul>
  * **/
 public class RenameRequest extends EditRequest {
-    /** -------- Atribute -------- **/
     /**
      * Noul nume al fisierului.
      */
     private String newName;
 
+
+    /**
+     * Constructor vid.
+     */
+    public RenameRequest(){super();}
     /**
      * Constructorul clasei; Apeleaza constructorul clasei parinte, furnizand cele doua argumente
      * generice fiecarei cereri; Mai mult decat atat, adauga descrierea cererii, necesara la versionare
@@ -26,7 +32,7 @@ public class RenameRequest extends EditRequest {
 
     }
 
-    /** -------- Gettere & Settere -------- **/
+
     /**
      * Setter pentru noul nume al fisierului.
      */

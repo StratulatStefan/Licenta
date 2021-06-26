@@ -8,10 +8,12 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Clasa care inglobeaza atributele fiecarui fisier
+ * Clasa care contine atributele fiecarui fisier.
  */
 public class FileAttributesForStorage implements Serializable {
-    /** -------- Atribute -------- **/
+    /**
+     * Identificatorul utilizatorului
+     */
     private String userId;
     /**
      * Numele fisierului
@@ -23,13 +25,14 @@ public class FileAttributesForStorage implements Serializable {
     private List<Pair<String, FileVersionData>> nodes;
 
 
-    /** -------- Constructor -------- **/
+    /**
+     * Constructor vid
+     */
     public FileAttributesForStorage(){
         this.nodes = new ArrayList<Pair<String, FileVersionData>>();
     }
 
 
-    /** -------- Gettere & Settere -------- **/
     /**
      * Getter pentru numele fisierului
      */
@@ -43,9 +46,15 @@ public class FileAttributesForStorage implements Serializable {
         this.filename = filename;
     }
 
+    /**
+     * Getter pentru identificatorul utilizatorului.
+     */
     public String getUserId() {
         return userId;
     }
+    /**
+     * Setter pentru identificatorul utilizatorului.
+     */
     public void setUserId(String userId) {
         this.userId = userId;
     }
@@ -74,7 +83,6 @@ public class FileAttributesForStorage implements Serializable {
         throw new NullPointerException("setCRC : Node not found!");
     }
 
-
     /**
      * Getter pentru Numarul versiunii
      */
@@ -99,6 +107,13 @@ public class FileAttributesForStorage implements Serializable {
         throw new NullPointerException("setVersionNo : Node not found!");
     }
 
+    /**
+     * <ul>
+     *  <li>Getter pentru dimensiunea fisierului.</li>
+     *  <li>Fisierul va fi stocat sub forma unor mai multor replici, pe mai multe noduri. De aceea,
+     *      se va specifica adresa nodului care contine replica a carei dimensiune se doreste.</li>
+     * </ul>
+     */
     public Long getFileSize(String nodeAddress) throws NumberFormatException{
         for(Pair<String, FileVersionData> node : nodes){
             if(node.getFirst().equals(nodeAddress)){
@@ -107,6 +122,13 @@ public class FileAttributesForStorage implements Serializable {
         }
         throw new NullPointerException("getFileSize : Node not found!");
     }
+    /**
+     * <ul>
+     *  <li>Setter pentru dimensiunea fisierului.</li>
+     *  <li>Fisierul va fi stocat sub forma unor mai multor replici, pe mai multe noduri. De aceea,
+     *      se va specifica adresa nodului care contine replica a carei dimensiune se doreste a fi setata.</li>
+     * </ul>
+     */
     public void setFileSize(String nodeAddress, Long filesize) throws NumberFormatException{
         for(Pair<String, FileVersionData> node : nodes){
             if(node.getFirst().equals(nodeAddress)){
@@ -168,7 +190,6 @@ public class FileAttributesForStorage implements Serializable {
     }
 
 
-    /** -------- Functii de prelucrare -------- **/
     /**
      * Functie de adaugare a unui nou nod in lista
      * @param nodeAddress Adresa nodului
@@ -193,7 +214,6 @@ public class FileAttributesForStorage implements Serializable {
     }
 
 
-    /** -------- Functii de validare -------- **/
     /**
      * Functie care verifica daca un anumit nod se afla in lista
      * @param nodeAddress Adresa nodului
@@ -207,7 +227,7 @@ public class FileAttributesForStorage implements Serializable {
         return false;
     }
 
-    /** -------- Functii de baza, supraincarcate -------- **/
+
     @Override
     public String toString() {
         StringBuilder stringBuilder = new StringBuilder();

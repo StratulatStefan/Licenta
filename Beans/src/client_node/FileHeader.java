@@ -3,13 +3,15 @@ package client_node;
 import java.io.Serializable;
 
 /**
- * Clasa folosita in comunicarea de date cu nodurile adiacente. Inglobeaza toate
- * datele caracteristice header-ului fisierului ce se va trimite. Prin header intelegem
- * token-ul, numele fisierului, dimensiunea fisierului si alte date caracteristice utilizatorului.
- * Obiectul care va instantia aceasta clasa va fi trimis prin retea, deci va trebui sa fie serializabil.
+ * <ul>
+ *  <li>Clasa folosita in comunicarea de date cu nodurile adiacente. Inglobeaza toate
+ *      datele caracteristice header-ului fisierului ce se va trimite. </li>
+ *  <li>Prin header intelegem token-ul, numele fisierului, dimensiunea fisierului si
+ *      alte date caracteristice utilizatorului.</li>
+ *  <li>Obiectul care va instantia aceasta clasa va fi trimis prin retea, deci va trebui sa fie serializabil.</li>
+ * </ul>
  */
 public class FileHeader implements Serializable {
-    /** -------- Atribute -------- **/
     /**
      * Token-ul ce defineste chain-ul de comunicare.
      */
@@ -32,14 +34,12 @@ public class FileHeader implements Serializable {
     private String description;
 
 
-    /** -------- Constructori -------- **/
     /**
      * Constructor vid pentru clasa.
      */
     public FileHeader(){}
 
 
-    /** -------- Gettere & Settere -------- **/
     /**
      * Getter pentru id-ul utilizatorului
      */

@@ -3,12 +3,14 @@ package client_node;
 import java.io.Serializable;
 
 /**
- * Clasa care inglobeaza raspunsul trimis de catre nodul intern catre frontend, ca raspuns la cererea
- * de stocare a unui fisier.
- * Obiectul care va instantia aceasta clasa va fi trimis prin retea, deci va trebui sa fie serializabil.
+ * <ul>
+ *  <li>Clasa care reprezinta raspunsul trimis de catre nodul intern catre frontend, ca raspuns la cererea
+ *      de stocare a unui fisier.</li>
+ *  <li>Raspunsul va contine toate elementele necesare validarii stocarii cu succes a fisierului.</li>
+ *  <li>Obiectul care va instantia aceasta clasa va fi trimis prin retea, deci va trebui sa fie serializabil.</li>
+ * </ul>
  */
 public class NewFileRequestFeedback implements Serializable {
-    /** -------- Atribute -------- **/
     /**
      * Adresa noului care trimite feedback-ul
      */
@@ -30,7 +32,13 @@ public class NewFileRequestFeedback implements Serializable {
      */
     private String status;
 
-    /** -------- Gettere & Settere -------- **/
+
+    /**
+     * Constructor vid
+     */
+    public NewFileRequestFeedback(){}
+
+
     /**
      * Getter pentru id-ul utilizatorului
      */

@@ -1,13 +1,14 @@
 package client_manager.data;
 
 /**
- * Clasa folosita pentru a incapsula cererea de adaugare a unui fisier, trimisa de la client la managerul general.
- * Va mosteni clasa ClientRequestManager, care incapsuleaza o cerere dintre client si managerul general.
- * Pe langa atributele de baza ale unei cereri dintre client si managerul general, avem nevoie si de dimensiunea fisierului si
- * factorul de replicare.
+ * <ul>
+ *  <li>Clasa folosita pentru a reprezenta cererea de adaugare a unui fisier, trimisa de la client la managerul general.</li>
+ *  <li>Va mosteni clasa ClientRequestManager, care incapsuleaza o cerere dintre client si managerul general.</li>
+ *  <li>Pe langa atributele de baza ale unei cereri dintre client si managerul general, avem nevoie si de dimensiunea fisierului si
+ *      factorul de replicare.</li>
+ * </ul>
  * **/
 public class NewFileRequest extends ClientManagerRequest {
-    /** -------- Atribute -------- **/
     /**
      * Dimensiunea fisierului
      */
@@ -17,12 +18,19 @@ public class NewFileRequest extends ClientManagerRequest {
      */
     private String userType;
     /**
-     * CRC-ul fisierului ; folosit doar de la frontend la managerul general.
+     * CRC-ul fisierului
      */
     private long crc;
 
 
-    /** -------- Gettere & Settere -------- **/
+    /**
+     * Constructor vid
+     */
+    public NewFileRequest(){
+        super();
+    }
+
+
     /**
      * Setter pentru dimensiunea fisierului.
      */
@@ -50,15 +58,15 @@ public class NewFileRequest extends ClientManagerRequest {
     }
 
     /**
-     * Getter pentru CRC
-     */
-    public long getCrc() {
-        return crc;
-    }
-    /**
      * Setter pentru CRC
      */
     public void setCrc(long crc) {
         this.crc = crc;
+    }
+    /**
+     * Getter pentru CRC
+     */
+    public long getCrc() {
+        return crc;
     }
 }

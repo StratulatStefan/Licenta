@@ -3,10 +3,9 @@ package model;
 import java.io.Serializable;
 
 /**
- * Clasa care contine atributele unui fisier
+ * Clasa care contine atributele unui fisier.
  */
 public class FileAttributes implements Serializable {
-    /** -------- Atribute -------- **/
     private String userId;
     /**
      * Numele fisierului
@@ -20,11 +19,27 @@ public class FileAttributes implements Serializable {
      * Statusul fisierului
      */
     private String status;
+    /**
+     * Dimensiunea fisierului.
+     */
     private long fileSize;
-
+    /**
+     * Obiectul ce contine toate datele despre versiunea unui fisier.
+     */
     private FileVersionData fileVersionData;
 
-    /** -------- Constructor -------- **/
+
+    /**
+     * Constructor vid
+     */
+    public FileAttributes(){}
+    /**
+     * <ul>
+     *  <li>Constructor cu argumente</li>
+     *  <li>Va instantia fiecare membru al clasei in functie de parametri.</li>
+     *  <li>In cazul datelor despre versiune, se va crea un nou obiect de tipul <strong>FileVersionData</strong></li>
+     * </ul>
+     */
     public FileAttributes(String filename, int replication_factor, String status, long crc, long filesize, String versionNo, String versionDesc) {
         this.filename = filename;
         this.replication_factor = replication_factor;
@@ -33,7 +48,7 @@ public class FileAttributes implements Serializable {
         this.fileVersionData = new FileVersionData(crc, versionNo, versionDesc, filesize);
     }
 
-    /** -------- Gettere & Settere -------- **/
+
     /**
      * Getter pentru numele fisierului
      */
@@ -86,31 +101,55 @@ public class FileAttributes implements Serializable {
         this.fileVersionData.setCrc(crc);
     }
 
+    /**
+     * Setter pentru numarul versiunii fisierului.
+     */
     public void setVersionNo(String versionNo) {
         this.fileVersionData.setVersionNo(versionNo);
     }
+    /**
+     * Getter pentru numarul versiunii.
+     */
     public String getVersionNo() {
         return this.fileVersionData.getVersionNo();
     }
 
+    /**
+     * Setter pentru descrierea versiunii.
+     */
     public void setVersionDescription(String versionDescription){ this.fileVersionData.setVersionDescription(versionDescription);}
+    /**
+     * Getter pentru descrierea versiunii.
+     */
     public String getVersionDescription(){ return this.fileVersionData.getVersionDescription();}
 
+    /**
+     * Getter pentru dimensiunea fisierului. [Bytes]
+     */
     public long getFileSize() {
         return fileSize;
     }
+    /**
+     * Setter pentru dimensiunea fisierului. [Bytes]
+     */
     public void setFileSize(long fileSize) {
         this.fileSize = fileSize;
     }
 
+    /**
+     * Getter pentru identificatorul utilizatorului.
+     */
     public String getUserId() {
         return userId;
     }
+    /**
+     * Setter pentru identificatorul utilizatorului.
+     */
     public void setUserId(String userId) {
         this.userId = userId;
     }
 
-    /** -------- Functii de baza, supraincarcate -------- **/
+
     @Override
     public String toString() {
         StringBuilder stringBuilder = new StringBuilder();

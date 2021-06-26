@@ -2,12 +2,13 @@ package node_manager;
 import java.io.Serializable;
 
 /**
- * Clasa folosita pentru a incapsula cererile dintre managerul general si nodul intern.
- * Obiectul care va instantia aceasta clasa va fi trimis prin retea, deci va trebui sa fie serializabil.
- * Clasa cuprinde atributele de baza, corespunzatoare oricarei cereri dintre managerul general si nodul intern.
+ * <ul>
+ *  <li>Clasa folosita pentru a reprezenta cererile dintre managerul general si nodul intern.</li>
+ *  <li>Obiectul care va instantia aceasta clasa va fi trimis prin retea, deci va trebui sa fie serializabil.</li>
+ *  <li>Clasa cuprinde atributele de baza, corespunzatoare oricarei cereri dintre managerul general si nodul intern.</li>
+ * </ul>
  * **/
 public class EditRequest implements Serializable {
-    /** -------- Atribute -------- **/
     /**
      * Id-ul utilizatorului.
      */
@@ -21,8 +22,16 @@ public class EditRequest implements Serializable {
      */
     private String description;
 
+
     /**
-     * Constructorul clasei; Instantiaza valorile pentru id-ul utilizatorului si pentru numele fisierului
+     * Constructorul vid
+     */
+    public EditRequest(){}
+    /**
+     * <ul>
+     * 	<li>Constructorul clasei.</li>
+     * 	<li> Instantiaza valorile pentru id-ul utilizatorului si pentru numele fisierului.</li>
+     * </ul>
      * @param user Id-ul utilizatoului
      * @param filename Numele fisierului utilizatorului
      */
@@ -32,7 +41,6 @@ public class EditRequest implements Serializable {
     }
 
 
-    /** -------- Gettere & Settere -------- **/
     /**
      * Setter pentru numele fisierului
      */

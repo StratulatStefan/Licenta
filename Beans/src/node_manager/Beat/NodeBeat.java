@@ -7,11 +7,13 @@ import java.util.List;
 
 
 /**
- * Clasa care va ingloba mesajul de tip heartbeat, care va fi trimis de la nodul intern la managerul general.
- *  * Obiectul care va instantia aceasta clasa va fi trimis prin retea, deci va trebui sa fie serializabil.
+ * <ul>
+ *  <li>Clasa care va reprezenta mesajul de tip heartbeat, care va fi trimis de la nodul intern la managerul general.</li>
+ *  <li>Va contine informarii de identificare a nodului, cantitatea de memorie ocupata si maparea de tip utilizator-fisiere</li>
+ *  <li>Obiectul care va instantia aceasta clasa va fi trimis prin retea, deci va trebui sa fie serializabil.</li>
+ * </ul>
  */
 public class NodeBeat implements Serializable {
-    /** -------- Atribute -------- **/
     /**
      * Adresa nodului intern curent;
      */
@@ -27,7 +29,6 @@ public class NodeBeat implements Serializable {
     private HashMap<String, List<FileAttribute>> userFiles;
 
 
-    /** -------- Constructor -------- **/
     /**
      * Constructorul clasei; Va initializa lista de fisiere pentru useri;
      */
@@ -36,7 +37,6 @@ public class NodeBeat implements Serializable {
     }
 
 
-    /** -------- Gettere & Settere -------- **/
     /**
      * Getter pentru cantitatea de memorie
      */
@@ -75,7 +75,6 @@ public class NodeBeat implements Serializable {
     public void addUserFiles(String userDir, List<FileAttribute> userFiles){
         this.userFiles.put(userDir, userFiles);
     }
-
     /**
      * Getter pentru lista fisierelor unui user, pe baza id-ului;
      * @param userId Id-ul utilizatorului pentru care se doreste obtinerea fisierelor
@@ -84,7 +83,6 @@ public class NodeBeat implements Serializable {
     public List<FileAttribute> getUserFilesById(String userId){
         return this.userFiles.get(userId);
     }
-
     /**
      * Functie care returneaza lista utilizatorilor care au fisiere stocate pe acest nod
      * @return Lista utilizatorilor
@@ -92,7 +90,6 @@ public class NodeBeat implements Serializable {
     public List<String> getUsers(){
         return new ArrayList<>(this.userFiles.keySet());
     }
-
     /**
      * Functie care returneaza intreaga tabela de status al stocarii
      */

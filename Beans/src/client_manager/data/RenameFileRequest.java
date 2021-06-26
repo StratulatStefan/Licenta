@@ -1,19 +1,27 @@
 package client_manager.data;
 
 /**
- * Clasa folosita pentru a incapsula cererea de redenumire a unui fisier, trimisa de la client la managerul general.
- * Va mosteni clasa ClientRequestManager, care incapsuleaza o cerere dintre client si managerul general.
- * Pe langa atributele de baza ale unei cereri dintre client si managerul general, avem nevoie si de noul nume al fisierului.
+ * <ul>
+ *  <li>Clasa folosita pentru a reprezenta cererea de redenumire a unui fisier, trimisa de la client la managerul general.</li>
+ *  <li>Va mosteni clasa ClientRequestManager, care incapsuleaza o cerere dintre client si managerul general.</li>
+ *  <li>Pe langa atributele de baza ale unei cereri dintre client si managerul general, avem nevoie si de noul nume al fisierului.</li>
+ * </ul>
  * **/
 public class RenameFileRequest extends ClientManagerRequest{
-    /** -------- Atribute -------- **/
     /**
      * Noul nume al fisierului.
      */
     private String newName;
 
 
-    /** -------- Gettere & Settere -------- **/
+    /**
+     * Constructor vid
+     */
+    public RenameFileRequest(){
+        super();
+    }
+
+
     /**
      * Setter pentru noul nume al fisierului.
      */

@@ -3,21 +3,28 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Clasa folosita pentru a incapsula cererea de replicare a unui fisier, trimisa de la managerul general la nodul intern
- * Va mosteni clasa ClientRequestManager, care incapsuleaza o cerere dintre managerul general si nodul intern
- * Pe langa atributele de baza ale unei cereri dintre client si managerul general, avem nevoie si lista de noduri care vor stoca noul fisier.
+ * <ul>
+ * 	<li>Clasa folosita pentru a reprezenta cererea de replicare a unui fisier, trimisa de la managerul general la nodul intern.</li>
+ * 	<li>Va mosteni clasa ClientRequestManager, care incapsuleaza o cerere dintre managerul general si nodul intern.</li>
+ * 	<li>Pe langa atributele de baza ale unei cereri dintre client si managerul general, avem nevoie si lista de noduri care vor stoca noul fisier.</li>
+ * </ul>
  * **/
 public class ReplicationRequest extends EditRequest {
-    /** -------- Atribute -------- **/
     /**
-     * Lista de noduri interne care vor stoca noul fisier.
-     * Tipul ArrayList este serializabil.
+     * <ul>
+     * 	<li>Lista de noduri interne care vor stoca noul fisier.</li>
+     * 	<li>Tipul ArrayList este serializabil.</li>
+     * </ul>
      */
     private ArrayList<String> destionationAddress;
 
+
     /**
-     * Constructorul clasei; Apeleaza constructorul clasei parinte, furnizand cele doua argumente
-     * generice fiecarei cereri; Mai mult decat atat, instantiaza lista de adrese;
+     * <ul>
+     * 	<li> Constructorul clasei.</li>
+     * 	<li> Apeleaza constructorul clasei parinte, furnizand cele doua argumente generice fiecarei cereri.</li>
+     * 	<li> Instantiaza lista de adrese.</li>
+     * </ul>
      * @param user Id-ul utilizatoului
      * @param filename Numele fisierului utilizatorului
      * @param destinationAddress Lista de adrese destinatie, pe care se va replica fisierul
@@ -26,9 +33,12 @@ public class ReplicationRequest extends EditRequest {
         super(user, filename);
         this.destionationAddress = new ArrayList<>(destinationAddress);
     }
+    /**
+     * Constructor vid
+     */
+    public ReplicationRequest(){super();}
 
 
-    /** -------- Gettere & Settere -------- **/
     /**
      * Getter pentru lista de noduri care vor stoca noul fisier.
      */
@@ -36,9 +46,11 @@ public class ReplicationRequest extends EditRequest {
         return destionationAddress;
     }
     /**
-     * Setter pentru lista de noduri care vor stoca noul fisier.
-     * Nu se va folosi tipul parametrului de intrare (List), ci se va crea un nou obiect de tipul
-     * ArrayList care, spre deosebire de tipul parametrului, este Serializabil.
+     * <ul>
+     * 	<li>Setter pentru lista de noduri care vor stoca noul fisier.</li>
+     * 	<li>Nu se va folosi tipul parametrului de intrare (List), ci se va crea un nou obiect de tipul
+     ArrayList care, spre deosebire de tipul parametrului, este Serializabil.</li>
+     * </ul>
      */
     public void setDestionationAddress(List<String> destionationAddress) {
         this.destionationAddress = new ArrayList<>(destionationAddress);

@@ -3,12 +3,15 @@ package node_manager.Beat;
 import java.io.Serializable;
 
 /**
- * Clasa care inglobeaza atributele unui fisier.
- * Obiectul ce inglobeaza atributele fisierului va fi trimis prin retea, deci
- * va trebui sa fie serializabil.
+ * <ul>
+ *  <li>Clasa care contine atributele unui fisier.</li>
+ *  <li>Reprezinta cererea ce va fi trimisa de la nodurile interne catre nodul general</li>
+ *  <li>Va contine date despre un fisier al utilizatorului</li>
+ *  <li>Obiectul ce inglobeaza atributele fisierului va fi trimis prin retea, deci
+ *      va trebui sa fie serializabil.</li>
+ * </ul>
  */
 public class FileAttribute implements Serializable {
-    /** -------- Atribute -------- **/
     /**
      * Numele fisierului
      */
@@ -21,9 +24,12 @@ public class FileAttribute implements Serializable {
      * Numarul versiunii fisierului.
      */
     private String versionNo;
+    /**
+     * Dimensiunea fisierului.
+     */
     private long filesize;
 
-    /** -------- Gettere & Settere -------- **/
+
     /**
      * Getter pentru numele fisierului
      */
@@ -63,9 +69,15 @@ public class FileAttribute implements Serializable {
         this.versionNo = versionNo;
     }
 
+    /**
+     * Getter pentru dimensiunea fisierului.
+     */
     public long getFilesize() {
         return filesize;
     }
+    /**
+     * Setter pentru dimensiunea fisierului.
+     */
     public void setFilesize(long filesize) {
         this.filesize = filesize;
     }

@@ -1,13 +1,21 @@
 package client_manager;
 
+/**
+ * <ul>
+ *  <li>Clasa care va reprezenta o cerere de la nodul general catre aplicatia de tip client</li>
+ *  <li>Se mosteneste clasa <strong>ManagerResponse</strong> atat din punct de vedere logic, dorind sa se
+ *      evidentieze o clasa de tip raspuns, dar si pentru a pastra elementele de tip mesaj de exceptie</li>
+ *  <li>Caracteristic acestui raspuns este modul in care este reprezentat corpul raspunsului. Acesta este
+ *      reprezentat sub forma unui mesaj de tip text.</li>
+ * </ul>
+ */
 public class ManagerTextResponse extends ManagerResponse {
-    /** -------- Atribute -------- **/
     /**
-     * Raspunsul afirmativ al nodului general. (succes)
+     * Raspunsul nodului general.
      */
     private String response;
 
-    /** -------- Constructori -------- **/
+
     /**
      * Constructorul vid.
      */
@@ -19,7 +27,6 @@ public class ManagerTextResponse extends ManagerResponse {
         this.response = response;
     }
 
-    /** -------- Gettere & Settere -------- **/
     /**
      * Setter pentru raspunsul nodului general.
      */
