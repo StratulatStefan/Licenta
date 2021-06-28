@@ -13,16 +13,34 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+/**
+ * <ul>
+ * 	<li>Serviciul care expune toate operatiile de tip CRUD specifice obiectului <strong>User</strong>.</li>
+ * </ul>
+ */
 @Service
 public class UserDaoService implements UserDao {
+    /**
+     * Obiectul de tip <strong>EntityManager</strong> care va asigura comunicarea cu serverul de baze de date.
+     * Obiectul va expune toate metodele necesare persistarii, accesari si prelucrarii inregistrarilor din tabela <strong>InternalNode.</strong>
+     */
     MySQLManager<User> mySQLManager = new MySQLManager<User>();
 
+    /**
+     * Obiectul de tip <strong>UserTypeDao</strong> care va expune metodele necesare accesari factorului de replicare.
+     */
     @Autowired
     UserTypeDao userTypeDao;
 
 
     /**
      * ============== CREATE ==============
+     */
+    /**
+     * <ul>
+     * 	<li>Crearea si persistarea unui nou utilizator in baza de date.</li>
+     * 	<li> Se va returna statusul operatiei de persistare.</li>
+     * </ul>
      */
     @Override
     public int insertUser(User user) throws Exception{
@@ -39,6 +57,11 @@ public class UserDaoService implements UserDao {
     /**
      * ============== RETRIEVE ==============
      */
+    /**
+     * <ul>
+     * 	<li>Extragerea unui utilizator pe baza identificatorului unic.</li>
+     * </ul>
+     */
     @Override
     public User getUserById(int id_user) throws NullPointerException {
         User user = mySQLManager.findByPrimaryKey(User.class, id_user);
@@ -47,6 +70,11 @@ public class UserDaoService implements UserDao {
         return user;
     }
 
+    /**
+     * <ul>
+     * 	<li>Extragerea unui utilizator pe baza adresei de email.</li>
+     * </ul>
+     */
     @Override
     public User getUserByUsername(String email) throws Exception {
         HashMap<String, Object> findCriteria = new HashMap<>(){{
@@ -61,26 +89,54 @@ public class UserDaoService implements UserDao {
         return users.get(0);
     }
 
+    /**
+     * <ul>
+     * 	<li>Extragerea locatiei utilizatorului.</li>
+     * </ul>
+     */
     @Override
     public String getUserCountry(int id_user) throws Exception {
         return getUserById(id_user).getCountry();
     }
 
+    /**
+     * <ul>
+     * 	<li>Extragerea tipului utilizatorului.</li>
+     * </ul>
+     */
     @Override
     public String getUserType(int id_user) throws Exception {
         return getUserById(id_user).getType();
     }
 
+    /**
+     * <ul>
+     * 	<li>Extragerea cantitatii de stocare disponibile utilizatorului.</li>
+     * </ul>
+     */
     @Override
     public long getUserStorageQuantity(int id_user) throws Exception {
         return getUserById(id_user).getStorage_quantity();
     }
 
+    /**
+     * <ul>
+     * 	<li>Extragerea factorului de replicare.</li>
+     * </ul>
+     */
     @Override
     public int getReplicationFactor(int id_user) throws Exception {
         return userTypeDao.getReplicationFactor(getUserById(id_user).getType());
     }
 
+    /**
+     * <ul>
+     * 	<li>Autentificarea unui utilizator.</li>
+     * 	<li> Autentificarea se realizeaza prin extragerea datelor utilizatorului din baza de date si compararea cu datele furnizate.</li>
+     * 	<li> Daca datele corespund, autentificarea a reusit si se va intoarce <strong>JWT</strong>-ul catre client.</li>
+     * 	<li> Autentificarea se baza <strong>email</strong>-ului si a <strong>parolei</strong>.</li>
+     * </ul>
+     */
     @Override
     public Map<String, String> login(String username, String password) throws Exception{
         User candidateUser = getUserByUsername(username);
@@ -98,6 +154,11 @@ public class UserDaoService implements UserDao {
     /**
      * ============== UPDATE ==============
      */
+    /**
+     * <ul>
+     * 	<li>Actualizarea cantitatii de stocare disponibila.</li>
+     * </ul>
+     */
     @Override
     public void updateStorageQuantity(int id_user, int quantity) throws Exception{
         User user = getUserById(id_user);
@@ -109,6 +170,11 @@ public class UserDaoService implements UserDao {
         mySQLManager.update(user);
     }
 
+    /**
+     * <ul>
+     * 	<li>Actualizarea locatiei utilizatorului.</li>
+     * </ul>
+     */
     @Override
     public void updateCountry(int id_user, String country) throws Exception{
         User user = getUserById(id_user);
@@ -116,6 +182,11 @@ public class UserDaoService implements UserDao {
         mySQLManager.update(user);
     }
 
+    /**
+     * <ul>
+     * 	<li>Actualizarea parolei utilizatorului.</li>
+     * </ul>
+     */
     @Override
     public void updatePassword(int id_user, String password) throws Exception{
         User user = getUserById(id_user);
@@ -123,6 +194,11 @@ public class UserDaoService implements UserDao {
         mySQLManager.update(user);
     }
 
+    /**
+     * <ul>
+     * 	<li>Actualizarea tipului utilizatorului.</li>
+     * </ul>
+     */
     @Override
     public void updateType(int id_user, String type) throws Exception{
         User user = getUserById(id_user);
@@ -137,6 +213,11 @@ public class UserDaoService implements UserDao {
         mySQLManager.update(user);
     }
 
+    /**
+     * <ul>
+     * 	<li>Actualizarea numarului de fisiere ale utilizatorului.</li>
+     * </ul>
+     */
     @Override
     public void updateNumberOfFiles(int id_user, int count) throws Exception {
         User user = getUserById(id_user);
@@ -148,6 +229,11 @@ public class UserDaoService implements UserDao {
 
     /**
      * ============== DELETE ==============
+     */
+    /**
+     * <ul>
+     * 	<li>Eliminarea unui utilizator pe baza identificatorului unic.</li>
+     * </ul>
      */
     @Override
     public void deleteUserById(int id) throws Exception {

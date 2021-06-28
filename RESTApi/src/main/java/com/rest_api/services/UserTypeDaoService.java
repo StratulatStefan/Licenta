@@ -8,12 +8,26 @@ import org.springframework.stereotype.Service;
 import java.util.List;
 import java.util.stream.Collectors;
 
+/**
+ * <ul>
+ * 	<li>Serviciul care expune toate operatiile de tip CRUD specifice obiectului <strong>UserType</strong>.</li>
+ * </ul>
+ */
 @Service
 public class UserTypeDaoService implements UserTypeDao {
+    /**
+     * Obiectul de tip <strong>EntityManager</strong> care va asigura comunicarea cu serverul de baze de date.
+     * Obiectul va expune toate metodele necesare persistarii, accesari si prelucrarii inregistrarilor din tabela <strong>InternalNode.</strong>
+     */
     MySQLManager<UserType> mySQLManager = new MySQLManager<UserType>();
 
     /**
      * ============== CREATE ==============
+     */
+    /**
+     * <ul>
+     * 	<li>Crearea si persistarea unui nou tip de utilizator in baza de date.</li>
+     * </ul>
      */
     @Override
     public void insertUserType(UserType userType) throws Exception{
@@ -23,6 +37,11 @@ public class UserTypeDaoService implements UserTypeDao {
 
     /**
      * ============== RETRIEVE ==============
+     */
+    /**
+     * <ul>
+     * 	<li>Extragerea tututor tipurilor de utilizator.</li>
+     * </ul>
      */
     @Override
     public List<UserType> getAllUserTypes() throws NullPointerException{
@@ -34,6 +53,12 @@ public class UserTypeDaoService implements UserTypeDao {
         return userTypes;
     }
 
+    /**
+     * <ul>
+     * 	<li>Extragerea datelor despre un anumit tip de utilizator,
+     *      pe baza sirului de caractere ce identifica in mod unic tipul</li>
+     * </ul>
+     */
     @Override
     public UserType getUserTypeData(String usertype) throws NullPointerException{
         UserType userType = (UserType)mySQLManager.findByPrimaryKey(UserType.class, usertype);
@@ -42,12 +67,24 @@ public class UserTypeDaoService implements UserTypeDao {
         return userType;
     }
 
+    /**
+     * <ul>
+     * 	<li>Extragerea factorului de replicare a unui anumit tip de utilizator,
+     *      pe baza sirului de caractere ce identifica in mod unic tipul</li>
+     * </ul>
+     */
     @Override
     public int getReplicationFactor(String usertype) throws NullPointerException{
         UserType userType = (UserType)mySQLManager.findByPrimaryKey(UserType.class, usertype);
         return userType.getReplication_factor();
     }
 
+    /**
+     * <ul>
+     * 	<li>Extragerea cantitatii de stocare disponibile unui anumit tip de utilizator,
+     *      pe baza sirului de caractere ce identifica in mod unic tipul</li>
+     * </ul>
+     */
     @Override
     public long getAvailableStorage(String usertype) throws NullPointerException{
         UserType userType = (UserType)mySQLManager.findByPrimaryKey(UserType.class, usertype);
@@ -58,6 +95,12 @@ public class UserTypeDaoService implements UserTypeDao {
     /**
      * ============== UPDATE ==============
      */
+    /**
+     * <ul>
+     * 	<li>Actualizarea factorului de replicare,
+     *      pe baza sirului de caractere ce identifica in mod unic tipul</li>
+     * </ul>
+     */
     @Override
     public void updateReplicationFactor(String userype, int new_replicationFactor) throws NullPointerException{
         UserType candidate = getUserTypeData(userype);
@@ -65,6 +108,12 @@ public class UserTypeDaoService implements UserTypeDao {
         mySQLManager.update(candidate);
     }
 
+    /**
+     * <ul>
+     * 	<li>Actualizarea cantitatii de stocare disponibile,
+     *      pe baza sirului de caractere ce identifica in mod unic tipul</li>
+     * </ul>
+     */
     @Override
     public void updateAvailableStorage(String userype, long availableStorage) {
         UserType candidate = getUserTypeData(userype);
@@ -75,6 +124,12 @@ public class UserTypeDaoService implements UserTypeDao {
 
     /**
      * ============== DELETE ==============
+     */
+    /**
+     * <ul>
+     * 	<li>Eliminarea unui anumit tip de utilizator,
+     *      pe baza sirului de caractere ce identifica in mod unic tipul</li>
+     * </ul>
      */
     @Override
     public void deleteUserType(String usertype) throws NullPointerException {

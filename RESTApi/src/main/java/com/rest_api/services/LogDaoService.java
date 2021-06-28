@@ -8,11 +8,26 @@ import org.springframework.stereotype.Service;
 import java.util.*;
 import java.util.stream.Collectors;
 
+/**
+ * <ul>
+ * 	<li>Serviciul care expune toate operatiile de tip CRUD specifice obiectului <strong>Log</strong>.</li>
+ * </ul>
+ */
 @Service
 public class LogDaoService implements LogDao {
+    /**
+     * Obiectul de tip <strong>EntityManager</strong> care va asigura comunicarea cu serverul de baze de date.
+     * Obiectul va expune toate metodele necesare persistarii, accesari si prelucrarii inregistrarilor din tabela <strong>Log.</strong>
+     */
     private MySQLManager<Log> mySQLManager = new MySQLManager<Log>();
+
     /**
      * ============== CREATE ==============
+     */
+    /**
+     * Crearea si persistarea unui nou eveniment, in baza de date.
+     * @param log Obiectul de tip eveniment.
+     * @return Statusul adaugarii.
      */
     @Override
     public int insertLogRegister(Log log) throws Exception {
@@ -23,6 +38,11 @@ public class LogDaoService implements LogDao {
     /**
      * ============== RETRIEVE ==============
      */
+    /**
+     * <ul>
+     * 	<li>Extragerea unui eveniment pe baza identificatorului unic.</li>
+     * </ul>
+     */
     @Override
     public Log getLogRegisterById(int registerId) throws NullPointerException {
         Log logRegister = mySQLManager.findByPrimaryKey(Log.class, registerId);
@@ -31,6 +51,11 @@ public class LogDaoService implements LogDao {
         return logRegister;
     }
 
+    /**
+     * <ul>
+     * 	<li>Extragerea unui eveniment pe baza mai multor criterii</li>
+     * </ul>
+     */
     @Override
     public List<Log> getLogRegistersByCriteria(HashMap<String, Object> criteria) throws NullPointerException {
         List<Log> logRegisters =  null;
@@ -62,6 +87,11 @@ public class LogDaoService implements LogDao {
     /**
      * ============== DELETE ==============
      */
+    /**
+     * <ul>
+     * 	<li>Eliminarea unui eveniment pe baza identificatorului unic.</li>
+     * </ul>
+     */
     @Override
     public void deleteLogRegister(int registerId) throws Exception {
         int deleteStatus = mySQLManager.remove(Log.class, registerId);
@@ -69,6 +99,11 @@ public class LogDaoService implements LogDao {
             throw new NullPointerException("Log register with id " + registerId + " not found!");
     }
 
+    /**
+     * <ul>
+     * 	<li>Eliminarea unuia sau mai multor evenimente, pe baza unor criterii</li>
+     * </ul>
+     */
     @Override
     public void deleteLogRegisterByCriteria(HashMap<String, Object> criteria) throws Exception {
         List<Log> candidateRegisters = getLogRegistersByCriteria(criteria);
@@ -77,6 +112,11 @@ public class LogDaoService implements LogDao {
         }
     }
 
+    /**
+     * <ul>
+     * 	<li>Eliminarea tuturor evenimentelor.</li>
+     * </ul>
+     */
     @Override
     public void deleteAll(){
         mySQLManager.removeAll(Log.class);
