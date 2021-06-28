@@ -13,17 +13,43 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
+/**
+ * <ul>
+ * 	<li>Clasa de tip controller <strong>@RestController</strong> care expune toate metodele HTTP specifice reprezentarii obiectului <strong>User</strong>.</li>
+ * 	<li> Se specifica si adresa <strong>@CrossOrigin</strong> : adresa aplicatiei client.</li>
+ * 	<li> Toate cererile HTTP vor contine in URI baza <strong>/api/user</strong>.</li>
+ * </ul>
+ */
 @CrossOrigin(origins = "http://localhost:3000")
 @RestController
 @RequestMapping(value = "/api/user")
 public class UsersController {
+    /**
+     * <ul>
+     * 	<li>Injectarea serviciului de tip <strong>UserDao</strong> care va expune toate metodele specifice prelucrarii obiectului.</li>
+     * 	<li> Injectarea se va face in mod transparent de catre SpringBoot <strong>@Autowired</strong>.</li>
+     * </ul>
+     */
     @Autowired
     private UserDao userDao;
 
+    /**
+     * <ul>
+     * 	<li>Obiectul care gestioneaza autorizarea clientului.</li>
+     * 	<li> Se verifica daca utilizatorul are rolul specific cererii.</li>
+     * 	<li> Se va furniza header-ul de autorizare <strong>Bearer TOKEN</strong> si lista de utilizatori permisi ai cererii si,
+     *       in urma decodarii <strong>JWT</strong>-ului se va decide daca se poate efectua operatia.</li>
+     * 	<li> In caz contrar, se intoarce <strong>401 NOT AUTHORIZED</strong>.</li>
+     * </ul>
+     */
     private AuthorizationService authorizationService = new AuthorizationService();
 
     /**
-     * ============== CREATE ==============
+     * <ul>
+     * 	<li>Functie de mapare a cererii de adaugare a unui nou utilizator</li>
+     * 	<li>Operatia este disponibila doar pentru administratorul sistemului.</li>
+     * </ul>
+     * @param user Obiectul ce contine caracteristicile obiectului
      */
     @RequestMapping(value = "", method = RequestMethod.POST)
     ResponseEntity<Map<String, String>> insertUser(@RequestBody User user){
@@ -39,9 +65,13 @@ public class UsersController {
         }
     }
 
-
     /**
-     * ============== RETRIEVE ==============
+     * <ul>
+     * 	<li>Functie de mapare a cererii de extragere a unui utilizator, pe baza identificatorului unic.</li>
+     * 	<li>Operatia este disponibila doar pentru toti utilizatorii sistemului.</li>
+     * </ul>
+     * @param id Identificatorul unic al utilizatorului
+     * @param authorizationValue Header-ul de autorizare.
      */
     @RequestMapping(value = "/search/{id}", method = RequestMethod.GET)
     ResponseEntity<User> getUserDataById(@PathVariable int id,
@@ -66,6 +96,14 @@ public class UsersController {
         }
     }
 
+    /**
+     * <ul>
+     * 	<li>Functie de mapare a cererii de extragere a unui utilizator pe baza adresei de email.</li>
+     * 	<li>Operatia este disponibila doar pentru toti utilizatorii sistemului.</li>
+     * </ul>
+     * @param email Adresa email a utilizatorului.
+     * @param authorizationValue Header-ul de autorizare.
+     */
     @RequestMapping(value = "/search", method = RequestMethod.GET)
     ResponseEntity<User> getUserData(@RequestParam(name="email", required = false, defaultValue = "") String email,
                                      @RequestHeader("Authorization") String authorizationValue) {
@@ -97,6 +135,20 @@ public class UsersController {
         }
     }
 
+    /**
+     * <ul>
+     * 	<li>Functie de mapare a cererii de extragere a unui anumit atribut al utilizatorului</li>
+     * 	<ul>
+     * 	    <li>Tara : <strong>country</strong></li>
+     * 	    <li>Factorul de replicare : <strong>replication_factor</strong></li>
+     * 	    <li>Cantitatea de stocare disponibila : <strong>storage_quantity</strong></li>
+     * 	    <li>Tipul utilizatorului: <strong>role</strong></li>
+     * 	</ul>
+     * 	<li>Operatia este disponibila doar pentru toti utilizatorii sistemului.</li>
+     * </ul>
+     * @param field
+     * @param authorizationValue Header-ul de autorizare.
+     */
     @RequestMapping(value = "/{field}", method = RequestMethod.GET)
     ResponseEntity<User> getUserFieldById(@PathVariable String field,
                                           @RequestHeader("Authorization") String authorizationValue) {
@@ -138,6 +190,13 @@ public class UsersController {
         }
     }
 
+    /**
+     * <ul>
+     * 	<li>Functie de mapare a cererii de autentificare a unui utilizator</li>
+     * 	<li>Se va returna JWT-ul.</li>>
+     * </ul>
+     * @param loginCredentials Credentialele de autentificare (email si parola).
+     */
     @RequestMapping(value = "/login", method = RequestMethod.POST)
     ResponseEntity<Map<String, Object>> login(@RequestBody HashMap<String, String> loginCredentials){
         try {
@@ -152,9 +211,13 @@ public class UsersController {
         }
     }
 
-
     /**
-     * ============== UPDATE ==============
+     * <ul>
+     * 	<li>Functie de mapare a cererii de actualizare a unui utilizator</li>
+     * 	<li>Operatia este disponibila doar pentru toti utilizatorii sistemului.</li>
+     * </ul>
+     * @param updateValue Dictionar ce contine atributele ce se doresc a fi actualizate, impreuna cu noile valori.
+     * @param authorizationValue Header-ul de autorizare.
      */
     @RequestMapping(value = "", method = RequestMethod.PUT)
     ResponseEntity<Map<String, String>> updateUser(@RequestBody HashMap<String, Object>   updateValue,
@@ -199,6 +262,14 @@ public class UsersController {
         }
     }
 
+    /**
+     * <ul>
+     * 	<li>Functie de mapare a cererii de actualizare a cantitatii de stocare disponibile pentru utilizator.</li>
+     * 	<li>Operatia este disponibila doar pentru administratorul sistemului.</li>
+     * </ul>
+     * @param userId Identificatorul unic al utilizatorului
+     * @param updateValue Noua valoare a cantitatii de stocare.
+     */
     @RequestMapping(value = "/{userId}/storage", method = RequestMethod.PUT)
     ResponseEntity<Map<String, String>> updateUserStorage(@PathVariable int                    userId,
                                                           @RequestBody HashMap<String, Object> updateValue){
@@ -226,7 +297,11 @@ public class UsersController {
     }
 
     /**
-     * ============== DELETE ==============
+     * <ul>
+     * 	<li>Functie de mapare a cererii de eliminare a unui utilizator.</li>
+     * 	<li>Operatia este disponibila doar pentru toti utilizatorii sistemului.</li>
+     * </ul>
+     * @param authorizationValue Header-ul de autorizare.
      */
     @RequestMapping(value = "", method = RequestMethod.DELETE)
     ResponseEntity<Map<String, String>> deleteUser(@RequestHeader("Authorization") String authorizationValue) throws Exception {

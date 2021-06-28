@@ -39,7 +39,7 @@ public class AuthorizationService {
      * 	<li>Functia de creare a unui nou JWT, pe baza datelor utilizatorilor.</li>
      * 	<li> Se va returna sirul de caractere care va reprezenta <strong>token</strong>-ul.</li>
      * </ul>
-     * @param id Identificatorul unic al fisierului
+     * @param id Identificatorul unic al utilizatorului
      * @param username Numele utilizatorului
      * @param userRole Rolul utilizatorului, folosit la autorizare.
      */

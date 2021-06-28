@@ -1,5 +1,6 @@
 package tables;
 
+import communication.Serializer;
 import config.AppConfig;
 import data.Pair;
 import model.StorageQuantity;
@@ -117,6 +118,18 @@ public class NodeStorageQuantityTable{
             storageTable.add(node);
         }
         return storageTable;
+    }
+
+    public String getSize(){
+        try {
+            long size = Serializer.getObjectSize(storageStatus);
+            Pair<Double, String> sz = FileSystem.convertToBestScale(size, 0);
+            return sz.getFirst() + " " + sz.getSecond();
+        }
+        catch (Exception exception){
+            System.out.println("Nu pot calcula dimensiunea!");
+            return "";
+        }
     }
 
     @Override

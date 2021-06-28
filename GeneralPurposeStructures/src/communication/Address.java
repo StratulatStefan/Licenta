@@ -1,12 +1,16 @@
 package communication;
 
+import sun.plugin2.message.Serializer;
+
+import java.io.Serializable;
+
 /**
  * <ul>
  * 	<li>Clasa care incapsuleaza o adresa de retea, formata din adresa IP si port.</li>
  * 	<li> Se asigura si mecanisme de validare a celor doua atribute.</li>
  * </ul>
  */
-public class Address {
+public class Address implements Serializable {
     /**
      * Adresa IP
      */

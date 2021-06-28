@@ -15,17 +15,42 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * <ul>
+ * 	<li>Clasa de tip controller <strong>@RestController</strong> care expune toate metodele HTTP specifice reprezentarii obiectului <strong>Log</strong>.</li>
+ * 	<li> Se specifica si adresa <strong>@CrossOrigin</strong> : adresa aplicatiei client.</li>
+ * 	<li> Toate cererile HTTP vor contine in URI baza <strong>/api/log</strong>.</li>
+ * </ul>
+ */
 @CrossOrigin(origins = "http://localhost:3000")
 @RestController
 @RequestMapping(value = "/api/log")
 public class LogController {
+    /**
+     * <ul>
+     * 	<li>Injectarea serviciului de tip <strong>LogDao</strong> care va expune toate metodele specifice prelucrarii obiectului.</li>
+     * 	<li> Injectarea se va face in mod transparent de catre SpringBoot <strong>@Autowired</strong>.</li>
+     * </ul>
+     */
     @Autowired
     private LogDao logDao;
 
+    /**
+     * <ul>
+     * 	<li>Obiectul care gestioneaza autorizarea clientului.</li>
+     * 	<li> Se verifica daca utilizatorul are rolul specific cererii.</li>
+     * 	<li> Se va furniza header-ul de autorizare <strong>Bearer TOKEN</strong> si lista de utilizatori permisi ai cererii si,
+     *       in urma decodarii <strong>JWT</strong>-ului se va decide daca se poate efectua operatia.</li>
+     * 	<li> In caz contrar, se intoarce <strong>401 NOT AUTHORIZED</strong>.</li>
+     * </ul>
+     */
     private AuthorizationService authorizationService = new AuthorizationService();
 
     /**
-     * ============== CREATE ==============
+     * <ul>
+     * 	<li>Functie de mapare a cererii de jurnalizare a unui eveniment</li>
+     * </ul>
+     * @param log Obiectul de tip eveniment ce se doreste a fi jurnalizat.
      */
     @RequestMapping(value = "", method = RequestMethod.POST)
     ResponseEntity<Map<String, String>> insertLogRegister(@RequestBody Log log){
@@ -41,9 +66,13 @@ public class LogController {
         }
     }
 
-
     /**
-     * ============== RETRIEVE ==============
+     * <ul>
+     * 	<li>Functie de mapare a cererii de extragere a unui eveniment, pe baza identificatorului unic,</li>
+     * 	<li>Operatia este disponibila doar pentru administratorul sistemului.</li>
+     * </ul>
+     * @param id Identificatorul unic al unui eveniment.
+     * @param authorizationValue Header-ul de autorizare.
      */
     @RequestMapping(value = "/{id}", method = RequestMethod.GET)
     ResponseEntity<Log> getLogRegisterById(@PathVariable int id,
@@ -66,6 +95,18 @@ public class LogController {
         }
     }
 
+    /**
+     * <ul>
+     * 	<li>Functie de mapare a cererii de extragere a unor evenimente pe baza anumitor criterii.</li>
+     * 	<li>Operatia este disponibila doar pentru administratorul sistemului.</li>
+     * 	<li><strong>! Functionalitatea specifica extragerii pe baza datelor calendaristice nu este completa !</strong></li>
+     * </ul>
+     * @param nodeAddress Adresa IP a nodului la nivelul caruia a fost generat evenimentul.
+     * @param messageType Tipul evenimentului.
+     * @param date1 Limita stanga a intervalul de referinta calendaristic.
+     * @param date2 Limita dreapta a intervalul de referinta calendaristic.
+     * @param authorizationValue Header-ul de autorizare.
+     */
     @RequestMapping(value = "", method = RequestMethod.GET)
     ResponseEntity<List<Log>> getLogRegisterByCriteria(@RequestParam(name = "node_address", required = false, defaultValue = "") String nodeAddress,
                                                        @RequestParam(name = "message_type", required = false, defaultValue = "") String messageType,
@@ -106,9 +147,13 @@ public class LogController {
         }
     }
 
-
     /**
-     * ============== DELETE ==============
+     * <ul>
+     * 	<li>Functie de mapare a cererii de eliminare a unei inregistrari pe baza identificatorului unic.</li>
+     * 	<li>Operatia este disponibila doar pentru administratorul sistemului.</li>
+     * </ul>
+     * @param id Identificatorul unic al unui eveniment.
+     * @param authorizationValue Header-ul de autorizare.
      */
     @RequestMapping(value = "/{id}", method = RequestMethod.DELETE)
     ResponseEntity<Map<String, String>> deleteLogRegister(@PathVariable int id,
@@ -134,6 +179,17 @@ public class LogController {
         }
     }
 
+    /**
+     * <ul>
+     * 	<li>Functie de mapare a cererii de eliminare a unei inregistrari pe baza anumitor criterii.</li>
+     * 	<li>Operatia este disponibila doar pentru administratorul sistemului.</li>
+     * </ul>
+     * @param nodeAddress Adresa IP a nodului la nivelul caruia a fost generat evenimentul.
+     * @param messageType Tipul evenimentului.
+     * @param date1 Limita stanga a intervalul de referinta calendaristic.
+     * @param date2 Limita dreapta a intervalul de referinta calendaristic.
+     * @param authorizationValue Header-ul de autorizare.
+     */
     @RequestMapping(value = "", method = RequestMethod.DELETE)
     ResponseEntity<Map<String, String>> deleteLogRegByCriteria(@RequestParam(name = "node_address", required = false, defaultValue = "") String nodeAddress,
                                                           @RequestParam(name = "message_type", required = false, defaultValue = "") String messageType,

@@ -104,8 +104,8 @@ public class HttpConnectionService {
         byte[] postData = jsonData.getBytes(StandardCharsets.UTF_8);
         HttpURLConnection connection = this.generateConnection(urlink, method);
         connection.setDoOutput(true);
-        connection.setRequestProperty( "Content-Type", "application/json");
-        connection.setRequestProperty( "Content-Length", Integer.toString(jsonData.length()));
+        connection.setRequestProperty("Content-Type", "application/json");
+        connection.setRequestProperty("Content-Length", Integer.toString(jsonData.length()));
         try( DataOutputStream wr = new DataOutputStream( connection.getOutputStream())) {
             wr.write( postData );
         }

@@ -14,17 +14,44 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * <ul>
+ * 	<li>Clasa de tip controller <strong>@RestController</strong> care expune toate metodele HTTP specifice reprezentarii obiectului <strong>UserType</strong>.</li>
+ * 	<li> Se specifica si adresa <strong>@CrossOrigin</strong> : adresa aplicatiei client.</li>
+ * 	<li> Toate cererile HTTP vor contine in URI baza <strong>/api/usertype</strong>.</li>
+ * </ul>
+ */
 @CrossOrigin(origins = "http://localhost:3000")
 @RestController
 @RequestMapping(value = "/api/usertype")
 public class UserTypesController {
+    /**
+     * <ul>
+     * 	<li>Injectarea serviciului de tip <strong>UserTypeDao</strong> care va expune toate metodele specifice prelucrarii obiectului.</li>
+     * 	<li> Injectarea se va face in mod transparent de catre SpringBoot <strong>@Autowired</strong>.</li>
+     * </ul>
+     */
     @Autowired
     private UserTypeDao userTypeDao;
 
+    /**
+     * <ul>
+     * 	<li>Obiectul care gestioneaza autorizarea clientului.</li>
+     * 	<li> Se verifica daca utilizatorul are rolul specific cererii.</li>
+     * 	<li> Se va furniza header-ul de autorizare <strong>Bearer TOKEN</strong> si lista de utilizatori permisi ai cererii si,
+     *       in urma decodarii <strong>JWT</strong>-ului se va decide daca se poate efectua operatia.</li>
+     * 	<li> In caz contrar, se intoarce <strong>401 NOT AUTHORIZED</strong>.</li>
+     * </ul>
+     */
     AuthorizationService authorizationService = new AuthorizationService();
 
     /**
-     * ============== CREATE ==============
+     * <ul>
+     * 	<li>Functie de mapare a cererii de adaugare a unui nou tip de utilizator.</li>
+     * 	<li>Operatia este disponibila doar pentru administratorul sistemului.</li>
+     * </ul>
+     * @param userType Noul tip de utilizator.
+     * @param authorizationValue Header-ul de autorizare.
      */
     @RequestMapping(value = "", method = RequestMethod.PUT)
     ResponseEntity<Map<String, String>> insertUserType(@RequestBody UserType userType,
@@ -48,9 +75,13 @@ public class UserTypesController {
         }
     }
 
-
     /**
-     * ============== RETRIEVE ==============
+     * <ul>
+     * 	<li>Functie de mapare a cererii de extragere a unui tip de utilizator, pe baza identificatorului unic./li>
+     * 	<li>Operatia este disponibila doar pentru toti utilizatorii sistemului.</li>
+     * </ul>
+     * @param type Identificatorul unic, reprezentand un sir de caractere cu numele tipului utilizatorului.
+     * @param authorizationValue Header-ul de autorizare.
      */
     @RequestMapping(value = "/{type}", method = RequestMethod.GET)
     ResponseEntity<UserType> getUserType(@PathVariable String type,
@@ -72,6 +103,19 @@ public class UserTypesController {
         }
     }
 
+    /**
+     * <ul>
+     * 	<li>Functie de mapare a cererii de extragere a unui atribut al tipului utilizatorului.</li>
+     * 	<li>Operatia este disponibila doar pentru toti utilizatorii sistemului.</li>
+     * 	<ul>
+     * 	    <li>Factorul de replicare : <strong>replication_factor</strong></li>
+     * 	    <li>Cantitatea de memorie totala disponibila : <strong>available_storage</strong></li>
+     * 	</ul>
+     * </ul>
+     * @param type  Identificatorul unic, reprezentand un sir de caractere cu numele tipului utilizatorului.
+     * @param field Atributul cautat.
+     * @param authorizationValue Header-ul de autorizare.
+     */
     @RequestMapping(value = "/{type}/{field}", method = RequestMethod.GET)
     ResponseEntity<UserType> getUserTypeField(@PathVariable String type,
                                               @PathVariable String field,
@@ -103,6 +147,12 @@ public class UserTypesController {
         }
     }
 
+    /**
+     * <ul>
+     * 	<li>Functie de mapare a cererii de extragere a tuturor tipurilor de utilizatori.</li>
+     * 	<li>Operatia este disponibila doar pentru toti utilizatorii sistemului.</li>
+     * </ul>
+     */
     @RequestMapping(value = "/all", method = RequestMethod.GET)
     ResponseEntity<List<UserType>> getAllUserTypes(){
         try{
@@ -115,9 +165,14 @@ public class UserTypesController {
         }
     }
 
-
     /**
-     * ============== UPDATE ==============
+     * <ul>
+     * 	<li>Functie de mapare a cererii de actualizare a unui tip de utilizator.</li>
+     * 	<li>Operatia este disponibila doar pentru administratorul sistemului.</li>
+     * </ul>
+     * @param type Identificatorul unic, reprezentand un sir de caractere cu numele tipului utilizatorului.
+     * @param updateValue Dictionar ce contine atributele ce trebuie actualizate si noile valori.
+     * @param authorizationValue Header-ul de autorizare.
      */
     @RequestMapping(value = "/{type}", method = RequestMethod.PUT)
     ResponseEntity<Map<String, String>> updateUserType(@PathVariable String type,
@@ -152,9 +207,13 @@ public class UserTypesController {
         }
     }
 
-
     /**
-     * ============== DELETE ==============
+     * <ul>
+     * 	<li>Functie de mapare a cererii de eliminare a unui tip de utilizator.</li>
+     * 	<li>Operatia este disponibila doar pentru administratorul sistemului.</li>
+     * </ul>
+     * @param type Identificatorul unic, reprezentand un sir de caractere cu numele tipului utilizatorului.
+     * @param authorizationValue Header-ul de autorizare.
      */
     @RequestMapping(value = "/{type}", method = RequestMethod.DELETE)
     ResponseEntity<Map<String, String>> deleteUserType(@PathVariable String type,

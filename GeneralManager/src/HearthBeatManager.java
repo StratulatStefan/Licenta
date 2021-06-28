@@ -141,9 +141,6 @@ public class HearthBeatManager implements Runnable{
                         registerNodeStorageQuantity(receivedAddress.getIpAddress(), message.getMemoryQuantity());
                     }
                     catch (ClassCastException exception){
-                        // mesajul trimis de acest nod a ajuns tot la el, ceea ce nu ne dorim sa se intample
-                        // nu stim de ce se intampla, dar se intampla cateodata.
-                        // primim RequestCRC
                     }
                     catch (Exception exception){
                         LoggerService.registerError(GeneralManager.generalManagerIpAddress,"Hearthbeatmanager receiveloop : " + exception.getMessage());

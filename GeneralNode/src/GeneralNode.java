@@ -16,10 +16,12 @@ import java.util.List;
 /* https://tldp.org/HOWTO/Multicast-HOWTO.html#toc1 */
 
 /**
- * Clasa generala a nodului intern.
+ * <ul>
+ * 	<li>Clasa generala a nodului intern.</li>
+ * 	<li>Va realiza instantierea si comunicarea tuturor obiectelor care expun mecanismele specifice nodului intern.</li>
+ * </ul>
  */
 public class GeneralNode{
-    /** -------- Atribute -------- **/
     /**
      * Adresa IP la care va fi mapat nodul intern
      */
@@ -28,19 +30,43 @@ public class GeneralNode{
      * Calea de baza la care se vor stoca fisierele
      */
     private  static String storagePath = AppConfig.getParam("storagePath");
+    /**
+     * <ul>
+     * 	<li>Flag care conditioneaza calcularea sumei de control a tuturor fisierelor din sistem.</li>
+     * 	<li> Va fi initializat cu valoarea <strong>true</strong> astfel incat, la pornirea nodului sa se calculeze sumele de control.</li>
+     * 	<li> Va fi resetat pe <strong>false</strong> ulterior pentru a evita calcularea sumelor de control.</li>
+     * </ul>
+     */
     private static boolean initFlag = true;
 
     /**
      * Obiectul care va fi trimis la nodul general sub forma de heartbeat
-     * **/
+     **/
     private final static NodeBeat storageStatus = new NodeBeat();
+    /**
+     * <ul>
+     * 	<li>Tabela sumelor de control, care va fi folosita pentru salvarea rezultatelor calcularii sumelor de control
+     *       si pentru extragerea sumei de control ce va fi trimisa catre nodul general in cadrul unui <strong>heartbeat</strong>.</li>
+     * </ul>
+     */
     public final static CRCTable crcTable = new CRCTable();
+    /**
+     * <ul>
+     * 	<li>Tabela fisierelor noi.</li>
+     * 	<li> Vor fi stocate doar fisierelor noi, pentru care suma de control trebuie calculata imediat.</li>
+     * </ul>
+     */
     private final static NewFiles newFiles = new NewFiles();
+    /**
+     * <ul>
+     * 	<li>Lista de asteptare, in care vor fi adaugate fisierele,
+     *      in momentul in care sunt prelucrate in cadrul unei operatii solicitate de client.</li>
+     * 	<li> Se evita astfel, calcularea sumei de control a fisierului.</li>
+     * 	<li> Nu se doreste obtinerea unor valori eronate care sa genereze replicari.</li>
+     * </ul>
+     */
     public final static PendingList pendingList = new PendingList();
 
-
-
-    /** -------- Managerii activitatilor -------- **/
     /**
      * Obiectul care se ocupa de mecanismul de hearbeats
      */
@@ -49,18 +75,20 @@ public class GeneralNode{
      * Obiectul care se va ocupa de comunicarea cu clientul
      */
     private ClientCommunicationManager clientCommunicationManager;
-
     /**
      * Obiectul care se va ocupa de comunicarea cu nodul general pentru prelucrarea fisiere.
      */
     private FileSystemManager fileSystemManager;
+    /**
+     * Obiectul care va gestiona toate prelucrarile versiunilor fisierelor.
+     */
     public static VersionControlManager versionControlManager;
 
-
-    /** -------- Constructor & Configurare -------- **/
-
     /**
-     * Constructorul clasei
+     * <ul>
+     * 	<li>Constructorul clasei.</li>
+     * 	<li> Realizeaza instantierea tuturor obiectelor care asigura mecanismele specifice nodului.</li>
+     * </ul>
      */
     public GeneralNode(String ipAddress) throws Exception {
         this.hearthBeatManager = new HearthBeatManager(ipAddress);
@@ -69,9 +97,14 @@ public class GeneralNode{
         versionControlManager = new VersionControlManager(ipAddress);
     }
 
-
-    /** -------- Getter -------- **/
-
+    /**
+     * <ul>
+     * 	<li>Calculeaza sumele de control ale tuturor fisierelor stocate in memoria nodului.</li>
+     * 	<li> Se tine cont de faptul ca, dupa finalizarea calculului, o suma de control se adauga in lista <strong>CRCTable</strong> urmand sa fie preluata imediat si trimisa catre nodul general.</li>
+     * 	<li> Pentru a eficientiza procesul trimiterii sumelor de control ale fisierelor de dimensiuni mici si pentru a reduce timpul global de calculare a sumelor, se paralelizeaza intregul mecanism.</li>
+     * 	<li> Fiecare fisier va fi analizat in mod separat.</li>
+     * </ul>
+     */
     public static void calculateFileSystemCRC(){
         String path = storagePath + ipAddress;
 
@@ -91,13 +124,13 @@ public class GeneralNode{
     }
 
     /**
-     * TODO rework description
-     * Functie care acceseaza filesystem-ul si determina statusul stocarii nodului curent;
-     * Extrage toti utilizatorii si fisierele din stocarea nodului curent, si compune heartBeat-ul
-     * ce va fi trimis catre nodul general.
-     * Pentru a se evita instantierea unui nou beat la perioade regulate de timp, heartbeat-ul are o singura instanta,
-     * care se trimite mereu catre nodul general, doar ca se modifica valorile acestuia
-     * @return Heartbeat-ul (acelasi, dar cu alte valori)
+     * <ul>
+     * 	<li>Daca in tabela <strong>CRCTable</strong> fisierele au suma de control <strong>-1</strong>, nu se va recalcula suma de control.</li>
+     * 	<li>In schimb, suma de control se va calcula doar la cererea nodului general.</li>
+     * 	<li>Daca fisierul curent se afla intr-o operatie de prelucrare, fapt evidentiat prin prezenta in lista <strong>PendingList</strong>,
+     *      se va transmiterea datelor acestora.</li>
+     * 	<li>Pe langa datele de identificare ale unui fisier, se vor include si date despre ultima versiune a fisierului.</li>
+     * </ul>
      */
     public static NodeBeat getStorageStatus() throws IOException {
         // la primul beat, se trimite neaparat tot statusul
@@ -160,11 +193,11 @@ public class GeneralNode{
         return storageStatus;
     }
 
-
-    /** -------- Main -------- **/
     /**
-     * Functia care porneste toate activitatile managerilor;
-     * Apeluri de functii sau pornire de thread-uri
+     * <ul>
+     * 	<li>Functia care porneste toate activitatile managerilor.</li>
+     * 	<li>Apeluri de functii sau pornire de thread-uri.</li>
+     * </ul>
      */
     public void StartActivity() throws Exception {
         getStorageStatus();
@@ -177,14 +210,16 @@ public class GeneralNode{
     }
 
     /**
-     * @param args Argumentele furnizate la linia de comanda
+     * <ul>
+     * 	<li>Functia main.</li>
+     * 	<li> Va instantia si porni toate mecanismele specifice nodului intern.</li>
+     * </ul>
      */
     public static void main(String[] args) {
         try {
             ipAddress = args[0];
-
-            GeneralNode generalManager = new GeneralNode(ipAddress);
-            generalManager.StartActivity();
+            GeneralNode generalNode = new GeneralNode(ipAddress);
+            generalNode.StartActivity();
         }
 
         catch (Exception exception){

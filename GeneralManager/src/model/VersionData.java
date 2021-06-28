@@ -13,7 +13,7 @@ public class VersionData implements Serializable {
      * Momentul de timp la care a fost inregistrata noua versiune.
      */
     private String timestamp;
-    /**
+     /**
      * Numele versiuni [v<x>]
      */
     private String versionName;

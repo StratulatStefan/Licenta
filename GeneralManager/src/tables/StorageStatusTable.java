@@ -1,6 +1,7 @@
 package tables;
 
 import communication.Address;
+import communication.Serializer;
 import config.AppConfig;
 import data.Pair;
 import logger.LoggerService;
@@ -8,6 +9,7 @@ import model.FileAttributesForStorage;
 import model.FileVersionData;
 import node_manager.Beat.FileAttribute;
 import node_manager.Beat.NodeBeat;
+import os.FileSystem;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -404,6 +406,18 @@ public class StorageStatusTable {
             }
         }
         return results;
+    }
+
+    public String getSize(){
+        try {
+            long size = Serializer.getObjectSize(statusTable);
+            Pair<Double, String> sz = FileSystem.convertToBestScale(size, 0);
+            return sz.getFirst() + " " + sz.getSecond();
+        }
+        catch (Exception exception){
+            System.out.println("Nu pot calcula dimensiunea!");
+            return "";
+        }
     }
 
     @Override

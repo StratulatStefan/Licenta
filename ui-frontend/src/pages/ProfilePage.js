@@ -234,7 +234,8 @@ class ProfilePage extends Component {
                             {userDetails}
                         </div>
                     </div>: 
-                    <p>Nu puteti accesa aceasta pagina daca utilizatorul nu este conectat</p>}
+                    <p>Nu puteti accesa aceasta pagina daca utilizatorul nu este conectat</p>
+                }
             </div>
       );
     }

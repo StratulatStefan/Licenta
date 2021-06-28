@@ -36,6 +36,7 @@ public class FrontendManager {
      */
     private static int generalManagerPort       = Integer.parseInt(AppConfig.getParam("generalManagerPort"));
 
+
     /**
      * <ul>
      * 	<li>Functie care va realiza comunicarea efectiva cu nodul general, in vederea trimiterii cererilor.</li>

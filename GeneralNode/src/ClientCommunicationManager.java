@@ -15,18 +15,23 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 
 /**
- * Clasa care va incapsula toata interactiunea dintre nodul intern si client (frontend).
- * Principala actiune este de a asculta pentru cereri de adaugare de fisiere.
+ * <ul>
+ * 	<li>Clasa care va incapsula toata interactiunea dintre nodul intern si client <strong>frontend</strong>.</li>
+ * 	<li> Principala actiune este de a asculta pentru cereri de incarcare si descarcare de fisiere.</li>
+ * </ul>
  */
 public class ClientCommunicationManager {
-    /** -------- Atribute -------- **/
     /**
      * Adresa nodului curent
      */
     private Address nodeAddress;
-
+    /**
+     * Portul serverului care va asculta pentru mesaje de confirmare.
+     */
     private static int feedbackPort = Integer.parseInt(AppConfig.getParam("feedbackPort"));
-
+    /**
+     * Adresa Ip serverului care va asculta pentru mesaje de confirmare.
+     */
     private static String frontendIpAddress = AppConfig.getParam("frontendAddress");
     /**
      * Dimensiunea bufferului in care vor fi citite datele de la un nod adiacent
@@ -41,21 +46,18 @@ public class ClientCommunicationManager {
      */
     private static int dataTransmissionPort = Integer.parseInt(AppConfig.getParam("dataTransmissionPort"));
 
-
-    /** -------- Constructor & Configurare -------- **/
-
     /**
-     * Constructorul clasei;
-     * Citeste si instantiaza parametrii de configurare
+     * <ul>
+     * 	<li>Constructorul clasei.</li>
+     * 	<li> Creeaza adresa nodului curent.</li>
+     * </ul>
      */
     public ClientCommunicationManager(String address) throws Exception{
         this.nodeAddress = new Address(address, dataTransmissionPort);
     }
 
-
-    /** -------- Functii de prelucrare -------- **/
     /**
-     * Functie care genereaza noul Stream de iesire pentru socket-ul de transmitere a fisierului catre urmatorul nod din lant.
+     * Functie care genereaza noul flux de iesire pentru socket-ul de transmitere a fisierului catre urmatorul nod din lant.
      * @param socket Socket-ul de comunicare cu urmatorul nod din lant
      * @param header Header-ul fisierului ce va fi transmis
      */
@@ -67,8 +69,10 @@ public class ClientCommunicationManager {
     }
 
     /**
-     * Functie care pregateste token-ul pentru urmatorul nod din lant;
-     * Prelucrarea presupune eliminarea nodului curent din lant (prima adresa din lant)
+     * <ul>
+     * 	<li>Functie care pregateste token-ul pentru urmatorul nod din lant.</li>
+     * 	<li> Prelucrarea presupune eliminarea nodului curent din lant <strong>prima adresa din lant</strong>.</li>
+     * </ul>
      * @param token Lantul de noduri.
      */
     private static String cleanChain(String token){
@@ -81,10 +85,8 @@ public class ClientCommunicationManager {
         }
     }
 
-
-    /** -------- Gettere -------- **/
     /**
-     * Functie care extrage urmatoarea adresa din lant, catre care se va trimite in continuare fisierul
+     * Functie care extrage urmatoarea adresa din lant, catre care se va trimite in continuare fisierul.
      * @param token Lantul de adrese.
      */
     private static String getDestinationIpAddress(String token) throws Exception{
@@ -93,11 +95,11 @@ public class ClientCommunicationManager {
         return null;
     }
 
-
-    /** -------- Functii de validare -------- **/
     /**
-     * Functie valideaza daca tokenul curent este valid;
-     * Nu este null si contine adrese IP valide.
+     * <ul>
+     * 	<li>Functie valideaza daca tokenul curent este valid.</li>
+     * 	<li> Nu este null si contine adrese IP valide.</li>
+     * </ul>
      * @param token Token-ul ce trebuie verificat.
      * @throws Exception Generata daca token-ul este invalid.
      */
@@ -123,11 +125,11 @@ public class ClientCommunicationManager {
         return true;
     }
 
-
-    /** -------- Main -------- **/
     /**
-     * Functie care inglobeaza comunicarea de date cu un nod adicant, avandu-se in vedere primirea de date de la un
-     * nod adiacent si, eventual, trimiterea informatiilor mai departe, in cazul in care nu este nod terminal.
+     * <ul>
+     * 	<li>Functie care inglobeaza comunicarea de date cu un nod adicant.</li>
+     * 	<li> Se are in vedere primirea de date de la un nod adiacent si, eventual, trimiterea informatiilor mai departe, in cazul in care nu este nod terminal.</li>
+     * </ul>
      * @param serverAddress Adresa socket-ului pe care este mapat nodul curent.
      * @param clientSocket Socket-ul nodului adiacent, de la care primeste date.
      * @return Runnable-ul necesar pornirii unui thread separat pentru aceasta comunicare.
@@ -211,10 +213,11 @@ public class ClientCommunicationManager {
     }
 
     /**
-     * Functie care inglobeaza activitatea de comunicare cu clientul si cu celelalte noduri din sistem;
-     * Comunicarea cu clientul are in vedere receptionarea de noi fisiere (cazul in care nodul intern este primul din lant)
-     * Comunicarea cu celelalte noduri interne se face in scopul trimiterii/primirii de fisiere (cazul in care nodul intern
-     * nu se afla primul in lant)
+     * <ul>
+     * 	<li>Functie care inglobeaza activitatea de comunicare cu clientul si cu celelalte noduri din sistem.</li>
+     * 	<li> Comunicarea cu clientul are in vedere receptionarea de noi fisiere <strong>cazul in care nodul intern este primul din lant</strong>.</li>
+     * 	<li> Comunicarea cu celelalte noduri interne se face in scopul trimiterii/primirii de fisiere <strong>cazul in care nodul intern nu se afla primul in lant</strong>.</li>
+     * </ul>
      * @throws IOException Exceptie generata la crearea ServerSocket-ului.
      */
     public void clientCommunicationLoop() throws Exception {
@@ -233,6 +236,12 @@ public class ClientCommunicationManager {
         }
     }
 
+    /**
+     * <ul>
+     * 	<li>Functie apelata in urma mecanismului de stocare a unui fisier, pentru trimiterea confirmarii catre client.</li>
+     * 	<li>  Parametrul de tip <strong>FileHeader</strong> se va furniza pentru a putea fi extrase datele de identificare ale nodului, utilizatorului si fisierului.</li>
+     * </ul>
+     */
     public void sendFeedbackToFrontend(FileHeader fileHeader, long crc){
         new Thread(new Runnable() {
             @Override

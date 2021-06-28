@@ -3,6 +3,7 @@ import data.Pair;
 import logger.LoggerService;
 import model.FileVersionData;
 
+import javax.sound.midi.SysexMessage;
 import javax.swing.*;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -103,7 +104,7 @@ public class ReplicationManager implements Runnable{
      * 	<li> Se pune fisierul in starea <strong>PENDING</strong> pentru a fi ignorat de procesul de replicare, pana se primeste confirmare de stocare cu succes.</li>
      * </ul>
      * @param replication_factor Factorul de replicare
-     * @param userId Identificatorul unic al fisierului.
+     * @param userId Identificatorul unic al utilizatorului.
      * @param userFile Numele fisierului
      * @param availableNodesAddressesForFile Lista de adrese a nodurilor care detin fisierul.
      * @param filesize Dimensiunea fisierului
@@ -144,7 +145,7 @@ public class ReplicationManager implements Runnable{
      * 	<li>Functia de solicitare a eliminarii tuturor replicilor unui fisier de pe nodurile specificate.</li>
      * </ul>
      * @param replication_factor Factorul de replicare al fisierului.
-     * @param userId Identificatorul unic al fisierului
+     * @param userId Identificatorul unic al utilizatorului
      * @param userFile Numele fisierului
      * @param candidates Fisierele care contin o replica a fisierului.
      */
@@ -180,6 +181,17 @@ public class ReplicationManager implements Runnable{
             System.out.println(GeneralManager.statusTable);
             System.out.println(GeneralManager.contentTable);
             System.out.println(GeneralManager.nodeStorageQuantityTable);
+
+            System.out.println("xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx");
+            System.out.println("Numarul nodurilor active : " + GeneralManager.connectionTable.numberOfActiveNodes());
+            System.out.println("Numarul fisiere inregistrare : " + GeneralManager.contentTable.numberOfFiles());
+            System.out.println("----------");
+            System.out.println("Dimensiunea ConnectionTable : " + GeneralManager.connectionTable.getSize());
+            System.out.println("Dimensiunea NodeStorageQuantityTable : " + GeneralManager.nodeStorageQuantityTable.getSize());
+            System.out.println("Dimensiunea ContentTable : " + GeneralManager.contentTable.getSize());
+            System.out.println("Dimensiunea StorageStatusTable : " + GeneralManager.statusTable.getSize());
+            System.out.println("xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx");
+
 
             System.out.println("------------------------------------");
             System.out.println("Replication Status");

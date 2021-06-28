@@ -171,7 +171,7 @@ public class ClientCommunicationManager {
      * 	<li>In cazul unui nou fisier se vor cauta trei noi noduri care sa stocheze fisierul.</li>
      * 	<li>Aceasta functie va cauta adresele nodurilor care stocheaza deja fisierul.</li>
      * </ul>
-     * @param userId Identificatorul unic al fisierului.
+     * @param userId Identificatorul unic al utilizatorului.
      * @param filename Numele fisierului.
      * @return Lista de noduri ce cont fisierul, organizata sub forma unui string.
      */

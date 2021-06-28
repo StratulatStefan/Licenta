@@ -12,12 +12,13 @@ import data.Time;
 import node_manager.Beat.RequestCRC;
 
 /**
- * Clasa care se va ocupa de tot mecanismul de heartbeats.
- * Va trimite mesaje frecvent catre nodul general;
- * Mesajele vor contine adresa nodului si statusul stocarii
+ * <ul>
+ * 	<li> Clasa care se va ocupa de tot mecanismul de heartbeats.</li>
+ * 	<li> Va trimite mesaje frecvent catre nodul general.</li>
+ * 	<li> Mesajele vor contine adresa nodului si statusul stocarii.</li>
+ * </ul>
  */
 public class HearthBeatManager implements Runnable{
-    /** -------- Atribute -------- **/
     /**
      * Adresa de multicast
      */
@@ -31,13 +32,11 @@ public class HearthBeatManager implements Runnable{
      */
     private Address nodeAddress;
     /**
-     * Frecventa heartbeat-urilor
-     * Exprimat in secunde.
+     * <ul>
+     * 	<li>Frecventa heartbeat-urilor Exprimat in secunde.</li>
+     * </ul>
      */
     private static double frequency = Double.parseDouble(AppConfig.getParam("hearthBeatFrequency"));
-
-
-    /** -------- Constructor & Configurare -------- **/
 
     /**
      * Constructorul managerului de heartbeat-uri pentru nodul curent.
@@ -47,11 +46,11 @@ public class HearthBeatManager implements Runnable{
         this.nodeAddress = new Address(address, multicastPort);
     }
 
-
-    /** -------- Main -------- **/
     /**
-     * Functie care se ocupa de secventa de trimitere a heart-beat-urilor, odata la frequency secunde.
-     * Fiecare trimitere a beat-urilor este urmata de verificarea tabelei de conexiuni.
+     * <ul>
+     * 	<li>Functie care se ocupa de secventa de trimitere a heart-beat-urilor, odata la frequency secunde.</li>
+     * 	<li> Fiecare trimitere a beat-urilor este urmata de verificarea tabelei de conexiuni.</li>
+     * </ul>
      * @param group Adresa de multicast pe care se va trimite mesajul
      * @param socket Socket-ul nodului curent
      * @return Runnable pe baza caruia se va porni thread-ul de trimitere
@@ -83,8 +82,11 @@ public class HearthBeatManager implements Runnable{
     }
 
     /**
-     * Functie care se ocupa de primirea mesajelor de la celelalte noduri. La fiecare primire a unui nou
-     * heartbeat, se actualizeaza tabela de conexiuni. Primirea se face incontinuu, fara timeout pe recv.
+     * <ul>
+     * 	<li>Functie care se ocupa de primirea mesajelor de la celelalte noduri.</li>
+     * 	<li> La fiecare primire a unui nou heartbeat, se actualizeaza tabela de conexiuni.</li>
+     * 	<li> Primirea se face incontinuu, fara timeout pe recv.</li>
+     * </ul>
      * @param socket Socket-ul nodului curent
      * @return Runnable-ul pe baza caruia se va crea thread-ul de receptie a hearth-beat-urilor.
      */
@@ -118,10 +120,12 @@ public class HearthBeatManager implements Runnable{
     }
 
     /**
-     * Acest manager de hearbeat-uri va trebui sa fie executat pe un thread separat, astfel incat sa nu blocheze comunicarea
-     * managerului general cu nodurile conectate. Asadar, trebuie implementata functia run, care se va executa la apelul start.
-     *
-     * Principala bucla care se ocupa de manevrarea heartbeat-urilor (trimitere/receptie).
+     * <ul>
+     * 	<li>Acest manager de hearbeat-uri va trebui sa fie executat pe un thread separat,
+     *      astfel incat sa nu blocheze comunicarea managerului general cu nodurile conectate.</li>
+     * 	<li> Asadar, trebuie implementata functia run, care se va executa la apelul start.</li>
+     * 	<li> Principala bucla care se ocupa de manevrarea heartbeat-urilor <strong>trimitere/receptie</strong>.</li>
+     * </ul>
      */
     public void run(){
         try {

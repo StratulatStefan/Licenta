@@ -15,12 +15,13 @@ import java.util.Collections;
 import java.util.List;
 
 /**
- * Clasa are ca obiectiv prelucrarile fisierelor;
- * Se bazeaza pe comunicarea cu nodul general si tratarea cererilor de prelucrare a fisierelor.
- * Replicare, eliminare, redenumire
+ * <ul>
+ * 	<li>Clasa are ca obiectiv prelucrarile fisierelor.</li>
+ * 	<li> Se bazeaza pe comunicarea cu nodul general si tratarea cererilor de prelucrare a fisierelor.</li>
+ * 	<li> Replicare, eliminare, redenumire.</li>
+ * </ul>
  */
 public class FileSystemManager implements Runnable{
-    /** -------- Atribute -------- **/
     /**
      * Adresa socket-ului pe care este mapata comunicarea cu nodul general.
      */
@@ -38,20 +39,15 @@ public class FileSystemManager implements Runnable{
      */
     private static String mainFilepath = AppConfig.getParam("storagePath");
 
-
-    /** -------- Constructor & Configurare -------- **/
     /**
-     * Functie care citeste si initializeaza parametrii de configurare
-    /**
-     * Constructorul clasei;
-     * Citeste si instantiaza parametrii de configurare
+     * <ul>
+     * 	<li>Constructorul clasei.</li>
+     * </ul>
      */
     public FileSystemManager(String address) throws Exception{
         this.address = new Address(address, fileSystemMngrPort);
     }
 
-
-    /** -------- Main -------- **/
     /**
      * Functia de trimitere a replicii fisierului solicitat, catre nodul corespunzator.
      * @param userId Id-ul utilizatorului care detine fisierul.
@@ -94,9 +90,10 @@ public class FileSystemManager implements Runnable{
     }
 
     /**
-     * Functia care inglobeaza bucla de comunicare cu clientul.
-     * Se interpreteaza cererea, se determina tipul operatiei solicitate si se executa operatiunea
-     * ceruta asupra fisierului.
+     * <ul>
+     * 	<li>Functia care inglobeaza bucla de comunicare cu clientul.</li>
+     * 	<li> Se interpreteaza cererea, se determina tipul operatiei solicitate si se executa operatiunea ceruta asupra fisierului.</li>
+     * </ul>
      * @param clientSocket Socket-ul pe care se conecteaza nodul general.
      */
     public Runnable fileSystemManagerLoop(Socket clientSocket){
@@ -227,6 +224,9 @@ public class FileSystemManager implements Runnable{
         };
     }
 
+    /*
+    * Trimierea statusului operatiei inapoi la nodul general, in urma finalizarii operatiei.
+     */
     public void sendFeedbackToGeneraManage(DataOutputStream dataOutputStream, FeedbackResponse feedbackResponse){
         try{
             dataOutputStream.write(Serializer.serialize(feedbackResponse));
@@ -236,6 +236,12 @@ public class FileSystemManager implements Runnable{
         }
     }
 
+    /**
+     * <ul>
+     * 	<li>Functie pentru descarcarea unui fisier.</li>
+     * 	<li> Descarcarea presupune trimiterea fisierului catre client.</li>
+     * </ul>
+     */
     public static void downloadFile(Socket socket, String userId, String filename) throws IOException {
         String filepath = "D:/Facultate/Licenta/Storage/" + GeneralNode.ipAddress + "/" + userId + "/" + filename;
 

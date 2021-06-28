@@ -11,7 +11,7 @@ public class Serializer {
     /**
      * Dimensiunea unui pachet de date.
      */
-    private final static int bufferSize = 4096;
+    private final static int bufferSize = 16184;
 
     /**
      * <ul>
@@ -30,6 +30,7 @@ public class Serializer {
         objectOutputStream.flush();
 
         byte[] content = byteArrayOutputStream.toByteArray();
+        System.out.println("----------------------> " + content.length + " <----------------------");
         byte[] data = new byte[bufferSize - content.length];
         byte[] result = new byte[bufferSize];
         System.arraycopy(content, 0, result, 0,  content.length);
@@ -56,5 +57,15 @@ public class Serializer {
         objectInputStream.close();
         byteArrayInputStream.close();
         return obj;
+    }
+
+    public static long getObjectSize(Object object) throws IOException {
+        ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+        ObjectOutputStream objectOutputStream = new ObjectOutputStream(byteArrayOutputStream);
+        objectOutputStream.writeObject(object);
+        objectOutputStream.flush();
+
+        byte[] content = byteArrayOutputStream.toByteArray();
+        return content.length;
     }
 }

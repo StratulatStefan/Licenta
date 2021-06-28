@@ -55,7 +55,7 @@ public class JWT {
      * 	<li> Token-ul va contine <strong>id</strong>-ul, <strong>username</strong>-ul si <strong>rolul</strong> utilizatorului.</li>
      * 	<li>  Token-ul va fi semnal digital si va avea un timp de expirare.</li>
      * </ul>
-     * @param id Identificatorul unic al fisierului
+     * @param id Identificatorul unic al utilizatorului
      * @param username Numele utilizatorului
      * @param userRole Rolul utilizatorului, folosit la autorizare.
      * @param sessionTime Durata unei sesiuni de comunicare cu clientul.

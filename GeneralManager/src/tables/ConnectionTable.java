@@ -4,9 +4,12 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
+
+import communication.Serializer;
 import data.Pair;
 import communication.Address;
 import data.Time;
+import os.FileSystem;
 
 /**
  * <ul>
@@ -135,6 +138,22 @@ public class ConnectionTable {
             }
         }
         return disconnected;
+    }
+
+    public String getSize(){
+        try {
+            long size = Serializer.getObjectSize(connectionTable);
+            Pair<Double, String> sz = FileSystem.convertToBestScale(size, 0);
+            return sz.getFirst() + " " + sz.getSecond();
+        }
+        catch (Exception exception){
+            System.out.println("Nu pot calcula dimensiunea!");
+            return "";
+        }
+    }
+
+    public int numberOfActiveNodes(){
+        return connectionTable.size();
     }
 
     /** -------- Functii de baza, supraincarcate -------- **/

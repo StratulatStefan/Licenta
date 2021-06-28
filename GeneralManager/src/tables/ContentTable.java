@@ -5,9 +5,12 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
+import communication.Serializer;
 import config.AppConfig;
+import data.Pair;
 import logger.LoggerService;
 import model.FileAttributes;
+import os.FileSystem;
 
 /**
  * <ul>
@@ -450,6 +453,28 @@ public class ContentTable implements Serializable {
             }
         }
         return results;
+    }
+
+    public String getSize(){
+        try {
+            long size = Serializer.getObjectSize(contentTable);
+            Pair<Double, String> sz = FileSystem.convertToBestScale(size, 0);
+            return sz.getFirst() + " " + sz.getSecond();
+        }
+        catch (Exception exception){
+            System.out.println("Nu pot calcula dimensiunea!");
+            return "";
+        }
+    }
+
+    public int numberOfFiles(){
+        int total = 0;
+        synchronized (this.contentTable) {
+            for(String userId : this.getUsers()){
+                total += this.contentTable.get(userId).size();
+            }
+        }
+        return total;
     }
 
     @Override
