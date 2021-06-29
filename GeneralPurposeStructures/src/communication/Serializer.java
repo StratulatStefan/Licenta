@@ -30,7 +30,6 @@ public class Serializer {
         objectOutputStream.flush();
 
         byte[] content = byteArrayOutputStream.toByteArray();
-        System.out.println("----------------------> " + content.length + " <----------------------");
         byte[] data = new byte[bufferSize - content.length];
         byte[] result = new byte[bufferSize];
         System.arraycopy(content, 0, result, 0,  content.length);

@@ -196,7 +196,7 @@ public class ClientCommunicationManager {
             return null;
         }
         System.out.println("Generam token-ul..");
-        List<String> candidates = GeneralManager.nodeStorageQuantityTable.getMostSuitableNodes(filesize);
+        List<String> candidates = GeneralManager.nodeStorageQuantityTable.getMostSuitableNodes(filesize, GeneralManager.connectionTable);
         if(candidates.size() == 0){
             LoggerService.registerError(GeneralManager.generalManagerIpAddress, "Niciun nod nu are suficienta memorie pentru a stoca noul fisier.");
             return null;

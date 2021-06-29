@@ -42,7 +42,9 @@ public class ReplicationManager implements Runnable{
      * @param availableNodes Lista nodurilor care contin deja fisieru
      */
     private List<String> searchCandidatesForReplication(int replication_factor, List<String> availableNodes, long filesize){
-        List<String> openNodes = GeneralManager.nodeStorageQuantityTable.getMostSuitableNodes(filesize).subList(0, replication_factor);
+        List<String> openNodes = GeneralManager.nodeStorageQuantityTable
+                .getMostSuitableNodes(filesize, GeneralManager.connectionTable)
+                .subList(0, replication_factor);
         try {
             return GeneralPurposeMethods.listDifferences(openNodes, availableNodes).subList(0, replication_factor - availableNodes.size());
         }
@@ -125,7 +127,6 @@ public class ReplicationManager implements Runnable{
             catch (Exception exception){
                 System.out.println("Replication : updatefilestatus1 : " + exception.getMessage());
             }
-            // cautam un criteriu pe baza caruia selectam nodul de la care se face copierea
             String source = availableNodesAddressesForFile.get(0);
             status += "\t\tFound source of replication : " + source + "\n\t\tFound candidates for replication : ";
             System.out.println("\t\tFound source of replication : " + source);

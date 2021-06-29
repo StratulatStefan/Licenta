@@ -120,6 +120,20 @@ public class ConnectionTable {
     }
 
     /**
+     * Functie de verificare a existentei unei anumite adrese in lista de adrese, doar pe baza adresei IP
+     * @param adddress Adresa IP cautata
+     * @return existenta adresei in lista
+     */
+    public boolean containsAddress(String adddress){
+        for(Pair<Address, Long> connection : this.connectionTable){
+            if(connection.getFirst().getIpAddress().equals(adddress)){
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
      * <ul>
      * 	<li>Functie care verifica starea conexiunilor.</li>
      * 	<li> O conexiune exista daca diferenta dintre timestampul curent si timestampulconexiunii este mai mica decat limita.</li>

@@ -80,10 +80,12 @@ public class NodeStorageQuantityTable{
      * @param filesize Dimensiunea ce se doreste a fi ocupata.
      * @return Lista de noduri care au disponibila cantitatea cautata de memorie
      */
-    public List<String> getMostSuitableNodes(long filesize){
+    public List<String> getMostSuitableNodes(long filesize, ConnectionTable connectionTable){
         synchronized (this.storageStatus) {
             List<Pair<String, Long>> availableQuantities = new ArrayList<Pair<String, Long>>();
             for (String node : new ArrayList<>(this.storageStatus.keySet())) {
+                if(!connectionTable.containsAddress(node))
+                    continue;
                 StorageQuantity quantity = this.storageStatus.get(node);
                 availableQuantities.add(new Pair<String, Long>(node, quantity.getTotalStorage() - quantity.getUsedStorage() - filesize));
             }
