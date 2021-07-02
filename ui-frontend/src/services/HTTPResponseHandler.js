@@ -8,6 +8,7 @@ export class HTTPResponseHandler{
                     status_code = 401
                     if(response["error status"] !== null && response["error status"].includes("expired")){
                         response['error status'] = "You session expired. Please try to reauthenticate."
+                        alert("Sesiunea a expirat! Incercati sa va reautentificati!")
                         status_code = 402
                     }
                     else{

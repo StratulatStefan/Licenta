@@ -46,6 +46,7 @@ public class HearthBeatManager implements Runnable{
     private static int checkStorageHealthFrequency = Integer.parseInt(AppConfig.getParam("checkStorageHealthFrequency"));
 
 
+
     /**
      * Constructorul managerului comunicatiei multicast.
      * @param address Adresa nodului curent

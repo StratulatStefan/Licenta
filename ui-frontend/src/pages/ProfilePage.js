@@ -13,6 +13,7 @@ class ProfilePage extends Component {
     constructor(props){
         super(props)
         document.getElementById("page-name").innerHTML = "Profile Page";
+        GeneralPurposeService.setHeaderLayout("USER")
         this.userData = localStorage.getItem('user_data')
         this.state = {
             isUserConnected     : false,
@@ -20,7 +21,6 @@ class ProfilePage extends Component {
             userDetailsCategory : ProfilePage.userDetailsCategories[0],
             additionalUserData  : null
         }
-
     }
 
     componentDidUpdate = () => {
@@ -139,7 +139,6 @@ class ProfilePage extends Component {
                     let total_storage = ProfilePage.availableUserTypes[this.state.additionalUserData["type"]]["available_storage"]
                     let available_storage = this.state.additionalUserData["storage_quantity"]
                     let used_storage = total_storage - available_storage
-                    let number_of_files = this.state.additionalUserData["number_of_file"]
                     userDetails = 
                         <div className = "accountData">
                             <p className="accountDataField" >
@@ -159,10 +158,6 @@ class ProfilePage extends Component {
                                 <span className = "accountDataValue">
                                     {GeneralPurposeService.getFileSizeUnit(available_storage)}
                                 </span>
-                            </p>
-                            <p className="accountDataField" >
-                                Number of files
-                                <span className = "accountDataValue">{number_of_files}</span>
                             </p>
                         </div>
                     break

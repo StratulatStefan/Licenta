@@ -24,7 +24,7 @@ import java.util.Map;
  * 	<li>Help : https://stackabuse.com/uploading-files-with-spring-boot/</li>
  * </ul>
  */
-@CrossOrigin(origins = "http://localhost:3000")
+@CrossOrigin(origins = "http://localhost:5000")
 @Controller
 public class FileController {
     /**

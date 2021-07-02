@@ -69,13 +69,14 @@ public class StorageStatusTable {
                     // daca fisierul utilizatorului curent nu exista, il adaugam
                     String filename = userFile.getFilename();
                     long crc = userFile.getCrc();
-                    String versionNo = userFile.getVersionNo();
                     long filesize = userFile.getFilesize();
+                    String versionNo = userFile.getVersionNo();
+                    String versionDescription = userFile.getDescription();
                     if(!this.checkFileForUser(user, filename)){
                         FileAttributesForStorage data = new FileAttributesForStorage();
                         data.setFilename(filename);
                         try{
-                            data.addNode(nodeAddress, crc, versionNo, filesize);
+                            data.addNode(nodeAddress, crc, versionNo, filesize, versionDescription);
                         }
                         catch (Exception exception){
                             System.out.println("Node already contains address!");
@@ -88,7 +89,7 @@ public class StorageStatusTable {
                             // adaugam adresa nodului
                             int candidate = this.getUserFile(user, filename);
                             if(candidate != -1){
-                                this.statusTable.get(user).get(candidate).addNode(nodeAddress, crc, versionNo,filesize);
+                                this.statusTable.get(user).get(candidate).addNode(nodeAddress, crc, versionNo,filesize, versionDescription);
                             }
                         }
                         else{
@@ -97,6 +98,7 @@ public class StorageStatusTable {
                                 this.statusTable.get(user).get(candidate).setVersionNo(nodeAddress, versionNo);
                                 long statusTableCRC = this.statusTable.get(user).get(candidate).getCrc(nodeAddress);
                                 String statusTableVersioNo = this.statusTable.get(user).get(candidate).getVersionNo(nodeAddress);
+                                String statusTabelDescription = this.statusTable.get(user).get(candidate).getVersionDescription(nodeAddress);
                                 long statusTableFilesize = this.statusTable.get(user).get(candidate).getFileSize(nodeAddress);
                                 if (crc != -1 && statusTableCRC != crc)
                                     this.statusTable.get(user).get(candidate).setCrc(nodeAddress, crc);
@@ -104,6 +106,8 @@ public class StorageStatusTable {
                                     this.statusTable.get(user).get(candidate).setFileSize(nodeAddress, filesize);
                                 if(!statusTableVersioNo.equals(versionNo))
                                     this.statusTable.get(user).get(candidate).setVersionNo(nodeAddress, versionNo);
+                                if(!statusTabelDescription.equals(versionDescription))
+                                    this.statusTable.get(user).get(candidate).setVersionDescription(nodeAddress, versionDescription);
                             }
                             catch (NullPointerException exception){
                                 LoggerService.registerWarning(generalManagerIpAddress, "File " + this.statusTable.get(user).get(candidate).getFilename() + " of user " + nodeAddress + " skipped! : " + exception.getMessage());
@@ -330,6 +334,27 @@ public class StorageStatusTable {
             }
         }
     }
+
+    /**
+     * Functie care returneaza descrierea ultimei versiuni a unui fisier.
+     * @param user Id-ul utilizatorului.
+     * @param file Numele fisierului.
+     * @return CRC-ul fisierului.
+     */
+    public String getLastVersionDescriptionOfFile(String user, String file){
+        synchronized (this.statusTable){
+            try {
+                int candidate = this.getUserFile(user, file);
+                if(candidate == -1)
+                    return null;
+                return this.statusTable.get(user).get(candidate).getNodesVersionsDescriptions().get(0);
+            }
+            catch (NullPointerException exception){
+                return null;
+            }
+        }
+    }
+
 
     /**
      * Functie care returneaza o referinta la un fisier al unui utilizator.

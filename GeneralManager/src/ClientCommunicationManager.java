@@ -193,7 +193,7 @@ public class ClientCommunicationManager {
         List<String> connectionAddresses = GeneralManager.connectionTable.getConnectionTable();
         if(connectionAddresses.size() <  replication_factor){
             LoggerService.registerError(GeneralManager.generalManagerIpAddress, "Nu sunt suficiente noduri disponibile");
-            return null;
+            //before : return null;
         }
         System.out.println("Generam token-ul..");
         List<String> candidates = GeneralManager.nodeStorageQuantityTable.getMostSuitableNodes(filesize, GeneralManager.connectionTable);
@@ -202,7 +202,8 @@ public class ClientCommunicationManager {
             return null;
         }
         LoggerService.registerSuccess(GeneralManager.generalManagerIpAddress, "User uploaded a new file with size : " + filesize + " and replication factor : " + replication_factor);
-        String token = String.join("-", candidates.subList(0, replication_factor));
+        //before : String token = String.join("-", candidates.subList(0, replication_factor));
+        String token = String.join("-", candidates.subList(0, Math.min(replication_factor, candidates.size())));
         System.out.println("====================================");
         System.out.println(token);
         System.out.println("====================================");
@@ -432,6 +433,8 @@ public class ClientCommunicationManager {
                                         response = new ManagerTextResponse();
                                         ((ManagerTextResponse)response).setResponse("OK");
                                         GeneralManager.contentTable.updateFileStatus(userId, filename, "[VALID]");
+                                        while((!GeneralManager.contentTable.getFileStatusForUser(userId, filename).contains("DELETED")));
+                                        Thread.sleep(200);
                                         break;
                                     }
                                 }
@@ -525,7 +528,6 @@ public class ClientCommunicationManager {
                         }
                         dataOutputStream.write(Serializer.serialize(response));
                     }
-                    System.out.println("Cerinta clientului a fost realizata..");
                     dataInputStream.close();
                     dataOutputStream.close();
                     clientSocket.close();

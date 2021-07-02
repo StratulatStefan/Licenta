@@ -28,6 +28,10 @@ public class FileAttribute implements Serializable {
      * Dimensiunea fisierului.
      */
     private long filesize;
+    /**
+     * Descrierea versiunii fisierului.
+     */
+    private String description;
 
 
     /**
@@ -80,5 +84,18 @@ public class FileAttribute implements Serializable {
      */
     public void setFilesize(long filesize) {
         this.filesize = filesize;
+    }
+
+    /**
+     * Getter pentru descrierea versiunii fisierului.
+     */
+    public String getDescription() {
+        return description;
+    }
+    /**
+     * Setter pentru descrierea versiunii fisierului.
+     */
+    public void setDescription(String description) {
+        this.description = description;
     }
 }

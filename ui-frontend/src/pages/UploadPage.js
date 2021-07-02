@@ -2,6 +2,7 @@ import React, { Component } from 'react';
 
 import { FileHandlerService }    from '../services/FileHandlerService';
 import { GeneralPurposeService } from '../services/GeneralPurposeService';
+import {UsersHandlerService} from '../services/UsersHandlerService';
 
 import '../styles/pages-style.css';
 import '../styles/pages-home-style.css';
@@ -12,12 +13,14 @@ class UploadPage extends Component {
         super(props)
         document.getElementById("page-name").innerHTML = "Upload Page";
         this.userData = JSON.parse(localStorage.getItem('user_data'))
+        console.log(this.userData)
         this.descriptionData = null;
         this.state = {
             currentFile : null,
             userType    : "STANDARD",
             preview     : <p id="upload_data_preview">No preview available</p>
         }
+        this.fetchUserType().then(_ => {})
     }
 
     componentDidMount = () => {
@@ -41,6 +44,27 @@ class UploadPage extends Component {
             dropArea.style.borderStyle = "solid"
         }, false)
         dropArea.addEventListener('drop', this.handleDropFiles, false)
+    }
+
+    fetchUserType = () => {
+        return new Promise(resolve => {
+            try{
+                this.setState({userType : this.props.location.state.detail["user_type"]})
+                resolve(null)
+            }
+            catch(e){
+                UsersHandlerService.getUserRole(this.userData["jwt"]).then(response => {
+                    if(response.code === 1){
+                        console.log(`props fetch: ${response["content"]}`)
+                        this.setState({userType : response["content"]})
+                    }
+                    else if(response.code === 401){
+                        localStorage.setItem("user_data", '')
+                    }
+                    resolve(null)
+                })
+            }
+        })
     }
 
     handleDropFiles = (e) => {
@@ -76,6 +100,7 @@ class UploadPage extends Component {
         FileHandlerService.uploadFile(this.state.currentFile, this.userData["jwt"], this.descriptionData, this.state.userType).then(response => {
             if(response.code === 1){
                 document.getElementById("dropmessage_1").innerHTML = response.content
+                document.getElementById("extra").innerHTML = "Your file will be available in a few seconds..."
             }
             else if(response.code === 401){
                 document.getElementById("dropmessage_1").innerHTML = response
@@ -114,6 +139,8 @@ class UploadPage extends Component {
                                     document.getElementById("uploader").style.display = "block"
                                 }}>Upload another file</button><br/>
                             <p id="dropmessage_1"></p>
+                            <br style={{height:"50%"}}/>
+                            <p style={{marginTop:"-5px"}} id="extra"></p>
                         </div>
                     </div>
                 </div>

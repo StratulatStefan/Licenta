@@ -424,8 +424,9 @@ class AdminMainPage extends Component {
                     )
                 })
             }
-            if(this.state.current_address !== null){
+            if(this.state.current_address !== null && this.state.current_address !== undefined){
                 storagestatus_nodes.files = []
+                console.log(this.state.storagestatus[this.state.current_address])
                 this.state.storagestatus[this.state.current_address].forEach(file => {
                     let indexOfAddress = file.nodesAddresses.indexOf(this.state.current_address)
                     let another_nodes = []

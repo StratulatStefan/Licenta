@@ -99,7 +99,7 @@ public class HearthBeatManager implements Runnable{
                 while(true){
                     try{
                         message = (RequestCRC)socket.receiveMessage();
-                        LoggerService.registerSuccess(GeneralNode.ipAddress,"Am primit cerere de includere a crc-ului in pachet!");
+                        System.out.println("Am primit cerere de includere a crc-ului in pachet!");
                         new Thread(new Runnable() {
                             @Override
                             public void run() {

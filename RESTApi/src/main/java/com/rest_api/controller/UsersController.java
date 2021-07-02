@@ -20,7 +20,7 @@ import java.util.Map;
  * 	<li> Toate cererile HTTP vor contine in URI baza <strong>/api/user</strong>.</li>
  * </ul>
  */
-@CrossOrigin(origins = "http://localhost:3000")
+@CrossOrigin(origins = "http://localhost:5000")
 @RestController
 @RequestMapping(value = "/api/user")
 public class UsersController {

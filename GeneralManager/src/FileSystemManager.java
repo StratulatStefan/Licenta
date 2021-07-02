@@ -93,7 +93,6 @@ public class FileSystemManager {
                     HashMap<String, Object> fileVersion = new HashMap<String, Object>();
                     fileVersion.put("version_no", versionData.getVersionName());
                     String description = versionData.getDescription();
-                    description = description.substring(description.indexOf(description.split("\\s")[3]));
                     fileVersion.put("version_desc", description);
                     fileVersion.put("version_hash", versionData.getHash());
                     fileVersion.put("version_timestamp", versionData.getTimestamp());

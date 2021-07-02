@@ -15,11 +15,16 @@ export class GeneralPurposeService{
     }
 
     static getCurrentTimestamp = (currentdate) => {
-        return currentdate.getDate() + "/"
-            + (currentdate.getMonth()+1)  + "/" 
-            + currentdate.getFullYear() + " "  
-            + currentdate.getHours() + ":"  
-            + currentdate.getMinutes()
+        let day     = currentdate.getDate()
+        let month   = currentdate.getMonth()
+        let year    = currentdate.getFullYear()
+        let hours   = currentdate.getHours()
+        let minutes = currentdate.getMinutes()
+        return (day < 10 ? "0" + day : day) + "/"
+            + (month < 10 ? "0" + (month + 1) : (month + 1))  + "/" 
+            + year + " "  
+            + (hours < 10 ? "0" + hours : hours) + ":"  
+            + (minutes < 10 ? "0" + minutes : minutes)
     }
 
     static getCurrentTimestampForLogging = (limit) => {

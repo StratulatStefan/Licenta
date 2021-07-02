@@ -62,9 +62,10 @@ public class ContentTable implements Serializable {
         synchronized (this.contentTable) {
             this.contentTable.clear();
             long crc;
-            String versionNo;
             int nodesCount;
             long filesize;
+            String versionNo;
+            String versionDescription;
             needInit = false;
             for (String user : storageStatusTable.getUsers()) {
                 HashMap<String, Integer> userFilesNodesCount = storageStatusTable.getUserFilesNodesCountForFile(user);
@@ -75,9 +76,10 @@ public class ContentTable implements Serializable {
                             needInit = true;
                         }
                         versionNo = storageStatusTable.getLastVersionOfFile(user, filename);
+                        versionDescription = storageStatusTable.getLastVersionDescriptionOfFile(user, filename);
                         nodesCount = userFilesNodesCount.get(filename);
                         filesize = storageStatusTable.getFileSize(user, filename, storageStatusTable.getAvailableNodesForFile(user, filename).get(0).getFirst());
-                        this.addRegister(user, filename, nodesCount, crc, "[VALID]", filesize, versionNo, "");
+                        this.addRegister(user, filename, nodesCount, crc, "[VALID]", filesize, versionNo, versionDescription);
                     }
                     catch (Exception exception){
                         // nu prea avem cum sa ajunge aici la init intrucat exceptia se genereaza doar daca inregistrarea exista deja

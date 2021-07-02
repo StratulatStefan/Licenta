@@ -33,21 +33,10 @@ class FileDetailsPage extends Component {
     }
 
     componentDidMount = () => {
+        GeneralPurposeService.setHeaderLayout("USER")
         this.checkForConnectedUser()
         this.fetchUserType().then(_ => {
-            let userFile = null
-            try{
-                userFile = this.props.location.state.detail.user_file
-                localStorage.setItem("userfile", JSON.stringify(userFile))
-            }
-            catch(e){
-                try{
-                    userFile = JSON.parse(localStorage.getItem('userfile'))
-                }
-                catch(e){
-                    console.log("How did you get here ? ")
-                }
-            }
+            let userFile = JSON.parse(localStorage.getItem('userfile'))
             if(userFile !== null){
                 document.getElementById("p_filename").innerHTML = userFile.filename
                 this.fileDetails(userFile)
@@ -141,10 +130,40 @@ class FileDetailsPage extends Component {
         document.getElementById("file_status_delete").innerHTML = "Deleting file..."
         document.getElementById("delete_file_button").style.visibility = "hidden"
         FileHandlerService.deleteFile(this.userData["jwt"], this.state.currentFileName, this.description).then(response => {
-            document.getElementById("file_status_delete").innerHTML = "File successfully deleted. Please Refresh."
-            document.getElementById("delete_file_button").style.visibility = "visible"
-            document.getElementById("delete_file_button").innerHTML = "Go to my files"
-            document.getElementById("delete_file_button").onclick = () => this.redirect("")
+            if(response.code === 1){
+                let global_count = 3;
+                let handler = this
+                document.getElementById("file_status_delete").innerHTML = "File successfully deleted!"
+                let interval = setInterval(function(){ 
+                    document.getElementById("delete_extra").innerHTML = "You will be redirected to main page in " + global_count + "..."
+                    global_count -= 1
+                    if(global_count === -1){
+                        clearInterval(interval)
+                        handler.redirect("")
+                    }
+                }, 1000);
+                //document.getElementById("delete_file_button").style.visibility = "visible"
+                //document.getElementById("delete_file_button").innerHTML = "Go to my files"
+                document.getElementById("delete_file_button").onclick = () => this.redirect("")
+            }
+            else{
+                document.getElementById("file_status_delete").innerHTML = "Your file cannot be deleted."
+            }
+        })
+    }
+
+    fileDetailsAfterRename = (newFileName) => {
+        FileHandlerService.getFileHistory(this.userData["jwt"], newFileName).then(response => {
+            if(response.code === 0){
+                let handler = this
+                setTimeout(function(){
+                    handler.fileDetailsAfterRename(newFileName)
+                }, 500)
+            }
+            else{
+                this.fileSuccessfullyDownloaded = false
+                this.setState({fileDetails : response.content, currentFileName : newFileName}, () => {this.downloadFile()})
+            }
         })
     }
 
@@ -160,11 +179,22 @@ class FileDetailsPage extends Component {
         }
         else{
             FileHandlerService.renameFile(this.userData["jwt"], this.state.currentFileName, this.newname, this.description).then(response => {
-                document.getElementById("file_status_rename_1").innerHTML = "File successfully renamed."
-                document.getElementById("p_filename").innerHTML = this.newname;
-                let userFile = this.state.userFile
-                userFile.filename = this.newname
-                this.setState({userFile : userFile}, () => localStorage.setItem("userfile", JSON.stringify(userFile)))
+                if(response.code === 1){
+                    document.getElementById("file_status_rename_1").innerHTML = "File successfully renamed."
+                    document.getElementById("p_filename").innerHTML = this.newname;
+                    let userFile = this.state.userFile
+                    userFile.filename = this.newname
+                    localStorage.setItem("userfile", JSON.stringify(userFile))
+                    this.state.currentFileName = this.newname
+                    this.setState({userFile : userFile}, () => {
+                        this.fileDetailsAfterRename(this.newname)   
+                    })
+                    
+                }
+                else{
+                    document.getElementById("file_status_rename_1").innerHTML = "File cannot be renamed."
+                }
+
             })
         }
 
@@ -245,7 +275,8 @@ class FileDetailsPage extends Component {
                                     <p id="file_status_delete">The erasing procedure is irreversible.<br/> 
                                         Your files will be deleted permanently.<br/><br/>
                                         Do you want to proceed ? 
-                                    </p>
+                                    </p><br/>
+                                    <p id="delete_extra"></p><br/>
                                     <button id="delete_file_button" style={{fontSize:"80%", padding : 0, paddingLeft:"5px", paddingRight:"5px", height:"40px"}} 
                                         onClick={() => this.deleteFile()}>Delete my file
                                     </button>
@@ -271,6 +302,7 @@ class FileDetailsPage extends Component {
                                     <p id="file_status_update">
                                         Direct update of file is not supported yet<br/><br/>
                                         Please update your file locally and upload it<br/>
+                                        Consider keeping the same name for file<br/><br/>
                                         The new version will be registered<br/><br/>
                                     </p>
                                     <button id="rename_file_button" style={{fontSize:"80%", padding : 0, paddingLeft:"5px", paddingRight:"5px", height:"40px"}} 

@@ -44,11 +44,11 @@ public class ReplicationManager implements Runnable{
     private List<String> searchCandidatesForReplication(int replication_factor, List<String> availableNodes, long filesize){
         List<String> openNodes = GeneralManager.nodeStorageQuantityTable
                 .getMostSuitableNodes(filesize, GeneralManager.connectionTable)
-                .subList(0, replication_factor);
+                .subList(0, Math.min(availableNodes.size(), replication_factor));
         try {
             return GeneralPurposeMethods.listDifferences(openNodes, availableNodes).subList(0, replication_factor - availableNodes.size());
         }
-        catch (IndexOutOfBoundsException exception){
+        catch (Exception exception){
             // nu s-au gasit suficiente noduri pe care sa se faca replicarea..
             return null;
         }

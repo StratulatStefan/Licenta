@@ -130,7 +130,7 @@ ul{
     border-radius: 10px;
 }
 
-#file_status, #file_status_delete, #file_status_rename, #file_status_rename_1, #file_status_update{
+#file_status, #file_status_delete, #file_status_rename, #file_status_rename_1, #file_status_update, #delete_extra{
     margin-top: 15%;
     width: 100%;
     text-align: center;

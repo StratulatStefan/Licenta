@@ -25,7 +25,7 @@ public class VersionControlManager {
     /**
      * Extensia fisierului de metadate.
      */
-    private final static String extension = AppConfig.getParam("metadataExtension");
+    public final static String extension = AppConfig.getParam("metadataExtension");
 
     /**
      * <ul>
@@ -89,10 +89,13 @@ public class VersionControlManager {
             List<String> metadataContent = FileSystem.getFileLines(metadataFilePath);
             String lastRegister = metadataContent.get(metadataContent.size() - 1);
             return new VersionData(lastRegister);
-
         }
         catch (IOException exception){
             LoggerService.registerError(GeneralNode.ipAddress,"Eroare la extragerea continutului fisierului de metadate " + metadataFilePath);
+            return null;
+        }
+        catch (ArrayIndexOutOfBoundsException exception){
+            LoggerService.registerError(GeneralNode.ipAddress, "Nu s-a gasit versiunea fisierului!");
             return null;
         }
     }

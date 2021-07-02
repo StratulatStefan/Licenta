@@ -56,7 +56,7 @@ public class VersionData implements Serializable {
         for(String field : fields) {
             stringBuilder.append(field).append(" ");
         }
-        this.description = stringBuilder.toString().replace("{", "").replace("}","");
+        this.description = metadataFileRegister.substring(metadataFileRegister.indexOf("{") + 1, metadataFileRegister.indexOf("}"));
     }
 
     /**

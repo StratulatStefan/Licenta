@@ -1,6 +1,8 @@
 import config.AppConfig;
 import generalstructures.PendingList;
 import logger.LoggerService;
+import model.VersionData;
+import node_manager.VersionsRequest;
 import tables.CRCTable;
 import model.NewFiles;
 import node_manager.Beat.FileAttribute;
@@ -103,6 +105,7 @@ public class GeneralNode{
      * 	<li> Se tine cont de faptul ca, dupa finalizarea calculului, o suma de control se adauga in lista <strong>CRCTable</strong> urmand sa fie preluata imediat si trimisa catre nodul general.</li>
      * 	<li> Pentru a eficientiza procesul trimiterii sumelor de control ale fisierelor de dimensiuni mici si pentru a reduce timpul global de calculare a sumelor, se paralelizeaza intregul mecanism.</li>
      * 	<li> Fiecare fisier va fi analizat in mod separat.</li>
+     * 	<li> Se ignora fisierele de matedate.</li>
      * </ul>
      */
     public static void calculateFileSystemCRC(){
@@ -111,12 +114,14 @@ public class GeneralNode{
         for (String userDir : FileSystem.getDirContent(path)) {
             String[] userFiles = FileSystem.getDirContent(path + "\\" + userDir);
             for(String file : userFiles){
+                if(file.contains(VersionControlManager.extension))
+                    continue;
                 new Thread(new Runnable() {
                     @Override
                     public void run() {
                         long crc = FileSystem.calculateCRC(path + "\\" + userDir + "\\" + file);
                         crcTable.updateRegister(userDir, file, crc);
-                        LoggerService.registerSuccess(GeneralNode.ipAddress,"Am modificat crc-ul pentru [" +userDir + ":" + file +"]");
+                        System.out.println("Am modificat crc-ul pentru [" +userDir + ":" + file +"]");
                     }
                 }).start();
             }
@@ -179,8 +184,11 @@ public class GeneralNode{
                         f.setCrc(crcTable.getCrcForFile(userDir, file));
                         crcTable.resetRegister(userDir, file);
                     }
-                    String versionName = versionControlManager.getLastVersionOfFile(userDir, file).getVersionName();
+                    VersionData versionData = versionControlManager.getLastVersionOfFile(userDir, file);
+                    String versionName = versionData.getVersionName();
+                    String versionDescription = versionData.getDescription();
                     f.setVersionNo(versionName);
+                    f.setDescription(versionDescription);
                     f.setFilesize(FileSystem.getFileSize(path + "\\" + userDir + "\\" + file));
                     fileAttributes.add(f);
                 }

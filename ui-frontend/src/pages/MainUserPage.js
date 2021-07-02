@@ -59,9 +59,14 @@ class MainUserPage extends Component {
     fetchUserFiles = () =>{
         document.getElementById("number_of_file").innerHTML = ""
         FileHandlerService.getUserFiles(this.userData["jwt"]).then(response => {
-            this.setState({userFiles : response.content})
-            console.log(response.content)
-            document.getElementById("number_of_file").innerHTML = `Found ${response.content.length} files`;
+            console.log(response)
+            if(response.code === 1){
+                document.getElementById("number_of_file").innerHTML = `Found ${response.content.length} files`;
+                this.setState({userFiles : (response.content.length === 0) ? null : response.content})
+            }
+            else{
+                this.setState({userFiles : null})
+            }
         })
     }
 
@@ -77,10 +82,8 @@ class MainUserPage extends Component {
 
     redirect = (destination, param) => {
         if(destination !== ""){
-            this.props.history.push({
-                "pathname" : destination,
-                "state" : {"detail" : {"user_file" : param}}
-            })
+            localStorage.setItem("userfile", JSON.stringify(param))
+            this.props.history.push(destination);
         }
         else{
             this.props.history.push("/")
@@ -126,19 +129,28 @@ class MainUserPage extends Component {
                         <hr id="mainpage_hr"/>
                         <br/><br/>
                         <div className = "home_body_main_div">
-                            <table>
-                                <thead>
-                                    <tr>
-                                        <td>Logo</td>
-                                        <td>File name</td>
-                                        <td>Version Description</td>
-                                        <td>Hash</td>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    {userFiles}
-                                </tbody>
-                            </table>
+                            {this.state.userFiles === null ? 
+                                <div style={{width:"100%"}}>
+                                    <img src= "/images/not_found.png" />
+                                    <br/><br/><br/>
+                                    <p>No file found!</p>
+                                    <br/>
+                                    <p>Please consider uploading a file first!</p>
+                                </div>:
+                                <table>
+                                    <thead>
+                                        <tr>
+                                            <td>Logo</td>
+                                            <td>File name</td>
+                                            <td>Version Description</td>
+                                            <td>Hash</td>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {userFiles}
+                                    </tbody>
+                                </table>
+                            }
                         </div>
                     </div> 
                 </div>
