@@ -66,6 +66,11 @@ public class AuthorizationService {
             throw new Exception("Your token does not respect the Base64 JWT format! Include the delimitation between header and payload");
         }
 
+        if(!JWT.validateJWTSignature(jwtToken)){
+            System.out.println("Token is not authentic!");
+            throw new Exception("Token is not authentic!");
+        }
+
         JWT jwt = new JWT(jwtToken);
         try {
             return jwt.decodeJWT();

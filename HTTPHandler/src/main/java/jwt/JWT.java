@@ -4,6 +4,7 @@ import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.JwtBuilder;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
+import io.jsonwebtoken.impl.crypto.DefaultJwtSignatureValidator;
 
 import javax.crypto.spec.SecretKeySpec;
 import javax.xml.bind.DatatypeConverter;
@@ -27,7 +28,7 @@ public class JWT {
     /**
      * Algoritmul de semnare digitala.
      */
-    private static final SignatureAlgorithm signatureAlgorithm = SignatureAlgorithm.HS512;
+    private static final SignatureAlgorithm signatureAlgorithm = SignatureAlgorithm.HS256;
 
     /**
      * Sirul de caractere care va contine token-ul efectiv.
@@ -61,8 +62,8 @@ public class JWT {
      * @param sessionTime Durata unei sesiuni de comunicare cu clientul.
      */
     public JWT(int id, String username, String userRole, long sessionTime){
-        byte[] apiSecretKey = DatatypeConverter.parseBase64Binary(SECRET_KEY);
-        Key signingKey = new SecretKeySpec(apiSecretKey, signatureAlgorithm.getJcaName());
+        //byte[] apiSecretKey = DatatypeConverter.parseBase64Binary(SECRET_KEY);
+        Key signingKey = new SecretKeySpec(SECRET_KEY.getBytes(), signatureAlgorithm.getJcaName());
         Map<String, Object> additionalClaims = new HashMap<String, Object>(){{
             put("role", userRole);
             put("username", username);
@@ -101,12 +102,29 @@ public class JWT {
     public String getRole() { return this.decodeJWT().get("role").toString(); }
 
     /**
+     * <ul>
+     *     <li>Functie care verifica autenticitatea token-ului</li>
+     *     <li>Se verifica ca header + payload sunt cele semnate digital</li>
+     * </ul>
+     */
+    public static boolean validateJWTSignature(String jwt){
+        String[] jwtElements = jwt.split("\\.");
+        String body      = jwtElements[0] + "." + jwtElements[1];
+        String signature = jwtElements[2];
+
+        SecretKeySpec secretKeySpec = new SecretKeySpec(SECRET_KEY.getBytes(), signatureAlgorithm.getJcaName());
+        DefaultJwtSignatureValidator validator = new DefaultJwtSignatureValidator(signatureAlgorithm, secretKeySpec);
+
+        return validator.isValid(body, signature);
+    }
+
+    /**
      * Functie pentru decodificarea token-ului.
      * @return Claim-uril din token (id, username, role)
      */
     public Claims decodeJWT(){
         Claims claims = Jwts.parser()
-                .setSigningKey(DatatypeConverter.parseBase64Binary(SECRET_KEY))
+                .setSigningKey(SECRET_KEY.getBytes())
                 .parseClaimsJws(this.jwt).getBody();
         return claims;
     }

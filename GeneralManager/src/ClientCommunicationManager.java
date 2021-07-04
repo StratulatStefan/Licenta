@@ -310,7 +310,6 @@ public class ClientCommunicationManager {
             serverSocket.bind(new InetSocketAddress(address.getIpAddress(), address.getPort()));
             while(true){
                 Socket clientSocket = serverSocket.accept();
-                System.out.println(String.format("Client nou conectat : [%s : %d]\n", clientSocket.getLocalAddress(), clientSocket.getLocalPort()));
                 new Thread(clientCommunicationThread(clientSocket)).start();
             }
         }

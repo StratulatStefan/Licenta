@@ -124,9 +124,10 @@ class AdminMainPage extends Component {
 
     handleContentTable = (message) => {
         if (message.body) {
-            console.log(message.body)
-            if(message.body.length > 0){
-                this.setState({content : JSON.parse(message.body)})
+            let content = JSON.parse(message.body)
+            console.log(content)
+            if(content.length > 0){
+                this.setState({content : content})
             }
             else{
                 this.setState({content : undefined})
@@ -140,6 +141,7 @@ class AdminMainPage extends Component {
                 this.setState({file_versions : response.content})
                 document.getElementById("replication_nodes_div").style.display = "none"
                 document.getElementById("versions_nodes_div").style.display = "block"
+                document.getElementById("subject_filename").innerHTML = filename
             }
             else{
                 this.setState({error_status : {code : response.code, message : response.content}})
@@ -149,21 +151,31 @@ class AdminMainPage extends Component {
 
     handleReplicationManagerStatus = (message) => {
         if (message.body) {
-            this.setState({replication_status : JSON.parse(message.body)})
+            let content = JSON.parse(message.body)
+            console.log(content)
+            if(content.length > 0){
+                this.setState({replication_status : content})
+            }
+            else{
+                this.setState({replication_status : undefined})
+            }
         }
     }
 
     handleConnectionTable = (message) => {
         if (message.body) {
+            let content = JSON.parse(message.body)
             let nodes_details = this.state.connectionTable.status
-            this.setState({connectionTable : {"addresses" : JSON.parse(message.body), "status" : nodes_details}})
+            let current_address = this.state.connectionTable.current_address
+            this.setState({connectionTable : {"addresses" : content, "status" : nodes_details, "current_address" : current_address}})
         }
     }
 
     handleNodesActivity = (message) => {
         if (message.body) {
             let addresses = this.state.connectionTable.addresses
-            this.setState({connectionTable : {"addresses" : addresses, "status" : JSON.parse(message.body)}})
+            let current_address = this.state.connectionTable.current_address
+            this.setState({connectionTable : {"addresses" : addresses, "status" : JSON.parse(message.body), "current_address" : current_address}})
         }
     }
 
@@ -171,31 +183,40 @@ class AdminMainPage extends Component {
         if (message.body) {
             let storage_status = {}
             let first_address = this.state.current_address
-            JSON.parse(message.body).forEach(register => {
-                register.nodesAddresses.forEach(address => {
-                    if(first_address === null){
-                        first_address = address
-                    }
-                    let node_registers = []
-                    if(Object.keys(storage_status).includes(address)){
-                        node_registers = storage_status[address]
-                    }
-                    node_registers.push(register)
-                    storage_status[address] = node_registers
+            let content = JSON.parse(message.body)
+            if(content.length > 0){
+                content.forEach(register => {
+                    register.nodesAddresses.forEach(address => {
+                        if(first_address === null){
+                            first_address = address
+                        }
+                        let node_registers = []
+                        if(Object.keys(storage_status).includes(address)){
+                            node_registers = storage_status[address]
+                        }
+                        node_registers.push(register)
+                        storage_status[address] = node_registers
+                    })
                 })
-            })
-            this.setState({storagestatus : storage_status, current_address : first_address})
+                this.setState({storagestatus : storage_status, current_address : first_address})
+            }
+            else{
+                this.setState({storagestatus : undefined, current_address : null})
+            }
         }
     }
 
     adminAction = (actionName) => {
         if(this.state.error_status.code !== 401 && this.state.error_status.code !== 402){
             this.menu_selection = actionName
-            document.getElementById("admin_log_view").style.display               = "none"
-            document.getElementById("admin_content_view").style.display           = "none"
-            document.getElementById("admin_nodes_view").style.display             = "none"
-            document.getElementById("admin_replication_view").style.display       = "none"
-            document.getElementById("admin_storagestatus_view").style.display     = "none"
+            let views = ["admin_log_view", "admin_content_view", "admin_nodes_view",
+                "admin_replication_view", "admin_storagestatus_view"    
+            ]
+
+            views.forEach(view => {
+                document.getElementById(view).style.display = "none"
+            })
+
             if(this.state.websocket.connected === true && this.state.websocket.subscriptions !== undefined){
                 this.state.websocket.subscriptions.forEach(_ => _.unsubscribe())
             }
@@ -283,6 +304,7 @@ class AdminMainPage extends Component {
             if(response.code === 1){
                 document.getElementById("replication_nodes_div").style.display = "block"
                 document.getElementById("versions_nodes_div").style.display = "none"
+                document.getElementById("subject_filename").innerHTML = filename
                 response.content.forEach(address => {
                     AdminHandlerService.fetchNodeData(this.userData["jwt"], address).then(response => {
                         if(response.code === 1){
@@ -323,11 +345,11 @@ class AdminMainPage extends Component {
     }
 
     render(){
+        var replicationNodesForFile = []
+        var versionForFile = []
         var availableNodesSelect = []
         var logData = []
         var content = []
-        var replicationNodesForFile = []
-        var versionForFile = []
         var storagestatus_nodes = {addresses : [], files : [], additional_data : []}
         var nodes_status = {addresses : [], status : []}
         var replication_status = []
@@ -344,69 +366,76 @@ class AdminMainPage extends Component {
                             <td><p>{log_register.node_address}</p></td>
                             <td><p>{log_register.message_type}</p></td>
                             <td><p>{log_register.description}</p></td>
-                            <td><p>{log_register.register_date}</p></td>
+                            <td><p>{GeneralPurposeService.getCurrentTimestamp(new Date(log_register.register_date))}</p></td>
                         </tr>
                     )
                 })
             }
             if(this.state.content !== null){
-                this.state.content.forEach(content_register => {
-                    content.push(
-                        <tr key={`content_${content_register.userId}_${content_register.filename}`}>
-                            <td><p>{content_register.userId}</p></td>
-                            <td><p>{content_register.filename}</p></td>
-                            <td>
-                                <p><button className="a_redirector"
-                                    style={{fontSize:"120%", textDecoration:"underline"}} 
-                                    onClick={() => this.fetchFileVersions(content_register.userId, content_register.filename)}
-                                    onMouseOver={() => {
-                                        document.getElementById("admin_view_title_1").style.visibility = "visible"
-                                        document.getElementById("admin_view_title_1").innerHTML = "Click to see the version of this file"
-                                    }}
-                                    onMouseLeave={() => {
-                                        document.getElementById("admin_view_title_1").style.visibility = "hidden"
-                                    }}
-                                    >{content_register.versionNo}</button>
-                                </p>
-                            </td>
-                            <td><p>{content_register.crc.toString(16)}</p></td>
-                            <td><p>{GeneralPurposeService.getFileSizeUnit(content_register.fileSize)}</p></td>
-                            <td>
-                                <p><button className="a_redirector"
-                                    style={{fontSize:"120%", textDecoration:"underline"}} 
-                                    onClick={() => this.fetchReplicationNodesForFile(content_register.userId, content_register.filename)} 
-                                    onMouseOver={() => {
-                                        document.getElementById("admin_view_title_1").style.visibility = "visible"
-                                        document.getElementById("admin_view_title_1").innerHTML = "Click to see the nodes that store this file"
-                                    }}
-                                    onMouseLeave={() => {document.getElementById("admin_view_title_1").style.visibility = "hidden"}}
-                                    >{content_register.replication_factor}</button>
-                                </p>
-                            </td>
-                            <td><p>{content_register.status}</p></td>
-                        </tr>
-                    )
-                })
+                document.getElementById("admin_view_title_0").style.visibility = "hidden"
+                if(this.state.content !== undefined){
+                    this.state.content.forEach(content_register => {
+                        content.push(
+                            <tr key={`content_${content_register.userId}_${content_register.filename}`}>
+                                <td><p>{content_register.userId}</p></td>
+                                <td><p>{content_register.filename}</p></td>
+                                <td>
+                                    {content_register.status === "[DELETED]"? <p>{content_register.versionNo}</p> : 
+                                        <p><button className="a_redirector"
+                                            style={{fontSize:"120%", textDecoration:"underline"}} 
+                                            onClick={() => {
+                                                this.fetchFileVersions(content_register.userId, content_register.filename)
+                                            }}
+                                            onMouseOver={() => {
+                                                document.getElementById("admin_view_title_1").style.visibility = "visible"
+                                                document.getElementById("admin_view_title_1").innerHTML = "Click to see the version of this file"
+                                            }}
+                                            onMouseLeave={() => {
+                                                document.getElementById("admin_view_title_1").style.visibility = "hidden"
+                                            }}
+                                            >{content_register.versionNo}</button>
+                                        </p>
+                                    }
+                                </td>
+                                <td><p>{content_register.crc.toString(16)}</p></td>
+                                <td><p>{GeneralPurposeService.getFileSizeUnit(content_register.fileSize)}</p></td>
+                                <td>
+                                    {content_register.status === "[DELETED]"? <p>{content_register.replication_factor}</p> : 
+                                        <p><button className="a_redirector"
+                                            style={{fontSize:"120%", textDecoration:"underline"}} 
+                                            onClick={() => this.fetchReplicationNodesForFile(content_register.userId, content_register.filename)} 
+                                            onMouseOver={() => {
+                                                document.getElementById("admin_view_title_1").style.visibility = "visible"
+                                                document.getElementById("admin_view_title_1").innerHTML = "Click to see the nodes that store this file"
+                                            }}
+                                            onMouseLeave={() => {document.getElementById("admin_view_title_1").style.visibility = "hidden"}}
+                                            >{content_register.replication_factor}</button>
+                                        </p>
+                                    }
+                                </td>
+                                <td><p>{content_register.status}</p></td>
+                            </tr>
+                        )
+                    })
+                }
             }
             if(this.state.file_versions !== null){
-                versionForFile.push(<div><p className="admin_view_title">This file has the following versions</p><br/></div>)
                 this.state.file_versions.forEach(version => {
                     versionForFile.push(
-                        <p className="admin_view_title">{version.version_no}. {version.version_desc} ({version.version_hash.toString(16)})</p>
+                        <p className="admin_view_title" style={{fontSize:"90%"}}>{version.version_no}. {version.version_desc} ({version.version_hash.toString(16)})</p>
                     )
                 })
             }
             if(this.state.content_nodes_data !== null){
-                replicationNodesForFile.push(<div><p className="admin_view_title">This file is stored by the following internal nodes</p><br/><br/></div>)
                 this.state.content_nodes_data.forEach(node => {
                     replicationNodesForFile.push(
                         <div>
-                            <p className="admin_view_title">{node.ip_address} from {node.location_country}</p>
+                            <p className="admin_view_title" style={{fontSize:"90%"}}>{node.ip_address} from {node.location_country}</p>
                         </div>
                     )
                 })
             }
-            if(this.state.storagestatus !== null){
+            if(this.state.storagestatus !== null && this.state.storagestatus !== undefined){
                 replicationNodesForFile = []
                 storagestatus_nodes.addresses = []
                 Object.keys(this.state.storagestatus).forEach(address => {
@@ -419,6 +448,7 @@ class AdminMainPage extends Component {
                                 this.setState({current_address : address})
                                 document.getElementById("storage_additional_data").style.visibility = "hidden"
                                 document.getElementById("storagestatus_delete_status").style.visibility = "hidden"
+                                document.getElementById("subject_filename_1").innerHTML = ""
                             }}>{address}
                         </button>
                     )
@@ -437,12 +467,14 @@ class AdminMainPage extends Component {
                     })
                     storagestatus_nodes.files.push(
                         <tr key={`storagestatus_${file.userId}_${file.filename}`}>
+                            <td><p>{file.userId}</p></td>
                             <td>
                                 <p><button className="a_redirector"
                                     style={{fontSize:"120%", textDecoration:"underline"}} 
                                     onClick={() => {
                                         document.getElementById("storagestatus_delete_status").style.visibility = "hidden"
                                         document.getElementById("storage_additional_data").style.visibility = "visible"
+                                        document.getElementById("subject_filename_1").innerHTML = file.filename
                                         this.selectedFile = {"user" : file.userId, "filename" : file.filename, "address" : this.state.current_address}
                                     }} 
                                     onMouseOver={() => {
@@ -452,10 +484,9 @@ class AdminMainPage extends Component {
                                     onMouseLeave={() => {
                                         document.getElementById("admin_view_title_11").style.visibility = "hidden"
                                     }}
-                                    >{file.userId}</button>
+                                    >{file.filename}</button>
                                 </p>
                             </td>
-                            <td><p>{file.filename}</p></td>
                             <td><p>{file.nodesVersions[indexOfAddress]}</p></td>
                             <td><p>{file.nodesCRCs[indexOfAddress].toString(16)}</p></td>
                             <td>{another_nodes}</td>
@@ -467,6 +498,7 @@ class AdminMainPage extends Component {
             if(this.state.connectionTable.addresses !== null){
                 nodes_status.addresses = []
                 let first_address = this.state.connectionTable.current_address
+                console.log("first_Address: " + first_address)
                 this.state.connectionTable.addresses.forEach(address => {
                     if(first_address === null || first_address === undefined){
                         first_address = address;
@@ -488,6 +520,7 @@ class AdminMainPage extends Component {
                     )                    
                 })
             }
+
             if(this.state.connectionTable.current_address !== null && this.state.connectionTable.current_address !== undefined){
                 let warnings = 0
                 let errors = 0
@@ -554,7 +587,7 @@ class AdminMainPage extends Component {
                 nodes_status.status.push(<br/>)
                 nodes_status.status.push(<br/>)
             }
-            if(this.state.replication_status !== null){
+            if(this.state.replication_status !== null && this.state.replication_status !== undefined){
                 replication_status = []
                 this.state.replication_status.forEach(status => {
                     replication_status.push(<p className="admin_view_title">{status}</p>)
@@ -625,8 +658,13 @@ class AdminMainPage extends Component {
                                 {this.state.content === null ? <p></p> : 
                                     this.state.content === undefined ? 
                                         this.state.error_status.code === 0 ? <p className="admin_view_title">{this.state.error_status.message}</p> :
-                                        <p className="admin_view_title">No log register found!</p> : 
-                                        <div id="content_div">
+                                        <div style={{width:"100%"}}>
+                                            <img style={{maxHeight:"350px", maxWidth:"350px"}} src= "/images/not_found.png" />
+                                            <br/><br/><br/>
+                                            <p className="admin_view_title">No register found in the Content Table!</p>
+                                            <br/>
+                                        </div> : 
+                                        <div className="content_div" id="contentDiv">
                                             <table id="content_table">
                                                 <thead>
                                                     <tr>
@@ -644,8 +682,12 @@ class AdminMainPage extends Component {
                                                 </tbody>
                                             </table>
                                             <div id="content_table_additional_data">
-                                                <p className="admin_view_title">Content Status Table</p>
-                                                <p id="admin_view_title_1" className="admin_view_title">&nbsp;</p>
+                                                <p className="admin_view_title">Content Status Table</p><br/>
+                                                <p id="admin_view_title_1" className="admin_view_title">&nbsp;</p><br/>
+                                                <hr/><br/>
+                                                <p className="admin_view_title" 
+                                                    id="subject_filename">
+                                                </p><br/>
                                                 <div id="replication_nodes_div">{replicationNodesForFile}</div>
                                                 <div id="versions_nodes_div">{versionForFile}</div>
                                             </div>
@@ -658,11 +700,17 @@ class AdminMainPage extends Component {
                                         <p className="admin_view_title">Fetching internal nodes storage status...</p> : 
                                         this.state.storagestatus === undefined ? 
                                             this.state.error_status.code === 0 ? <p className="admin_view_title">{this.state.error_status.message}</p> :
-                                            <p className="admin_view_title">No storage status registers found!</p> :
+                                            <div style={{width:"100%"}}>
+                                                <br/><br/><br/><br/>
+                                                <img style={{maxHeight:"350px", maxWidth:"350px"}} src= "/images/not_found.png" />
+                                                <br/><br/><br/>
+                                                <p className="admin_view_title">No register found in the Storage Status Table!</p>
+                                                <br/>
+                                            </div>:
                                         <div>
                                             {storagestatus_nodes.addresses}
                                             <br/><br/>
-                                            <div id="content_div">
+                                            <div className="content_div" id="storageDiv">
                                                 <table id="content_table">
                                                     <thead>
                                                         <tr>
@@ -678,18 +726,15 @@ class AdminMainPage extends Component {
                                                     </tbody>
                                                 </table>
                                                 <div id="content_table_additional_data">
-                                                    <p className="admin_view_title">Storage Status Table</p>
-                                                    <p id="admin_view_title_11" className="admin_view_title">&nbsp;</p>
-                                                    <div id="replication_nodes_div">{replicationNodesForFile}</div>
-                                                    <div id="versions_nodes_div">{versionForFile}</div>
-                                                    <br/>
+                                                    <p className="admin_view_title">Storage Status Table</p><br/>
+                                                    <p id="admin_view_title_11" className="admin_view_title">&nbsp;</p><br/>
+                                                    <hr/>
+                                                    <p className="admin_view_title" 
+                                                        id="subject_filename_1">
+                                                    </p><br/>
                                                     <div id="storage_additional_data" style={{visibility:"hidden"}}>
-                                                        {this.selectedFile !== null ? 
-                                                            <p style={{fontSize : "80%"}}>{this.selectedFile.filename}</p> : 
-                                                            []
-                                                        }
                                                         <p className="admin_view_title">Delete this file from this node.<br/>This will trigger a replication to another node.</p>
-                                                        <button className="redirector" onClick={this.deleteFileFromInternalNode}>Delete</button>
+                                                        <br/><button className="redirector" onClick={this.deleteFileFromInternalNode}>Delete</button>
                                                         <p className="admin_view_title" id="storagestatus_delete_status" style={{visibility : "hidden"}}>
                                                             File successfully deleted from node.<br/>
                                                             The change will be visible at the next update from General Manager<br/>
@@ -724,7 +769,13 @@ class AdminMainPage extends Component {
                                     <p className="admin_view_title">Fetching replication manager status...</p> : 
                                     this.state.replication_status === undefined ? 
                                         this.state.error_status.code === 0 ? <p className="admin_view_title">{this.state.error_status.message}</p> :
-                                        <p className="admin_view_title">No replication status register found!</p> :
+                                        <div style={{width:"100%"}}>
+                                            <br/><br/><br/><br/>
+                                            <img style={{maxHeight:"350px", maxWidth:"350px"}} src= "/images/not_found.png" />
+                                            <br/><br/><br/>
+                                            <p className="admin_view_title">No register found in the Replication Manager Table!</p>
+                                            <br/>
+                                        </div> :
                                     <div>
                                         <div className="node_status">
                                             <p className="admin_view_title">Replication Manager Status</p>
