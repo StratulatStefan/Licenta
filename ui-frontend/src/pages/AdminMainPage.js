@@ -179,6 +179,32 @@ class AdminMainPage extends Component {
         }
     }
 
+    highlightNodeStatus = (selectedAddress, label) => {
+        let addressList = null
+        let identificator = null
+        if(label === 0){
+            addressList = this.state.connectionTable.addresses
+            identificator = "node_status_address"
+            
+        }
+        else if(label === 1){
+            addressList = Object.keys(this.state.storagestatus)
+            identificator = "storage_status_address"
+        }
+
+        addressList.forEach(address => {
+            if(address === selectedAddress){
+                document.getElementById(`${identificator}_${address}`).style.fontSize = "125%" 
+                document.getElementById(`${identificator}_${address}`).style.color = "#39A9CB"; 
+            }
+            else{
+                document.getElementById(`${identificator}_${address}`).style.fontSize = "105%" 
+                document.getElementById(`${identificator}_${address}`).style.color = "#344fa1"; 
+            }
+        })
+        
+    }
+
     handleStorageStatus = (message) => {
         if (message.body) {
             let storage_status = {}
@@ -440,7 +466,8 @@ class AdminMainPage extends Component {
                 storagestatus_nodes.addresses = []
                 Object.keys(this.state.storagestatus).forEach(address => {
                     storagestatus_nodes.addresses.push(
-                        <button 
+                        <button
+                            id = {`storage_status_address_${address}`}  
                             className="a_redirector" 
                             href="#"
                             style={{marginTop:"-15%"}} 
@@ -449,6 +476,7 @@ class AdminMainPage extends Component {
                                 document.getElementById("storage_additional_data").style.visibility = "hidden"
                                 document.getElementById("storagestatus_delete_status").style.visibility = "hidden"
                                 document.getElementById("subject_filename_1").innerHTML = ""
+                                this.highlightNodeStatus(address, 1)
                             }}>{address}
                         </button>
                     )
@@ -457,48 +485,50 @@ class AdminMainPage extends Component {
             if(this.state.current_address !== null && this.state.current_address !== undefined){
                 storagestatus_nodes.files = []
                 console.log(this.state.storagestatus[this.state.current_address])
-                this.state.storagestatus[this.state.current_address].forEach(file => {
-                    let indexOfAddress = file.nodesAddresses.indexOf(this.state.current_address)
-                    let another_nodes = []
-                    file.nodesAddresses.forEach(address => {
-                        if(address !== this.state.current_address){
-                            another_nodes.push(<p style={{display:"block", fontSize: "80%"}}>{address}</p>)
-                        }
+                if(this.state.storagestatus[this.state.current_address] !== undefined){
+                    this.state.storagestatus[this.state.current_address].forEach(file => {
+                        let indexOfAddress = file.nodesAddresses.indexOf(this.state.current_address)
+                        let another_nodes = []
+                        file.nodesAddresses.forEach(address => {
+                            if(address !== this.state.current_address){
+                                another_nodes.push(<p style={{display:"block", fontSize: "80%"}}>{address}</p>)
+                            }
+                        })
+                        storagestatus_nodes.files.push(
+                            <tr key={`storagestatus_${file.userId}_${file.filename}`}>
+                                <td><p>{file.userId}</p></td>
+                                <td>
+                                    <p><button className="a_redirector"
+                                        style={{fontSize:"120%", textDecoration:"underline"}} 
+                                        onClick={() => {
+                                            document.getElementById("storagestatus_delete_status").style.visibility = "hidden"
+                                            document.getElementById("storage_additional_data").style.visibility = "visible"
+                                            document.getElementById("subject_filename_1").innerHTML = file.filename
+                                            this.selectedFile = {"user" : file.userId, "filename" : file.filename, "address" : this.state.current_address}
+                                        }} 
+                                        onMouseOver={() => {
+                                            document.getElementById("admin_view_title_11").style.visibility = "visible"
+                                            document.getElementById("admin_view_title_11").innerHTML = "Click for more details about this file"
+                                        }}
+                                        onMouseLeave={() => {
+                                            document.getElementById("admin_view_title_11").style.visibility = "hidden"
+                                        }}
+                                        >{file.filename}</button>
+                                    </p>
+                                </td>
+                                <td><p>{file.nodesVersions[indexOfAddress]}</p></td>
+                                <td><p>{file.nodesCRCs[indexOfAddress].toString(16)}</p></td>
+                                <td>{another_nodes}</td>
+                            </tr>
+                        )
                     })
-                    storagestatus_nodes.files.push(
-                        <tr key={`storagestatus_${file.userId}_${file.filename}`}>
-                            <td><p>{file.userId}</p></td>
-                            <td>
-                                <p><button className="a_redirector"
-                                    style={{fontSize:"120%", textDecoration:"underline"}} 
-                                    onClick={() => {
-                                        document.getElementById("storagestatus_delete_status").style.visibility = "hidden"
-                                        document.getElementById("storage_additional_data").style.visibility = "visible"
-                                        document.getElementById("subject_filename_1").innerHTML = file.filename
-                                        this.selectedFile = {"user" : file.userId, "filename" : file.filename, "address" : this.state.current_address}
-                                    }} 
-                                    onMouseOver={() => {
-                                        document.getElementById("admin_view_title_11").style.visibility = "visible"
-                                        document.getElementById("admin_view_title_11").innerHTML = "Click for more details about this file"
-                                    }}
-                                    onMouseLeave={() => {
-                                        document.getElementById("admin_view_title_11").style.visibility = "hidden"
-                                    }}
-                                    >{file.filename}</button>
-                                </p>
-                            </td>
-                            <td><p>{file.nodesVersions[indexOfAddress]}</p></td>
-                            <td><p>{file.nodesCRCs[indexOfAddress].toString(16)}</p></td>
-                            <td>{another_nodes}</td>
-                        </tr>
-                    )
-                })
+                }
             }
 
             if(this.state.connectionTable.addresses !== null){
                 nodes_status.addresses = []
                 let first_address = this.state.connectionTable.current_address
-                console.log("first_Address: " + first_address)
+                console.log("first_address: " + first_address)
                 this.state.connectionTable.addresses.forEach(address => {
                     if(first_address === null || first_address === undefined){
                         first_address = address;
@@ -507,17 +537,19 @@ class AdminMainPage extends Component {
                         this.setState({connectionTable : {addresses : addresses, status : status, current_address : first_address}})
                     }
                     nodes_status.addresses.push(
-                        <button 
-                            className="a_redirector" 
+                        <button
+                            id = {`node_status_address_${address}`} 
+                            className = "a_redirector" 
                             href="#"
                             style={{marginTop:"-10%"}} 
                             onClick={() => {
                                 let addresses = this.state.connectionTable.addresses
                                 let status = this.state.connectionTable.status
-                                this.setState({connectionTable : {addresses : addresses, status : status, current_address : address}}) 
+                                this.highlightNodeStatus(address, 0)
+                                this.setState({connectionTable : {addresses : addresses, status : status, current_address : address}})
                             }}>{address}
                         </button>
-                    )                    
+                    )                          
                 })
             }
 

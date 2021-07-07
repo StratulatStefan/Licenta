@@ -19,10 +19,6 @@ public class GeneralManager{
      * Adresa IP la care va fi mapat managerul general
      */
     public static String generalManagerIpAddress = AppConfig.getParam("generalManagerIpAddress");
-    /**
-     * Calea de baza la care se vor stoca fisierele
-     */
-    public static String storagePath = AppConfig.getParam("storagePath");
 
     /**
      * Tabela (o lista) nodurilor conectate in retea, care comunica cu nodul curent.

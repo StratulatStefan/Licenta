@@ -18,6 +18,7 @@ class FileDetailsPage extends Component {
         this.description = null
         this.newname     = null
         this.fileSuccessfullyDownloaded = false
+        this.filesize = null
         this.state = {
             isUserConnected            : false,
             userType                   : null,
@@ -106,10 +107,15 @@ class FileDetailsPage extends Component {
         if(this.fileSuccessfullyDownloaded === true){
             document.getElementById("file_status").innerHTML = "Downloading file..."
             document.getElementById("downloaduri").click()
-            document.getElementById("file_status").innerHTML = "File successfully downloaded!"
+            document.getElementById("file_status").innerHTML = "Downloading file..."
+            console.log(this.state.userFile.filesize)
+            setTimeout(function(){
+                document.getElementById("file_status").innerHTML = "File successfully downloaded!"
+            }, this.state.userFile.filesize / 1e4 / 2.5)
         }
         else{
             FileHandlerService.downloadFile(this.userData["jwt"], this.state.currentFileName).then(response => {
+                console.log(response.content)
                 document.getElementById("downloaduri").href = response.content
                 let fileType = GeneralPurposeService.getFileType(this.state.currentFileName)
                 if(fileType === "image"){
@@ -142,12 +148,10 @@ class FileDetailsPage extends Component {
                         handler.redirect("")
                     }
                 }, 1000);
-                //document.getElementById("delete_file_button").style.visibility = "visible"
-                //document.getElementById("delete_file_button").innerHTML = "Go to my files"
                 document.getElementById("delete_file_button").onclick = () => this.redirect("")
             }
             else{
-                document.getElementById("file_status_delete").innerHTML = "Your file cannot be deleted."
+                document.getElementById("file_status_delete").innerHTML = response.content
             }
         })
     }
@@ -192,7 +196,7 @@ class FileDetailsPage extends Component {
                     
                 }
                 else{
-                    document.getElementById("file_status_rename_1").innerHTML = "File cannot be renamed."
+                    document.getElementById("file_status_rename_1").innerHTML = response.content
                 }
 
             })

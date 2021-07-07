@@ -183,7 +183,7 @@ public class ReplicationManager implements Runnable{
             System.out.println(GeneralManager.contentTable);
             System.out.println(GeneralManager.nodeStorageQuantityTable);
 
-            System.out.println("xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx");
+            /*System.out.println("xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx");
             System.out.println("Numarul nodurilor active : " + GeneralManager.connectionTable.numberOfActiveNodes());
             System.out.println("Numarul fisiere inregistrare : " + GeneralManager.contentTable.numberOfFiles());
             System.out.println("----------");
@@ -191,7 +191,7 @@ public class ReplicationManager implements Runnable{
             System.out.println("Dimensiunea NodeStorageQuantityTable : " + GeneralManager.nodeStorageQuantityTable.getSize());
             System.out.println("Dimensiunea ContentTable : " + GeneralManager.contentTable.getSize());
             System.out.println("Dimensiunea StorageStatusTable : " + GeneralManager.statusTable.getSize());
-            System.out.println("xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx");
+            System.out.println("xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx");*/
 
 
             System.out.println("------------------------------------");
@@ -232,12 +232,14 @@ public class ReplicationManager implements Runnable{
                                 continue;
                             }
                         }
-                        else if (replication_factor > availableNodesForFile.size() && !GeneralManager.contentTable.getFileStatusForUser(userId, userFile).contains("PENDING")) {
+                        else if (replication_factor > availableNodesForFile.size() &&
+                                !GeneralManager.contentTable.getFileStatusForUser(userId, userFile).contains("PENDING") &&
+                                !GeneralManager.contentTable.getFileStatusForUser(userId, userFile).contains("RENAMED")) {
                             long filesize = GeneralManager.contentTable.getFileSizeOfUserFile(userId, userFile);
                             replicationStatus += this.replication(replication_factor, userId, userFile, availableNodesAddressesForFile, filesize);
                             replicationStatusTable.add(replicationStatus);
                         }
-                        else if(replication_factor < availableNodesForFile.size()){
+                        else if(replication_factor < availableNodesForFile.size() && !GeneralManager.contentTable.getFileStatusForUser(userId, userFile).contains("RENAMED")){
                             List<String> candidates = searchCandidatesForDeletion(availableNodesForFile.size() - replication_factor, availableNodesAddressesForFile);
                             replicationStatus += this.deletion(replication_factor, userId, userFile, candidates);
                             replicationStatusTable.add(replicationStatus);

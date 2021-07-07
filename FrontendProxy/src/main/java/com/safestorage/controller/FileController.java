@@ -360,6 +360,39 @@ public class FileController {
         }
     }
 
+    /**
+     * Functie de mapare a cererii de modificare a tipului, care va implica modificarea numarului de replici disponibile in prezent in sistem pentru un user
+     * Operatia este disponibila doar utilizatorii obisnuiti, intrucat pentru administrator nu exista specific un factor de replicare.
+     * @param data Obiectul ce va
+     * @param authorizationValue Valoarea de autorizare, avand structura <strong>BEARER token</strong>.
+     *                           Se va folosi la autorizarea clientului si la extragerea identificatorului.
+     * @return
+     */
+    @RequestMapping(path = "/proxy/user_type", method = RequestMethod.PUT)
+    public ResponseEntity<String> updateReplicationFactorForFiles(@RequestBody HashMap<String, String> data,
+                                                                  @RequestHeader("Authorization") String authorizationValue){
+        int userId = -1;
+        try {
+            AuthorizationService.UserTypes[] allowedUserTypes = new AuthorizationService.UserTypes[]{AuthorizationService.UserTypes.STANDARD, AuthorizationService.UserTypes.PREMIUM};
+            Map<String, Object> userData = authorizationService.userAuthorization(authorizationValue, allowedUserTypes);
+            userId = Integer.parseInt((String)userData.get("sub"));
+        }
+        catch (Exception exception){
+            Map<String, String> errorResponse = ResponseHandlerService.buildErrorStatus(exception.getMessage());
+            return new ResponseEntity(errorResponse, HttpStatus.UNAUTHORIZED);
+        }
+
+        try {
+            String newUserType = data.get("user_type");
+            String status = fileService.updateInternalUserType(String.format("%d", userId), newUserType).getResponse();
+            return new ResponseEntity(ResponseHandlerService.buildSuccessStatus(status), HttpStatus.OK);
+        }
+        catch (Exception exception){
+            Map<String, String> errorResponse = ResponseHandlerService.buildErrorStatus(exception.getMessage());
+            return new ResponseEntity(errorResponse, HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+
+    }
 }
 
 

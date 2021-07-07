@@ -185,15 +185,15 @@ public class ClientCommunicationManager {
                         if(nextElementSocket != null){
                             dataOutputStream.write(buffer, 0, read);
                         }
+                        LoggerService.registerSuccess(GeneralNode.ipAddress, "File write done");
                     }
-                    LoggerService.registerSuccess(GeneralNode.ipAddress, "File write done");
-                    // send feedback to frontend
                     dataInputStream.close();
                     fileOutputStream.close();
                     if(nextElementSocket != null) {
                         nextElementSocket.close();
                         dataOutputStream.close();
                     }
+
                     clientSocket.close();
                     GeneralNode.pendingList.removeFromList(fileHeader.getUserId(), fileHeader.getFilename());
                     long filecrc = FileSystem.calculateCRC(filepath);

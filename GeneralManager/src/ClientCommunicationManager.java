@@ -43,7 +43,8 @@ public class ClientCommunicationManager {
         GET_STORAGE_STATUS,
         GET_REPLICATION_STATUS,
         GET_CONNECTION_TABLE,
-        DELETE_FILE_FROM_NODE
+        DELETE_FILE_FROM_NODE,
+        UPDATE_REPLICATION_FACTOR
     }
     /**
      * Enum care va cuprinde statusul unui anumit fisier, raportat la tabela stocarii.
@@ -122,6 +123,9 @@ public class ClientCommunicationManager {
         if(operation == DeleteFileFromNodeRequest.class){
             return ClientRequest.DELETE_FILE_FROM_NODE;
         }
+        if(operation == UpdateUserTypeRequest.class){
+            return ClientRequest.UPDATE_REPLICATION_FACTOR;
+        }
         return null;
     }
 
@@ -193,7 +197,6 @@ public class ClientCommunicationManager {
         List<String> connectionAddresses = GeneralManager.connectionTable.getConnectionTable();
         if(connectionAddresses.size() <  replication_factor){
             LoggerService.registerError(GeneralManager.generalManagerIpAddress, "Nu sunt suficiente noduri disponibile");
-            //before : return null;
         }
         System.out.println("Generam token-ul..");
         List<String> candidates = GeneralManager.nodeStorageQuantityTable.getMostSuitableNodes(filesize, GeneralManager.connectionTable);
@@ -202,7 +205,6 @@ public class ClientCommunicationManager {
             return null;
         }
         LoggerService.registerSuccess(GeneralManager.generalManagerIpAddress, "User uploaded a new file with size : " + filesize + " and replication factor : " + replication_factor);
-        //before : String token = String.join("-", candidates.subList(0, replication_factor));
         String token = String.join("-", candidates.subList(0, Math.min(replication_factor, candidates.size())));
         System.out.println("====================================");
         System.out.println(token);
@@ -399,18 +401,29 @@ public class ClientCommunicationManager {
                                         break;
                                     }
                                     case FILE_EXISTS:{
+                                        String newName = ((RenameFileRequest)clientManagerRequest).getNewName();
+                                        response = new ManagerTextResponse();
+                                        if(GeneralManager.contentTable.checkForUserFile(userId, newName)){
+                                            if(GeneralManager.contentTable.getFileStatusForUser(userId, newName).contains("DELETED") ||
+                                               GeneralManager.contentTable.getFileStatusForUser(userId, newName).contains("RENAMED")){
+                                                GeneralManager.contentTable.removeUserFile(userId, newName);
+                                            }
+                                            else{
+                                                ((ManagerTextResponse)response).setException("You already have a file with this name");
+                                            }
+                                            break;
+                                        }
                                         GeneralManager.contentTable.updateFileStatus(userId, filename, "[PENDING]");
                                         String currentVersionNo = GeneralManager.statusTable.getLastVersionOfFile(userId, filename);
                                         long currentCRc = GeneralManager.statusTable.getCRCsForFile(userId, filename);
-                                        String newName = ((RenameFileRequest)clientManagerRequest).getNewName();
                                         long filesize = GeneralManager.contentTable.getFileSizeOfUserFile(userId, filename);
                                         List<String> candidateNodes = GeneralManager.statusTable.getAvailableNodesAddressesForFile(userId, filename);
                                         String feedbackResponseStatus = GeneralManager.fileSystemManager.renameFile(userId, filename, newName, candidateNodes, clientManagerRequest.getDescription());
                                         GeneralManager.contentTable.updateFileName(userId, filename, newName);
-                                        response = new ManagerTextResponse();
                                         ((ManagerTextResponse)response).setResponse(feedbackResponseStatus);
                                         confirmUserRequest(userId, newName);
-                                        GeneralManager.contentTable.addRegister(userId, filename, 0, currentCRc, "[DELETED]", filesize, currentVersionNo, description);
+                                        String last_descr = GeneralManager.statusTable.getLastVersionDescriptionOfFile(userId, filename);
+                                        GeneralManager.contentTable.addRegister(userId, filename, candidateNodes.size(), currentCRc, "[RENAMED]", filesize, currentVersionNo, last_descr);
                                         GeneralManager.contentTable.updateFileVersion(userId, newName, -1, description);
                                         break;
                                     }
@@ -425,9 +438,8 @@ public class ClientCommunicationManager {
                                     }
                                     case FILE_EXISTS:{
                                         GeneralManager.contentTable.updateFileStatus(userId, filename, "[PENDING]");
-                                        String candidateAddress = GeneralManager.statusTable.getAvailableNodesAddressesForFile(userId, filename).get(0);
-                                        String filepath = GeneralManager.storagePath + candidateAddress + "/" + userId + "/" + filename;
-                                        registerUserMemoryConsumption(userId, FileSystem.getFileSize(filepath), false);
+                                        Long filesize = GeneralManager.contentTable.getFileSizeOfUserFile(userId, filename);
+                                        registerUserMemoryConsumption(userId, filesize, false);
                                         GeneralManager.contentTable.updateReplicationFactor(userId, filename, 0);
                                         response = new ManagerTextResponse();
                                         ((ManagerTextResponse)response).setResponse("OK");
@@ -453,6 +465,14 @@ public class ClientCommunicationManager {
                                         break;
                                     }
                                 }
+                                break;
+                            }
+                            case UPDATE_REPLICATION_FACTOR:{
+                                response = new ManagerTextResponse();
+                                String new_userType = ((UpdateUserTypeRequest)clientManagerRequest).getUser_type();
+                                int new_replicationFactor = getReplicationFactor(new_userType);
+                                GeneralManager.contentTable.updateUserReplicationFactor(userId, new_replicationFactor);
+                                ((ManagerTextResponse)response).setResponse("Replication factor of user " + userId + " successfully updated!");
                                 break;
                             }
                             case GET_USER_FILES:{
@@ -531,18 +551,24 @@ public class ClientCommunicationManager {
                     dataOutputStream.close();
                     clientSocket.close();
                 }
+                catch (IOException exception){
+                    LoggerService.registerError(GeneralManager.generalManagerIpAddress,
+                            String.format("Could not properly close connection with my friend : [%s : %d]", clientSocket.getLocalAddress(), clientSocket.getLocalPort())
+                    );
+                    return;
+                }
                 catch (Exception exception){
                     response.setException(exception.getMessage());
 
                     try {
                         dataOutputStream.write(Serializer.serialize(response));
+                        clientSocket.close();
                     } catch (IOException e) {
                         e.printStackTrace();
                     }
 
-                    System.out.println(exception.getMessage());
-                    LoggerService.registerError(GeneralManager.generalManagerIpAddress,
-                            String.format("Could not properly close connection with my friend : [%s : %d]", clientSocket.getLocalAddress(), clientSocket.getLocalPort())
+                    LoggerService.registerWarning(GeneralManager.generalManagerIpAddress,
+                            "Client communication manager exception : " + exception.getMessage()
                     );
                 }
             }

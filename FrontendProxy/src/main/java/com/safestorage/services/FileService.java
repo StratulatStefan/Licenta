@@ -226,4 +226,18 @@ public class FileService {
 
         return (ManagerComplexeResponse) FrontendManager.managerOperationRequest(getNodesForFileRequest);
     }
+
+    /**
+     * Functie pentru actualizare a tipului corespunzator unui utilizator din tabela de continut a nodului general
+     * @param user Identificatorul unic al utilizatorului
+     * @param newUserType Noul tip al utilizatorului
+     */
+    public ManagerTextResponse updateInternalUserType(String user, String newUserType) throws IOException, ClassNotFoundException {
+        UpdateUserTypeRequest updateReplicationFactor = new UpdateUserTypeRequest();
+        updateReplicationFactor.setUserId(user);
+        updateReplicationFactor.setUser_type(newUserType);
+
+        return (ManagerTextResponse)FrontendManager.managerOperationRequest(updateReplicationFactor);
+
+    }
 }

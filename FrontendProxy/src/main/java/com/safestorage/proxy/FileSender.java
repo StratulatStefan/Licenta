@@ -11,10 +11,7 @@ import config.AppConfig;
 
 import java.io.*;
 import java.net.Socket;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.LinkedList;
-import java.util.List;
+import java.util.*;
 
 /**
  * <ul>
@@ -46,6 +43,10 @@ public class FileSender {
      * Calea la care vor fi stocate fisierele clientului, in urma descarcarii de la nodurile interne.
      */
     private static String downloadFilePath      = AppConfig.getParam("filedownloadpath");
+    /**
+     * Timeout-ul pentru primirea feeedback-ului.
+     */
+    private static Long feedbackRecvTimeout     = Long.parseLong(AppConfig.getParam("feedbackRecvTimeout"));
 
     /**
      * <ul>
@@ -153,24 +154,35 @@ public class FileSender {
         final List<Thread> threads = new ArrayList<>();
         try {
             final List<String> addresses = new LinkedList<String>(Arrays.asList(getAddressesFromToken(token)));
+            final List<Long> feedbackRecvTimes = new ArrayList<Long>();
             total_nodes = addresses.size();
             while(received_nodes != total_nodes){
                 received_nodes += 1;
                 Thread thread = new Thread(new Runnable() {
                     @Override
                     public void run() {
+                        long starting_time = System.currentTimeMillis();
+                        long recvLimit;
                         try{
                             NewFileRequestFeedback feedback;
-                            while ((feedback = FrontendProxyUiApplication.feedbackManager.getFeedback(userId, fname)) == null);
+                            while ((feedback   = FrontendProxyUiApplication.feedbackManager.getFeedback(userId, fname)) == null){
+                                synchronized (feedbackRecvTimes) {
+                                    recvLimit = feedbackRecvTimes.isEmpty() ? feedbackRecvTimeout : Collections.max(feedbackRecvTimes) * 5;
+                                    if ((System.currentTimeMillis() - starting_time) / 1e3 > recvLimit)
+                                        throw new Exception("Feedback receive timeout!");
+                                }
+                            }
                             String nodeAddress = feedback.getNodeAddress();
-                            String fileName = feedback.getFilename();
-                            String userID = feedback.getUserId();
-                            long crc = feedback.getCrc();
+                            String fileName    = feedback.getFilename();
+                            String userID      = feedback.getUserId();
+                            long crc           = feedback.getCrc();
                             System.out.print(String.format("Feedback primit de la : [%s]\n", nodeAddress));
                             if (fileName.equals(fname) && userID.equals(userId) && CRC == crc) {
                                 System.out.println(" >> [OK]");
                                 valid_nodes[0] += 1;
-                            } else System.out.println(" >> [INVALID]");
+                            } else
+                                System.out.println(" >> [INVALID]");
+                            feedbackRecvTimes.add((long)((System.currentTimeMillis() - starting_time) / 1e3));
                         }
                         catch (Exception exception){
                             System.out.println("Exceptie la primirea feedback-ului! : " + exception.getMessage());

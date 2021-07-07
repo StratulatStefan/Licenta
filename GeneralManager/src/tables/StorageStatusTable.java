@@ -286,7 +286,8 @@ public class StorageStatusTable {
                 int candidate = this.getUserFile(user, file);
                 if(candidate == -1)
                     return null;
-                return this.statusTable.get(user).get(candidate).getNodesCRCs().get(0);
+                List<Long> controlSums = this.statusTable.get(user).get(candidate).getNodesCRCs();
+                return (Long)this.getMostVoted(controlSums.stream().map(node -> (Object)node).collect(Collectors.toList()));
             }
             catch (NullPointerException exception){
                 return null;
@@ -327,7 +328,8 @@ public class StorageStatusTable {
                 int candidate = this.getUserFile(user, file);
                 if(candidate == -1)
                     return null;
-                return this.statusTable.get(user).get(candidate).getNodesVersions().get(0);
+                List<String> versionNumbers = this.statusTable.get(user).get(candidate).getNodesVersions();
+                return (String)this.getMostVoted(versionNumbers.stream().map(node -> (Object)node).collect(Collectors.toList()));
             }
             catch (NullPointerException exception){
                 return null;
@@ -347,7 +349,8 @@ public class StorageStatusTable {
                 int candidate = this.getUserFile(user, file);
                 if(candidate == -1)
                     return null;
-                return this.statusTable.get(user).get(candidate).getNodesVersionsDescriptions().get(0);
+                List<String> versionDescriptions = this.statusTable.get(user).get(candidate).getNodesVersionsDescriptions();
+                return (String)this.getMostVoted(versionDescriptions.stream().map(node -> (Object)node).collect(Collectors.toList()));
             }
             catch (NullPointerException exception){
                 return null;
@@ -431,6 +434,36 @@ public class StorageStatusTable {
             }
         }
         return results;
+    }
+
+    /**
+     * <ul>
+     *  <li>Functie folosita, in special, in contextul operatiei de reconstruire a starii tabelei de continut.</li>
+     *  <li>Dintr-o lista de valori posibile ale unui atribut al unui fisier, se alege atributul continut de cele mai multe fisiere.</li>
+     * </ul>
+     * @return Valoarea cae mai votata a atributului.
+     */
+    private Object getMostVoted(List<Object> candidates){
+        List<Object> candidateSet = new ArrayList<>();
+        int[] scores = new int[candidates.size()];
+        for(Object candidate : candidates){
+            if(!candidateSet.contains(candidate)){
+                candidateSet.add(candidate);
+                scores[candidateSet.size() - 1] = 1;
+            }
+            else{
+                scores[candidateSet.indexOf(candidate)] += 1;
+            }
+        }
+        int max_idx = 0;
+        int max = scores[0];
+        for(int index = 1; index < scores.length; index++){
+            if(scores[index] > max){
+                max = scores[index];
+                max_idx = index;
+            }
+        }
+        return candidateSet.get(max_idx);
     }
 
     public String getSize(){

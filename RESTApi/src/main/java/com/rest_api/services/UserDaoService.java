@@ -1,5 +1,6 @@
 package com.rest_api.services;
 
+import com.rest_api.interfaces.PasswordEncrypter;
 import com.rest_api.interfaces.UserDao;
 import com.rest_api.interfaces.UserTypeDao;
 import com.rest_api.model.User;
@@ -21,6 +22,11 @@ import java.util.stream.Collectors;
 @Service
 public class UserDaoService implements UserDao {
     /**
+     * Cheia secreta de criptare/decriptare
+     */
+    private String secreyKey = "SafeStorageSecreyKey";
+
+    /**
      * Obiectul de tip <strong>EntityManager</strong> care va asigura comunicarea cu serverul de baze de date.
      * Obiectul va expune toate metodele necesare persistarii, accesari si prelucrarii inregistrarilor din tabela <strong>InternalNode.</strong>
      */
@@ -31,6 +37,12 @@ public class UserDaoService implements UserDao {
      */
     @Autowired
     UserTypeDao userTypeDao;
+
+    /**
+     * Serviciul care va realiza criptarea si decriptarea parolei utilizatorului
+     */
+    @Autowired
+    private PasswordEncrypter passwordEncrypter;
 
 
     /**
@@ -49,6 +61,7 @@ public class UserDaoService implements UserDao {
             throw new Exception(String.format("User with address %s already exists!", user.getEmail()));
         UserType userTypeData = userTypeDao.getUserTypeData(user.getType());
         user.setStorage_quantity(userTypeData.getAvailable_storage());
+        user.setPassword(passwordEncrypter.encrypt(user.getPassword(), secreyKey));
         mySQLManager.insert(user);
         return user.getId();
     }
@@ -77,7 +90,7 @@ public class UserDaoService implements UserDao {
      */
     @Override
     public User getUserByUsername(String email) throws Exception {
-        HashMap<String, Object> findCriteria = new HashMap<>(){{
+        HashMap<String, Object> findCriteria = new HashMap(){{
             put("email", email);
         }};
         List<User> users =  mySQLManager.findByCriteria(User.class, findCriteria)
@@ -142,7 +155,8 @@ public class UserDaoService implements UserDao {
         User candidateUser = getUserByUsername(username);
         if(candidateUser == null)
             throw new Exception("User with email " + username + " not found!");
-        if(!candidateUser.getPassword().equals(password))
+        String decryptedPassword = passwordEncrypter.decrypt(candidateUser.getPassword(), secreyKey);
+        if(!decryptedPassword.equals(password))
             throw new Exception("Wrong password!");
         return new HashMap<String, String>(){{
             put("jwt", AuthorizationService.generateUserIdentity(candidateUser.getId(), username, candidateUser.getType()));

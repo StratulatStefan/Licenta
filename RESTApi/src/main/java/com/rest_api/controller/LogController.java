@@ -125,7 +125,7 @@ public class LogController {
 
         try {
             SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd hh:mm");
-            HashMap<String, Object> criterias = new HashMap<>(){{
+            HashMap<String, Object> criterias = new HashMap(){{
                 if(!nodeAddress.equals(""))
                     put("node_address", nodeAddress);
                 if(!messageType.equals(""))
@@ -207,7 +207,7 @@ public class LogController {
 
         try{
             SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd/hh:mm");
-            HashMap<String, Object> criterias = new HashMap<>(){{
+            HashMap<String, Object> criterias = new HashMap(){{
                 if(!nodeAddress.equals(""))
                     put("node_address", nodeAddress);
                 if(!messageType.equals(""))

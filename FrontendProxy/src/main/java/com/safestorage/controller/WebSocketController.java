@@ -83,7 +83,7 @@ public class WebSocketController {
      * 	<li>Fiecare publish va fi precedat de o cerere de extragere a starii de la nodul general.</li>
      * </ul>
      */
-    @Scheduled(fixedRate = 4000)
+    @Scheduled(fixedRate = 2000)
     public void sendContent(){
         for(Object topic : topics){
             try {

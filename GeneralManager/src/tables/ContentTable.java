@@ -82,7 +82,6 @@ public class ContentTable implements Serializable {
                         this.addRegister(user, filename, nodesCount, crc, "[VALID]", filesize, versionNo, versionDescription);
                     }
                     catch (Exception exception){
-                        // nu prea avem cum sa ajunge aici la init intrucat exceptia se genereaza doar daca inregistrarea exista deja
                     }
                 }
             }
@@ -135,6 +134,24 @@ public class ContentTable implements Serializable {
     }
 
     /**
+     * Functie de modificare a factorului de replicare al unui utilizator.
+     * @param replication_factor Noul factor de replicare.
+     * @throws Exception Generata daca fisierul nu exista.
+     */
+    public void updateUserReplicationFactor(String userId, int replication_factor) throws Exception{
+        synchronized (this.contentTable){
+            if(!this.containsUser(userId)){-
+                throw new Exception("Register not found!");
+            }
+            for(FileAttributes fileAttributes : this.contentTable.get(userId)){
+                fileAttributes.setReplication_factor(replication_factor);
+                return;
+            }
+            throw new Exception("Register not found!");
+        }
+    }
+
+    /**
      * Functie de modificare a numelui unui fisier.
      * @param filename Numele (vechi) fisierului.
      * @param newfilename Noul nume.
@@ -148,6 +165,25 @@ public class ContentTable implements Serializable {
             for(FileAttributes fileAttributes : this.contentTable.get(userId)){
                 if(fileAttributes.getFilename().equals(filename)){
                     fileAttributes.setFilename(newfilename);
+                    return;
+
+                }
+            }
+            throw new Exception("Register not found!");
+        }
+    }
+
+    /**
+     * Functie pentru eliminarea fisierului unui utilizator
+     */
+    public void removeUserFile(String userId, String filename) throws Exception{
+        synchronized (this.contentTable){
+            if(!this.containsUser(userId)){
+                throw new Exception("Register not found!");
+            }
+            for(FileAttributes fileAttributes : this.contentTable.get(userId)){
+                if(fileAttributes.getFilename().equals(filename)){
+                    this.contentTable.get(userId).remove(fileAttributes);
                     return;
 
                 }
@@ -278,7 +314,7 @@ public class ContentTable implements Serializable {
     }
 
     /**
-     * Functie care verifica daca un utilizator contine un anumit fisier.
+     * Functie care verifica daca un utilizator detine un anumit fisier, tinand cont si de suma de control.
      * @param userId Id-ul utilizatorului
      * @param filename Numele fisierului cautat.
      */
@@ -289,6 +325,28 @@ public class ContentTable implements Serializable {
                 return false;
             for (FileAttributes userFile : userFiles) {
                 if (userFile.getFilename().equals(filename) && (crc == -1 || userFile.getCrc() == crc)) {
+                    return true;
+                }
+            }
+        }
+        catch (Exception exception){
+            //return false; (e deja aruncat la final)
+        }
+        return false;
+    }
+
+    /**
+     * Functie care verifica daca un utilizator detine un anumit fisier.
+     * @param userId Id-ul utilizatorului
+     * @param filename Numele fisierului cautat.
+     */
+    public boolean checkForUserFile(String userId, String filename){
+        try {
+            List<FileAttributes> userFiles = getUserFiles(userId);
+            if (userFiles == null)
+                return false;
+            for (FileAttributes userFile : userFiles) {
+                if (userFile.getFilename().equals(filename)) {
                     return true;
                 }
             }
@@ -429,7 +487,7 @@ public class ContentTable implements Serializable {
     public List<Object> getUserFilesForFrontend(String userId) throws Exception {
         List<Object> userFiles = new ArrayList<>();
         for(FileAttributes file : this.getUserFiles(userId)){
-            if(file.getStatus().contains("DELETE") || file.getStatus().contains("PENDING")){
+            if(file.getStatus().contains("DELETE") || file.getStatus().contains("RENAMED")){
                 continue;
             }
             HashMap<String, Object> userFile = new HashMap<>();

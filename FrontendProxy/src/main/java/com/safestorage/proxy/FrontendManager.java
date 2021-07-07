@@ -80,6 +80,9 @@ public class FrontendManager {
         else if(operation == DeleteFileFromNodeRequest.class){
             op = "[DELETE FILE FROM INTERNAL NODE]";
         }
+        else if(operation == UpdateUserTypeRequest.class){
+            op = "[UPDATE REPLICATION FACTOR]";
+        }
         else {
             String[] fname = clientRequest.getFilename().split("\\\\");
             clientRequest.setFilename(fname[fname.length - 1]);

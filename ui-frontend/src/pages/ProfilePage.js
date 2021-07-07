@@ -104,6 +104,12 @@ class ProfilePage extends Component {
             if(response.code === 1){
                 document.getElementById("updatePlanStatus").innerHTML = `Plan successfully changed to ${newplan}.`
                 this.fetchAdditionalUserData()
+                UsersHandlerService.updateUserTypeInternally(this.userData["jwt"], newplan).then(response => {
+                    console.log(response)
+                    if(response.code === 1){
+                        console.log("User type changed internally also!")
+                    }
+                })
             }
             else{
                 console.log(response.content)
