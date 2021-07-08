@@ -233,17 +233,19 @@ public class ReplicationManager implements Runnable{
                             }
                         }
                         else if (replication_factor > availableNodesForFile.size() &&
-                                !GeneralManager.contentTable.getFileStatusForUser(userId, userFile).contains("PENDING") &&
-                                !GeneralManager.contentTable.getFileStatusForUser(userId, userFile).contains("RENAMED")) {
+                                (!GeneralManager.contentTable.getFileStatusForUser(userId, userFile).contains("PENDING") ||
+                                !GeneralManager.contentTable.getFileStatusForUser(userId, userFile).contains("RENAMED"))) {
                             long filesize = GeneralManager.contentTable.getFileSizeOfUserFile(userId, userFile);
                             replicationStatus += this.replication(replication_factor, userId, userFile, availableNodesAddressesForFile, filesize);
                             replicationStatusTable.add(replicationStatus);
                         }
-                        else if(replication_factor < availableNodesForFile.size() && !GeneralManager.contentTable.getFileStatusForUser(userId, userFile).contains("RENAMED")){
+                        else if((replication_factor < availableNodesForFile.size() && !GeneralManager.contentTable.getFileStatusForUser(userId, userFile).contains("RENAMED")) ||
+                                (replication_factor == 0 && availableNodesForFile.size() > 1 && GeneralManager.contentTable.getFileStatusForUser(userId, userFile).contains("RENAMED"))){
                             List<String> candidates = searchCandidatesForDeletion(availableNodesForFile.size() - replication_factor, availableNodesAddressesForFile);
                             replicationStatus += this.deletion(replication_factor, userId, userFile, candidates);
                             replicationStatusTable.add(replicationStatus);
                         }
+
                         else{
                             replicationStatus += "[UNKNOWN]\n";
                             System.out.println(replicationStatus);

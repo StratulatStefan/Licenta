@@ -140,12 +140,11 @@ public class ContentTable implements Serializable {
      */
     public void updateUserReplicationFactor(String userId, int replication_factor) throws Exception{
         synchronized (this.contentTable){
-            if(!this.containsUser(userId)){-
+            if(!this.containsUser(userId)){
                 throw new Exception("Register not found!");
             }
             for(FileAttributes fileAttributes : this.contentTable.get(userId)){
                 fileAttributes.setReplication_factor(replication_factor);
-                return;
             }
             throw new Exception("Register not found!");
         }

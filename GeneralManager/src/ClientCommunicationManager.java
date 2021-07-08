@@ -141,7 +141,7 @@ public class ClientCommunicationManager {
             boolean fileStatus = GeneralManager.contentTable.checkForUserFile(user, filename, crc);
             if(fileStatus){
                 String status = GeneralManager.contentTable.getFileStatusForUser(user, filename);
-                if(status.contains("DELETED"))
+                if(status.contains("DELETED") || status.contains("RENAMED"))
                     return ClientRequestStatus.FILE_NOT_FOUND;
                 return ClientRequestStatus.FILE_EXISTS;
             }
@@ -241,7 +241,7 @@ public class ClientCommunicationManager {
                     GeneralManager.contentTable.updateReplicationFactor(user, filename, replication_factor);
                     GeneralManager.contentTable.updateFileCRC(user, filename, crc);
                     GeneralManager.contentTable.updateFileSize(user, filename, filesize);
-                    GeneralManager.contentTable.updateFileVersion(user, filename, status.contains("DELETED")? 1 : -1, versionDescription);
+                    GeneralManager.contentTable.updateFileVersion(user, filename, status.contains("DELETED") || status.contains("RENAMED")? 1 : -1, versionDescription);
                 }
             }
             catch (Exception exception){
@@ -423,7 +423,7 @@ public class ClientCommunicationManager {
                                         ((ManagerTextResponse)response).setResponse(feedbackResponseStatus);
                                         confirmUserRequest(userId, newName);
                                         String last_descr = GeneralManager.statusTable.getLastVersionDescriptionOfFile(userId, filename);
-                                        GeneralManager.contentTable.addRegister(userId, filename, candidateNodes.size(), currentCRc, "[RENAMED]", filesize, currentVersionNo, last_descr);
+                                        GeneralManager.contentTable.addRegister(userId, filename, 0, currentCRc, "[RENAMED]", filesize, currentVersionNo, last_descr);
                                         GeneralManager.contentTable.updateFileVersion(userId, newName, -1, description);
                                         break;
                                     }

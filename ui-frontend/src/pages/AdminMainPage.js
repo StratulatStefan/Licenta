@@ -406,7 +406,7 @@ class AdminMainPage extends Component {
                                 <td><p>{content_register.userId}</p></td>
                                 <td><p>{content_register.filename}</p></td>
                                 <td>
-                                    {content_register.status === "[DELETED]"? <p>{content_register.versionNo}</p> : 
+                                    {content_register.status === "[DELETED]" || content_register.status === "[RENAMED]"? <p>{content_register.versionNo}</p> : 
                                         <p><button className="a_redirector"
                                             style={{fontSize:"120%", textDecoration:"underline"}} 
                                             onClick={() => {
@@ -426,7 +426,7 @@ class AdminMainPage extends Component {
                                 <td><p>{content_register.crc.toString(16)}</p></td>
                                 <td><p>{GeneralPurposeService.getFileSizeUnit(content_register.fileSize)}</p></td>
                                 <td>
-                                    {content_register.status === "[DELETED]"? <p>{content_register.replication_factor}</p> : 
+                                    {content_register.status === "[DELETED]" || content_register.status === "[RENAMED]"? <p>{content_register.replication_factor}</p> : 
                                         <p><button className="a_redirector"
                                             style={{fontSize:"120%", textDecoration:"underline"}} 
                                             onClick={() => this.fetchReplicationNodesForFile(content_register.userId, content_register.filename)} 
@@ -450,6 +450,7 @@ class AdminMainPage extends Component {
                     versionForFile.push(
                         <p className="admin_view_title" style={{fontSize:"90%"}}>{version.version_no}. {version.version_desc} ({version.version_hash.toString(16)})</p>
                     )
+                    versionForFile.push(<br/>)
                 })
             }
             if(this.state.content_nodes_data !== null){

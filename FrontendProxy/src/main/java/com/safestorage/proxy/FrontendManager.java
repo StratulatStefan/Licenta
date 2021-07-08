@@ -177,7 +177,6 @@ public class FrontendManager {
                         long start = System.currentTimeMillis();
                         FileSender.sendFile(requestData, token);
                         long timeElapsed = System.currentTimeMillis() - start;
-                        // long fileCRC = FileSystem.calculateCRC(requestData.getFilename());
                         FileSender.waitForFeedback(requestData.getUserId(), token, requestData.getFilename(), timeElapsed, ((NewFileRequest) requestData).getCrc());
                         FileSystem.deleteFile(requestData.getFilename());
                     }

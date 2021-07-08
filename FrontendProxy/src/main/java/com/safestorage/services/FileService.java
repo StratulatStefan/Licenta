@@ -45,8 +45,7 @@ public class FileService {
             return uploadDir + "\\" + file.getOriginalFilename();
         }
         catch (Exception e){
-            throw new Exception("Could not store file " + file.getOriginalFilename() + ". Please try again!"
-            );
+            throw new Exception("Could not store file " + file.getOriginalFilename() + ". Please try again!");
         }
     }
 

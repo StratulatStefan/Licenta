@@ -167,7 +167,7 @@ public class FileSender {
                             NewFileRequestFeedback feedback;
                             while ((feedback   = FrontendProxyUiApplication.feedbackManager.getFeedback(userId, fname)) == null){
                                 synchronized (feedbackRecvTimes) {
-                                    recvLimit = feedbackRecvTimes.isEmpty() ? feedbackRecvTimeout : Collections.max(feedbackRecvTimes) * 5;
+                                    recvLimit = feedbackRecvTimes.isEmpty() ? feedbackRecvTimeout : Collections.max(feedbackRecvTimes) * 10;
                                     if ((System.currentTimeMillis() - starting_time) / 1e3 > recvLimit)
                                         throw new Exception("Feedback receive timeout!");
                                 }
@@ -177,6 +177,7 @@ public class FileSender {
                             String userID      = feedback.getUserId();
                             long crc           = feedback.getCrc();
                             System.out.print(String.format("Feedback primit de la : [%s]\n", nodeAddress));
+                            System.out.println( CRC + " | " + crc);
                             if (fileName.equals(fname) && userID.equals(userId) && CRC == crc) {
                                 System.out.println(" >> [OK]");
                                 valid_nodes[0] += 1;
@@ -286,7 +287,7 @@ public class FileSender {
             dataInputStream.close();
             outputStream.close();
             socket.close();
-            return "/buffer/" + filename;
+            return filepath;
         }
         catch (Exception exception){
             System.out.println("Exceptie la trimiterea unui nou fisier: " + exception.getMessage());

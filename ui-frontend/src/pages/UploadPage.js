@@ -97,8 +97,15 @@ class UploadPage extends Component {
 
     uploadFile = () => {
         document.getElementById("dropmessage_1").innerHTML = "Uploading file..."
+        let file_send = false
+        setTimeout(function(){
+            if(file_send === false){
+                document.getElementById("dropmessage_1").innerHTML = "Your file cannot be stored"
+            }
+        }, 7500)
         FileHandlerService.uploadFile(this.state.currentFile, this.userData["jwt"], this.descriptionData, this.state.userType).then(response => {
             if(response.code === 1){
+                file_send = true
                 document.getElementById("dropmessage_1").innerHTML = response.content
                 document.getElementById("extra").innerHTML = "Your file will be available in a few seconds..."
             }
@@ -106,6 +113,7 @@ class UploadPage extends Component {
                 document.getElementById("dropmessage_1").innerHTML = response
                 console.log(`eroare : ${response}`)
             }
+            console.log(response)
         })
     }
 

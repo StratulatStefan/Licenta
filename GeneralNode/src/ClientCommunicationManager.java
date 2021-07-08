@@ -152,11 +152,11 @@ public class ClientCommunicationManager {
                         if(!header_found) {
                             try {
                                 fileHeader = (FileHeader) Serializer.deserialize(buffer);
-                                filepath = storagePath + serverAddress + "/" + fileHeader.getUserId();
+                                filepath = storagePath + serverAddress + "\\\\" + fileHeader.getUserId();
                                 if(!Files.exists(Paths.get(filepath)))
                                     Files.createDirectories(Paths.get(filepath));
                                 GeneralNode.pendingList.addToList(fileHeader.getUserId(), fileHeader.getFilename());
-                                filepath += "/" + fileHeader.getFilename();
+                                filepath += "\\\\" + fileHeader.getFilename();
                                 fileOutputStream = new FileOutputStream(filepath);
                                 String token = cleanChain(fileHeader.getToken());
                                 if(token != null){
@@ -185,8 +185,8 @@ public class ClientCommunicationManager {
                         if(nextElementSocket != null){
                             dataOutputStream.write(buffer, 0, read);
                         }
-                        LoggerService.registerSuccess(GeneralNode.ipAddress, "File write done");
                     }
+                    LoggerService.registerSuccess(GeneralNode.ipAddress, "File write done");
                     dataInputStream.close();
                     fileOutputStream.close();
                     if(nextElementSocket != null) {
