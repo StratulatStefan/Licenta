@@ -1,0 +1,58 @@
+.Home .upload_div p{
+    font-size: 100%;
+    padding-top: 1%;
+}
+
+.Home .upload_div p #dropmessage{
+    padding-top: 5%;
+}
+
+.Home .upload_body{
+    display: flex;
+    margin-top: -1.5%;
+    padding-left: 15%;
+    padding-right: 15%;
+
+}
+
+.Home .upload_body .upload_div{
+    position: relative;
+    float: left;
+    height: 100%;
+    border : 5px solid #02475e;
+    border-radius: 25px;
+    height: 40%;
+    width: 50%;
+    margin: 0 auto;
+    margin-top: 5%;
+}
+
+.Home .upload_body #upload_data{
+    width: 70%;
+    float: left;
+    height: 1000px;
+    border : 5px solid #02475e;
+    display: none;
+    font-size: 95%;
+}
+
+
+.Home .upload_body #upload_date_filename{
+    font-size: 140%;
+}
+
+.Home .upload_body button{
+    margin-top: 5%;
+}
+
+.Home .upload_body input{
+    position: relative;
+    width: 70%;
+}
+
+.Home .upload_body #upload_data_preview{
+    height: 30%;
+    width: 80%;
+    border: 5px solid black;
+    border-radius: 20px;
+}

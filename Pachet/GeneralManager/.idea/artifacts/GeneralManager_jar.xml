@@ -1,0 +1,18 @@
+<component name="ArtifactManager">
+  <artifact type="jar" build-on-make="true" name="GeneralManager:jar">
+    <output-path>$PROJECT_DIR$/../Deploy/GeneralManager</output-path>
+    <root id="archive" name="GeneralManager.jar">
+      <element id="directory" name="META-INF">
+        <element id="file-copy" path="$PROJECT_DIR$/out/META-INF/MANIFEST.MF" />
+      </element>
+      <element id="module-output" name="GeneralManager" />
+      <element id="extracted-dir" path="$PROJECT_DIR$/../HTTPHandler/target/HTTPHandler-1.0-SNAPSHOT.jar" path-in-jar="/" />
+      <element id="library" level="project" name="src" />
+      <element id="extracted-dir" path="$PROJECT_DIR$/../HTTPHandler/target/HTTPHandler-1.0-SNAPSHOT-jar-with-dependencies.jar" path-in-jar="/" />
+      <element id="file-copy" path="$PROJECT_DIR$/../HTTPHandler/target/HTTPHandler-1.0-SNAPSHOT-jar-with-dependencies.jar" />
+      <element id="file-copy" path="$PROJECT_DIR$/../HTTPHandler/target/HTTPHandler-1.0-SNAPSHOT.jar" />
+      <element id="module-output" name="Beans" />
+      <element id="module-output" name="GeneralPurposeStructures" />
+    </root>
+  </artifact>
+</component>

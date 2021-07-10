@@ -1,0 +1,14 @@
+#mainpage_hr{
+    width: 99%;
+}
+
+#number_of_file{
+    width: 50%;
+    text-align: right;
+    right: 10px;
+    font-size: 110%;
+}
+
+span{
+    font-size: 80%;
+}

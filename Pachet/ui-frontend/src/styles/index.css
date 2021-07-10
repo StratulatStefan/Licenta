@@ -1,0 +1,90 @@
+html{
+  height: 100%;
+}
+
+body {
+  margin: 0;
+  font-family: sans-serif;
+  height: 100%;
+  overflow-y: hidden;
+}
+
+.header {
+  text-align: center;
+  background-color: #132c33;
+  color: #d8e3e7;
+  -webkit-text-stroke-width: 0px;
+  -webkit-text-stroke-color: #126e82;
+
+  height: 100%;
+  width: 15%;
+  position: fixed;
+  top: 0;
+  left: 0;
+  overflow-x: hidden;
+  transition: 0.5s;
+  padding-top: 1%;
+}
+
+.header #title{
+  font-size: 30px;
+  padding-left: 10%;
+  padding-right: 10%;
+}
+
+.header #title_logo{
+  max-width: 110px;
+  max-height: 110px;
+}
+
+.header a{
+  display: block;
+  padding: 4%;
+  color: white;
+  font-size: 140%;
+  transition: all 0.3s ease;
+  text-decoration: none;
+}
+
+.header .menu-option:hover{
+  font-size: 170%;
+  color:#2978b5;
+}
+
+.header #page-name{
+  font-size: 32px;
+  padding-top: 20%;
+  padding-left: 10%;
+  padding-right: 10%;
+
+}
+
+#root{
+  text-align: center;
+  background-color : #dbe4eb;
+  height: 100%;
+  overflow : auto;
+  overflow-x: hidden;
+  margin-left: 15%;
+
+}
+
+.log_data{
+  position: fixed;
+  bottom: 3%;
+  width: 15%;
+  font-size: 20px;
+}
+
+.log_data #log_data_profile{
+  max-width: 75px;
+  max-height: 75px;
+  visibility: hidden;
+}
+
+button{
+  font-size: 20px;
+  border-radius: 10px;
+  color : #0c4271;
+  font-weight: bold;
+}

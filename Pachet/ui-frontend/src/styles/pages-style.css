@@ -1,0 +1,148 @@
+.App{
+    color: #02475e;
+}
+
+.App p, label, input, select, button{
+    font-size: 140%;
+    font-weight: bold;
+    color: #02475e;
+}
+
+.App select{
+    width: 30%;
+    font-size: 120%;
+    text-align: center;
+}
+
+.App hr{
+    width: 90%;
+    height: 2px;
+    background-color: #126e82;
+    border-radius: 15px;
+    border:1px solid #126e82;
+}
+
+.App .title{
+    margin-top: 2%;
+    margin-bottom: 1%;
+    font-size: 140%;
+}
+
+.App .title #title_logo{
+    vertical-align: middle;
+}
+
+.App #title_logo{
+    max-width: 60px;
+    max-height: 60px;
+}
+
+.App .login_div{
+    margin-top: 20%;
+    color: white;
+    font-size: 25px;
+    font-weight: bold;
+}
+
+.App .login_div .credential{
+    margin-top: 30px;
+}
+
+.App .login_div .help{
+    margin-top: 40px;
+    font-size: 20px;
+}
+
+.App .login_div .credential input, select{
+    margin-left: 20px;
+    height: 40px;
+    font-size: 20px;
+    text-align: center;
+}
+
+.App .login_div .credential select{
+    width: 300px;
+}
+
+.App #homediv{
+    margin: 0 auto;
+    margin-top: 2%;
+    width: 70%;
+    height: 900px;
+    display: flex;
+}
+
+.App #homediv #homediv_left{
+    position: relative;
+    width: 50%;
+    float: left;
+    height: 100%;
+}
+
+.App #homediv #homediv_right{
+    width: 50%;
+    float: left;
+    height: 100%;
+}
+
+.App #homediv #homediv_left #homediv_imgdiv{
+    position: relative;
+    padding-top: 10%;
+    width: 90%;
+    float: left;
+    height: 50%;
+}
+
+.App #homediv #homediv_left #homediv_descdiv{
+    position: relative;
+    width: 100%;
+    float: left;
+    height: 50%;
+}
+
+.App #homediv #homediv_left #homediv_imgdiv #homediv_img{
+    max-width: 100%;
+    max-height: 100%;
+}
+
+.App #homediv #homediv_right input{
+    position: relative;
+    height: 5%;
+    font-size: 100%;
+    width: 50%;
+    text-align: center;
+    border: 3px solid #325288;
+    border-radius: 5px;
+}
+
+.App .login_header{
+    margin-top: 18%;
+    margin-bottom: 10%;
+}
+
+.App button{
+    margin-top: 5%;
+    padding: 15px;
+    font-size: 20px;
+    border-radius: 10px;
+    background-color : #0c4271;
+    color:rgb(253, 253, 253);
+    font-weight: bold;
+}
+
+.App .a_redirector{
+    background-color: transparent;
+    border : none;
+    color : #344fa1;
+    font-weight: bold;
+    font-size: 105%;
+}
+
+.App .a_redirector:hover{
+    font-size: 110%;
+    color : #3d84b8;
+}
+
+#status_message{
+    display: none;
+}

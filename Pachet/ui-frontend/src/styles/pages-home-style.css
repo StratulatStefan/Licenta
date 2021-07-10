@@ -1,0 +1,189 @@
+.Home{
+    position: relative;
+    margin-top: 4%;
+    margin-left: 3%;
+    font-size: 20px;
+    width: 95%;
+    height: 1000px;
+}
+
+
+.Home .home_header{
+    text-align: left;
+}
+
+.Home .upload_header{
+    text-align: center;
+    margin-top: -2%;
+    font-size: 100%;
+}
+
+.Home p{
+    display: inline-block;
+}
+
+.Home input{
+    display: inline-block;
+    text-align: center;
+    font-size: 80%;
+    margin-right: 20px;
+    color : #233e8b;
+    font-weight: bold;
+}
+
+.Home .userFile{
+    border: 5px solid black;
+    border-radius: 15px;
+    display: flex;
+    margin-bottom: 1%;
+}
+
+.Home td{
+    border-bottom: 5px solid #6e7e86;
+    text-align: center;
+    padding: 15px;
+}
+
+.Home td p{
+    font-size: 90%;
+}
+
+.Home td img{
+    border-radius: 15px;
+    margin-bottom: 1%;
+    position: relative;
+    width: 50px;
+    height: 60px;
+    padding: 15px;
+    margin-left: 20px;
+    margin-right: 20px;
+}
+
+tr{
+    border: 5px solid black;
+    border-radius: 5px;
+}
+
+.table_fname{
+    width: 400px;
+}
+
+.table_version{
+    width: 300px;
+}
+
+.home_body_main_div{
+    display: flex;
+    width: 100%;
+    margin: 0 auto;
+    margin-left: -20px;
+}
+
+#file_versions{
+    width: 20%;
+    height: 800px;
+    padding-left: 1%;
+    padding-top: 2%;
+}
+
+#file_versions label{
+    font-size: 90%;
+}
+
+#file_details{
+    width: 25%;
+    height: 800px;
+    text-align: center;
+    padding-left: 2%;
+    padding-top: 2%;
+
+}
+
+#file_details #details_filename{
+    font-size: 160%;
+}
+
+#file_details #details_hash, .details_activity{
+    font-size: 130%;
+
+}
+
+#file_details #details_hash{
+    float: right;
+}
+
+ul{
+    list-style-type:circle;
+}
+
+.home_body_main_div p{
+    font-size: 120%;
+
+}
+
+.file_actions button{
+    text-align: center;
+    font-size: 30px;
+    margin-left: 20px;
+    font-weight: bold;
+    color: #005a8d;
+    border-radius: 10px;
+}
+
+#file_status, #file_status_delete, #file_status_rename, #file_status_rename_1, #file_status_update, #delete_extra{
+    margin-top: 15%;
+    width: 100%;
+    text-align: center;
+    font-size: 85%;
+}
+
+.request_description{
+    text-align: center;
+    margin-top: 2%;
+    visibility: hidden;
+}
+
+input{
+    width: 70%;
+    border-radius: 7px;
+}
+
+#downloaduri{
+    visibility: hidden;
+}
+
+
+
+table{
+    width: 80%;
+    margin: 0 auto;
+}
+
+.Home thead td{
+    text-align: center;
+    border-bottom: 5px solid #007580;
+}
+
+.App #previews embed, iframe{
+    border-radius: 10px;
+    height: 750px;
+    margin-top: 3%;
+    margin-left: 2%;
+    margin-right: 1%;
+}
+
+.App #previews{
+    width: 50%;
+}
+
+.App embed, iframe{
+    width: 100%;
+}
+
+#p_filename{
+    width: 50%;
+}
+
+.action_div{
+    display: none;
+}
