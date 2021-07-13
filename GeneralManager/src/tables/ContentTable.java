@@ -144,7 +144,10 @@ public class ContentTable implements Serializable {
                 throw new Exception("Register not found!");
             }
             for(FileAttributes fileAttributes : this.contentTable.get(userId)){
-                fileAttributes.setReplication_factor(replication_factor);
+                int curent_replFactor = fileAttributes.getReplication_factor();
+                if(curent_replFactor != 0) {
+                    fileAttributes.setReplication_factor(replication_factor);
+                }
             }
             throw new Exception("Register not found!");
         }

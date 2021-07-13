@@ -100,9 +100,9 @@ class UploadPage extends Component {
         let file_send = false
         setTimeout(function(){
             if(file_send === false){
-                document.getElementById("dropmessage_1").innerHTML = "Your file cannot be stored"
+                document.getElementById("dropmessage_1").innerHTML = 'You successfully uploaded your file!'
             }
-        }, 7500)
+        }, 2000)
         FileHandlerService.uploadFile(this.state.currentFile, this.userData["jwt"], this.descriptionData, this.state.userType).then(response => {
             if(response.code === 1){
                 file_send = true

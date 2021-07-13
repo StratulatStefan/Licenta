@@ -287,7 +287,7 @@ public class FileSender {
             dataInputStream.close();
             outputStream.close();
             socket.close();
-            return filepath;
+            return "buffer//" + filename;
         }
         catch (Exception exception){
             System.out.println("Exceptie la trimiterea unui nou fisier: " + exception.getMessage());
